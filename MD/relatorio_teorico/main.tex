@@ -19,7 +19,7 @@
 \usepackage{booktabs}               % Tabelas profissionais
 \usepackage{graphicx}               % Inclusão de imagens
 \usepackage{amsmath, amssymb}       % Símbolos matemáticos
-\usepackage[pdftex]{hyperref}       % Links e índices clicáveis
+\usepackage[pdftex,unicode]{hyperref}
 
 % --- 3. Configuração do Ambiente de Código (MATLAB) ---
 \usepackage{listings}
@@ -28,21 +28,40 @@
 \definecolor{string_purple}{rgb}{0.58,0,0.82}
 \definecolor{back_gray}{rgb}{0.97,0.97,0.97}
 
-% Definicao do estilo "matlab" que o erro diz estar em falta
+% 1º: Definir as regras globais (incluindo o literate para os acentos)
+\lstset{
+	language=Matlab,
+	backgroundcolor=\color{back_gray},   
+	commentstyle=\color{comment_green},
+	keywordstyle=\color{keyword_blue},
+	stringstyle=\color{string_purple},
+	basicstyle=\ttfamily\small,
+	breaklines=true,         
+	frame=single,            
+	showstringspaces=false,  
+	extendedchars=true,      
+	literate={á}{{\'a}}1 {ã}{{\~a}}1 {à}{{\`a}}1 {é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {õ}{{\~o}}1 {ú}{{\'u}}1 {ç}{{\c{c}}}1 {Á}{{\'A}}1 {Ã}{{\~A}}1 {À}{{\`A}}1 {É}{{\'E}}1 {Ê}{{\^E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Õ}{{\~O}}1 {Ú}{{\'U}}1 {Ç}{{\c{C}}}1
+	{⊆}{{$\subseteq$}}1
+	{∈}{{$\in$}}1
+	{×}{{$\times$}}1
+	{→}{{$\to$}}1,
+}
+
+% 2º: Definir o estilo específico que vai herdar/acrescentar ao lstset
 \lstdefinestyle{matlab}{
-    language=Matlab,
-    basicstyle=\ttfamily\small,
-    keywordstyle=\color{blue},
-    stringstyle=\color{purple},
-    commentstyle=\color{green!60!black},
-    numbers=left,
-    numberstyle=\tiny\color{gray},
-    stepnumber=1,
-    numbersep=10pt,
-    backgroundcolor=\color{gray!5},
-    tabsize=4,
-    showstringspaces=false,
-    breaklines=true
+	language=Matlab,
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{keyword_blue},
+	stringstyle=\color{string_purple},
+	commentstyle=\color{comment_green},
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	stepnumber=1,
+	numbersep=10pt,
+	backgroundcolor=\color{back_gray},
+	tabsize=4,
+	showstringspaces=false,
+	breaklines=true
 }
 
 \theoremstyle{definition} % Estilo com texto normal (romano)
@@ -125,10 +144,10 @@ Nesta secção, detalhamos como cada estrutura matemática é representada atrav
 \input{Categorias/10_EqRel}
 \input{Categorias/11_Mon}
 
-\input{Categorias/12_mag}
-\input{Categorias/13_dimag}
-\input{Categorias/14_vect}
-\input{Categorias/15_row}
+\input{Categorias/12_Mag}
+\input{Categorias/13_Dimag}
+%\input{Categorias/14_Vect}
+\input{Categorias/15_Row}
 
 \input{Categorias/16_Lat.tex}
 
@@ -139,6 +158,8 @@ Nesta secção, detalhamos como cada estrutura matemática é representada atrav
 \input{Categorias/20_Trees}
 \input{Categorias/21_Turing_Machines}
 \input{Categorias/22_Struct}
+
+\input{Categorias/23_FiniteSet}
 
 
 \chapter{Construções e Funtores}
@@ -158,12 +179,13 @@ Aqui demonstramos a capacidade de gerar novas estruturas (limites e colimites) e
 \input{Constructions/09_Partial_Orders}
 \input{Constructions/10_EqRel}
 \input{Constructions/11_Mon}
-\input{Constructions/12_mag}
-\input{Constructions/13_dimag}
-\input{Constructions/14_vect}
-\input{Constructions/15_row}
-\input{Constructions/16_Lat}
 
+\input{Constructions/12_Mag}
+\input{Constructions/13_Dimag}
+%\input{Constructions/14_Vect}
+\input{Constructions/15_Row}
+
+\input{Constructions/16_Lat}
 \input{Constructions/17_DLat}
 \input{Constructions/18_Bool}
 \input{Constructions/19_OrdMon}
@@ -171,6 +193,8 @@ Aqui demonstramos a capacidade de gerar novas estruturas (limites e colimites) e
 \input{Constructions/20_Trees}
 \input{Constructions/21_Turing_Machines}
 \input{Constructions/22_Struct}
+
+\input{Constructions/23_FiniteSet}
 
 % -------- Funtores --------
 \input{Functors/01_Fin_Vect}
@@ -188,9 +212,11 @@ Aqui demonstramos a capacidade de gerar novas estruturas (limites e colimites) e
 \input{Functors/10_Rel_Fin}
 \input{Functors/11_Simp_PreOrd}
 \input{Functors/12_Graph_Rel}
-\input{Functors/13_rel_preord}
-\input{Functors/14_trees_structs}
-\input{Functors/15_end_struct}
+
+\input{Functors/13_Rel_Preord}
+\input{Functors/14_Trees_Structs}
+\input{Functors/15_End_Struct}
+
 \input{Functors/16_Dimag_Mag}
 \input{Functors/17_Lat_DLat}
 \input{Functors/18_DLat_Bool}

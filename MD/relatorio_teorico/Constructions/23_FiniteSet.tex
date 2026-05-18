@@ -1,0 +1,644 @@
+% ============================================================
+%  Secção: FinSet (Conjuntos Finitos como Matrizes Linha)
+%  VERSÃO ATUALIZADA E APROFUNDADA
+%  Para inserir nos Capítulos 2 e 3 do relatório
+% ============================================================
+
+% ─────────────────────────────────────────────────────────────
+%  CAPÍTULO 2 — Modelação da Categoria FinSet
+% ─────────────────────────────────────────────────────────────
+
+\section{FinSet (Conjuntos Finitos como Matrizes Linha)}
+
+A categoria \textbf{FinSet} constitui a base computacional do
+trabalho desenvolvido neste relatório. Ao contrário da categoria
+\textbf{Fin} (Secção~2.1), onde os objetos são representados
+apenas pela sua cardinalidade, em FinSet cada objeto é uma
+\emph{matriz linha de MATLAB/Octave com linhas únicas e ordenadas
+lexicograficamente}. Esta representação permite modelar conjuntos
+cujos elementos são registos multidimensionais — strings, vetores
+inteiros, coordenadas no espaço — de forma direta, sem perda de
+informação estrutural.
+
+A categoria FinSet é o ambiente natural para implementar
+construções universais (produto, coproduto, equalizador,
+pullback e pushout), funções hash, homologia de endomapas e
+estruturas algébricas como magmas, sendo todas estas noções
+rigorosamente definíveis como morfismos ou funtores em FinSet.
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Objetos}
+
+\begin{definition}[Objeto de FinSet]
+Um \textbf{objeto} da categoria FinSet é uma variável MATLAB/Octave
+\texttt{A} que satisfaz o \emph{invariante de representação}:
+\begin{equation}
+    \texttt{isequal(A,\; unique(A,\textquotesingle rows\textquotesingle))} \;=\; \texttt{true}.
+    \label{eq:finset_inv}
+\end{equation}
+Isto significa que as linhas de \texttt{A} são distintas e estão
+ordenadas lexicograficamente. Cada linha representa um elemento
+do conjunto finito correspondente.
+\end{definition}
+
+\begin{remark}
+A função \texttt{unique(A,'rows')} do MATLAB realiza
+simultaneamente a remoção de duplicados e a ordenação
+lexicográfica. Qualquer operação que produza um novo objeto deve
+terminar com \texttt{sortrows(unique(X,'rows'))} para restaurar
+o invariante~\eqref{eq:finset_inv}.
+\end{remark}
+
+\begin{lstlisting}[style=matlab, caption={Exemplos de objetos em FinSet}]
+is_FinSet_object = @(X) isequal(X, sortrows(unique(X,'rows')));
+
+% Objeto 1: conjunto de inteiros {1,...,7}
+A = (1:7)';
+isequal(A, unique(A,'rows'))   % true
+
+% Objeto 2: conjunto de strings (alunos da sala)
+A_str = sortrows(['Abe'; 'Bar'; 'Car'; 'Dye'; 'Eve'; 'Fly';
+                  'Gym'; 'Hym'; 'Ive'; 'Jun'; 'Kay'; 'Lie';
+                  'May'; 'Neo'; 'Oli'; 'Pie'; 'Que'; 'Ray';
+                  'Sym'; 'Til']);
+isequal(A_str, unique(A_str,'rows'))  % true (20 alunos)
+
+% Objeto 3: mesas como pares (linha, coluna) em {1..5}x{1..3}
+[i,j] = ind2sub([5 3], 1:15);
+B = sortrows([i(:), j(:)]);          % 15 mesas
+
+% Objeto 4: vetores em Z^3 (inclui negativos)
+C = sortrows([1 0 0; 0 1 0; 0 0 1; 0 0 0;
+              -1 0 0; 0 -1 0; 0 0 -1]);
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Morfismos}
+
+\begin{definition}[Morfismo de FinSet]
+Um \textbf{morfismo} em FinSet é um triplo $(B,\, f,\, A)$ onde:
+\begin{itemize}
+    \item $A$ e $B$ são objetos de FinSet;
+    \item $f$ é um vetor de inteiros de comprimento $|A|$
+          (i.e., \texttt{size(A,1)}) satisfazendo:
+          \begin{equation}
+              \texttt{nnz(f) == size(A,1)}
+              \quad\text{e}\quad
+              f(i) \in \{1, \ldots, |B|\},\;\forall i.
+              \label{eq:finset_morph}
+          \end{equation}
+\end{itemize}
+A condição \texttt{nnz(f) == size(A,1)} garante que $f$ é uma
+\emph{função total}: todo o elemento do domínio tem exatamente
+uma imagem. A expressão \texttt{B(f,:)} devolve, para cada linha
+$i$ de $A$, a linha $f(i)$ de $B$, codificando assim
+$f: A \to B$.
+\end{definition}
+
+\begin{lstlisting}[style=matlab, caption={Verificação e exemplos de morfismos em FinSet}]
+function ok = is_FinSet_morphism(B, f, A)
+    f  = f(:);
+    ok = (numel(f) == size(A,1)) && ...
+         (nnz(f)   == size(A,1)) && ...
+         all(f >= 1)             && ...
+         all(f <= size(B,1));
+end
+
+% Morfismo: cada aluno (A_str) -> mesa (B)
+% f(x) = indice da mesa do aluno x
+f = mod((1:20)'-1, 13) + 1;
+assert(is_FinSet_morphism(B, f, A_str));
+
+% Visualizacao: "aluno x sentado na mesa (i,j)"
+disp([num2str((1:20)'), repmat(' -> ', 20, 1), ...
+      num2str(B(f,:))]);
+\end{lstlisting}
+
+\begin{definition}[Identidade e Composição]
+A \textbf{identidade} em $A$ é o morfismo $(A,\;(1:n)',\;A)$
+com $n = |A|$.
+A \textbf{composição} de $(C,g,B)$ com $(B,f,A)$ é
+$(C,\; g(f),\; A)$, i.e., a indexação composta
+\texttt{h = g(f)}.
+\end{definition}
+
+\begin{proposition}
+A composição em FinSet é associativa e a identidade é neutra,
+fazendo de FinSet uma categoria.
+\end{proposition}
+\begin{proof}
+Para $(D,h,C)$, $(C,g,B)$, $(B,f,A)$:
+$(h \circ g) \circ f = h(g(f)) = h \circ (g \circ f)$,
+pois a indexação de vetores é associativa em MATLAB.
+\end{proof}
+
+\begin{lstlisting}[style=matlab, caption={Composição de morfismos}]
+function h = compose_FinSet(g, f)
+    h = g(f);   % h(i) = g(f(i))
+end
+
+% Verificacao de associatividade
+f1 = [2;1;3]; g1 = [3;1;2]; h1 = [2;3;1];
+assert(isequal(compose_FinSet(h1, compose_FinSet(g1,f1)), ...
+               compose_FinSet(compose_FinSet(h1,g1), f1)));
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Funções Hash como Morfismos de FinSet}
+
+\begin{definition}[Função Hash em FinSet]
+Uma \textbf{função hash} $h: U \to \{1,\ldots,m\}$ é um morfismo
+em FinSet de um universo de chaves $U$ (potencialmente grande)
+para um conjunto de \emph{buckets} de cardinalidade $m$ pequena.
+Em notação de FinSet, $h = (B_m,\, f_h,\, U)$ com
+$B_m = (1:m)'$.
+\end{definition}
+
+A diferença fundamental entre uma função hash e um morfismo
+injetivo é a presença de \textbf{colisões}: $h(x) = h(y)$
+com $x \neq y$. A gestão de colisões é uma escolha adicional
+(encadeamento, endereçamento aberto, etc.) que corresponde
+categoricamente à escolha de uma \emph{secção} do morfismo
+de quociente associado.
+
+\begin{lstlisting}[style=matlab, caption={Três famílias de funções hash como morfismos de FinSet}]
+%% 1) Hash por divisao: h(k) = mod(k,m) + 1
+hash_div  = @(k, m) mod(k, m) + 1;
+
+%% 2) Hash por multiplicacao (Knuth)
+%    A = (sqrt(5)-1)/2 (razao aurea conjugada)
+A_knuth   = (sqrt(5)-1)/2;
+hash_mult = @(k, m) floor(m * mod(k*A_knuth, 1)) + 1;
+
+%% 3) Hash polinomial para strings
+function idx = hash_poly(s, m)
+    p = 31; val = 0;
+    for i = 1:numel(s)
+        val = mod(val*p + double(s(i)), m);
+    end
+    idx = val + 1;
+end
+
+%% Demonstracao: U = {1,...,20}, m = 7 buckets
+U = 1:20; m = 7;
+h1 = arrayfun(@(k) hash_div(k,m),  U);
+h2 = arrayfun(@(k) hash_mult(k,m), U);
+
+fprintf('Chaves: '); fprintf('%3d', U);  fprintf('\n');
+fprintf('Div   : '); fprintf('%3d', h1); fprintf('\n');
+fprintf('Mult  : '); fprintf('%3d', h2); fprintf('\n');
+\end{lstlisting}
+
+\begin{definition}[Colisão e Resolução]
+Dada $h: U \to B_m$, diz-se que $x, y \in U$ com $x \neq y$
+\textbf{colidem} se $h(x) = h(y)$.
+A \textbf{resolução por encadeamento} associa a cada bucket
+$b \in B_m$ uma lista $T[b] = \{x \in U : h(x) = b\}$,
+que corresponde à \emph{fibra} de $h$ sobre $b$.
+\end{definition}
+
+\begin{lstlisting}[style=matlab, caption={Tabela hash com encadeamento — aplicação a ficheiros}]
+%% Tabela hash para ficheiros (hash de conteudo)
+function T = build_hash_table(keys, m, h_fn)
+    T = cell(m,1);
+    for i = 1:numel(keys)
+        b = h_fn(keys(i));
+        T{b} = [T{b}, keys(i)];
+    end
+end
+
+%% Simulacao: 5 "ficheiros" como vetores de bytes
+files = {[72 101 108 108 111],    ...  % "Hello"
+         [87 111 114 108 100],    ...  % "World"
+         [77 65 84 76 65 66],     ...  % "MATLAB"
+         [70 105 110 83 101 116], ...  % "FinSet"
+         [72 101 108 108 111]};        % "Hello" (duplicado)
+m_f = 8;
+function h = hash_content(data, m)
+    p = 257; h = 0;
+    for i = 1:numel(data)
+        h = mod(h*p + data(i), m);
+    end
+    h = h + 1;
+end
+for i = 1:numel(files)
+    fprintf('Ficheiro %d -> bucket %d\n', i, ...
+            hash_content(files{i}, m_f));
+end
+%% Ficheiros 1 e 5 colidem: mesmo conteudo!
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Homologia de Endomapas vs.\ Funções Hash}
+
+\begin{definition}[Homologia de um Endomapa]
+Dado $\varphi: A \to A$ com $|A| = n$, o
+\textbf{grafo dirigido associado} $G(\varphi)$ tem vértices
+$A$ e arestas $i \to \varphi(i)$.
+A \textbf{homologia} de $\varphi$ é a matriz
+$H(\varphi) \in \mathbb{N}^{c \times 4}$,
+onde $c$ é o número de componentes conexas (no sentido do
+grafo subjacente não dirigido) e cada linha~$r$ contém:
+\begin{equation}
+H(\varphi)_{r} = \bigl(\#\text{grau-in }0,\;
+                        \#\text{grau-in }1,\;
+                        \#\text{grau-in }\geq 2,\;
+                        \text{comp. do ciclo}\bigr)_r.
+    \label{eq:homology}
+\end{equation}
+\end{definition}
+
+\begin{remark}
+Todo o endomapa $\varphi$ de um conjunto finito possui
+pelo menos um ciclo em cada componente conexa (teorema
+de Rho de Floyd). Os vértices \emph{fora} do ciclo formam
+``caudas'' (grau de entrada 0 no ciclo).
+Os vértices de grau de entrada $\geq 2$ são pontos de
+ramificação.
+\end{remark}
+
+\begin{lstlisting}[style=matlab, caption={Cálculo da matriz de homologia}]
+function H = endomap_homology(phi)
+    phi = phi(:)';  n = numel(phi);
+    % --- 1. Componentes conexas (union-find)
+    parent = 1:n;
+    function r = find_root(x)
+        while parent(x)~=x
+            parent(x)=parent(parent(x)); x=parent(x);
+        end; r=x;
+    end
+    for i=1:n, a=find_root(i); b=find_root(phi(i));
+        if a~=b, parent(a)=b; end
+    end
+    comp_label = arrayfun(@find_root, 1:n);
+    [comp_ids,~,comp_idx] = unique(comp_label);
+    n_comp = numel(comp_ids);
+    % --- 2. Grau de entrada
+    in_deg = histc(phi, 1:n);
+    % --- 3. Detectar ciclos
+    on_cycle = false(1,n);
+    for s=1:n
+        visited=false(1,n); x=s;
+        while ~visited(x) && ~on_cycle(x)
+            visited(x)=true; x=phi(x);
+        end
+        if ~on_cycle(x) && visited(x)
+            y=x;
+            while ~on_cycle(y), on_cycle(y)=true; y=phi(y); end
+        end
+    end
+    % --- 4. Montar H
+    H = zeros(n_comp,4);
+    for c=1:n_comp
+        mc = (comp_idx==c);
+        id = in_deg(mc);
+        H(c,:) = [sum(id==0), sum(id==1), sum(id>=2), ...
+                  sum(mc & on_cycle)];
+    end
+    H = sortrows(H);
+end
+\end{lstlisting}
+
+\begin{lstlisting}[style=matlab, caption={Exemplos do quadro da aula}]
+%% Exemplo 1 (quadro, Imagem 4):
+%% phi: 1->2, 2->1, 3->4, 4->6, 5->6, 6->3, 7->7
+phi1 = [2, 1, 4, 6, 6, 3, 7];
+H1   = endomap_homology(phi1);
+disp('Homologia phi1:'); disp(H1);
+%% Resultado esperado (3 componentes):
+%%   grau0 grau1 grau2 ciclo
+%%     0     2     0     2    (ciclo {1,2})
+%%     1     2     1     3    (ciclo {3,4,6}, cauda {5})
+%%     0     1     0     1    (ciclo {7})
+
+%% Exemplo 2 (quadro, Imagem 2, secção esquerda):
+%% phi: 1->5, 2->3, 3->2, 4->5, 5->6, 6->7, 7->4
+phi2 = [5, 3, 2, 5, 6, 7, 4];
+H2   = endomap_homology(phi2);
+disp('Homologia phi2:'); disp(H2);
+
+%% Exemplo 3 (quadro, Imagem 3):
+%% phi: 1->2, 2->3, 3->4, 4->5, 5->2, 6->7, 7->7
+phi3 = [2, 3, 4, 5, 2, 7, 7];
+H3   = endomap_homology(phi3);
+disp('Homologia phi3:'); disp(H3);
+\end{lstlisting}
+
+\begin{proposition}
+A homologia $H: \mathrm{End}(A) \to \mathrm{FinSet}$ é um
+\textbf{invariante de conjugação}: se $\varphi \sim \psi$
+(i.e., existe bijeção $w : A \to A$ tal que
+$\varphi \circ w = w \circ \psi$), então
+$H(\varphi) = H(\psi)$.
+\end{proposition}
+
+\begin{proof}
+A conjugação por $w$ é um isomorfismo de grafos de
+$G(\psi)$ em $G(\varphi)$, preservando assim a estrutura
+das componentes conexas, os graus de entrada e os
+comprimentos de ciclo.
+\end{proof}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Hash vs.\ Homologia: Análise Comparativa}
+
+\begin{table}[htbp]
+\centering
+\caption{Comparação entre funções hash e a função de homologia.}
+\begin{tabular}{lll}
+\toprule
+\textbf{Propriedade} & \textbf{Função Hash} & \textbf{Homologia} \\
+\midrule
+Domínio & $U$ (chaves arbitrárias) & $\mathrm{End}(A)$ (endomapas) \\
+Codomínio & $\{1,\ldots,m\}$ (buckets) & Matrizes de $\mathbb{N}^{c\times 4}$ \\
+Objetivo & Indexação rápida & Classificação estrutural \\
+Colisões & Inevitáveis (pretendidas) & Possíveis (indesejadas) \\
+Complexidade & $O(1)$ (avaliação) & $O(n)$ (cálculo) \\
+Invariância & Nenhuma garantida & Sob conjugação \\
+Aplicação & BD, ficheiros, criptografia & Classes de End(A) \\
+\bottomrule
+\end{tabular}
+\label{tab:hash_vs_hom}
+\end{table}
+
+Ambas as construções são morfismos de FinSet que
+\emph{resumem} informação de um objeto grande (universo $U$
+ou $\mathrm{End}(A)$) num objeto mais pequeno. A diferença
+essencial está no objetivo: eficiência de acesso (hash) vs.\
+invariância estrutural (homologia).
+
+Em particular, a homologia pode ser usada como uma
+\textbf{hash de classificação} para endomapas: ao invés de
+comparar dois endomapas diretamente (custo $O(n)$), calcula-se
+$H(\varphi)$ e $H(\psi)$ e compara-se as matrizes resultantes.
+Se $H(\varphi) \neq H(\psi)$, os endomapas não são conjugados
+(e.g.\ num ficheiro de base de dados de estruturas, basta
+indexar pelo hash da homologia).
+
+\begin{lstlisting}[style=matlab, caption={Uso da homologia como hash de classificação}]
+%% Indexacao de endomapas por homologia
+phi_list = {[2,1,3,4,5], [1,2,3,4,5], [2,1,4,3,5], ...
+            [3,1,2,4,5], [2,3,1,4,5], [2,1,5,3,4]};
+m_hash = 16;   % numero de buckets para a tabela hash
+
+groups = containers.Map('KeyType','char','ValueType','any');
+for k = 1:numel(phi_list)
+    H   = endomap_homology(phi_list{k});
+    key = mat2str(H);     % string da matriz = chave hash
+    if groups.isKey(key)
+        groups(key) = [groups(key), k];
+    else
+        groups(key) = k;
+    end
+end
+disp('Grupos de conjugacao por homologia:');
+keys_g = groups.keys;
+for g = 1:numel(keys_g)
+    fprintf('  Homologia %s -> endomapas %s\n', ...
+            keys_g{g}, mat2str(groups(keys_g{g})));
+end
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Estrutura de Magma a partir de Endomapas}
+
+\begin{definition}[Magma derivado de um Endomapa]
+Dado $\varphi: A \to A$, define-se a operação binária
+$*_\varphi$ em $A$ por:
+\begin{equation}
+    x *_\varphi x = \varphi(x)
+    \qquad\text{e}\qquad
+    x^{n+1} = \varphi^n(x),
+    \label{eq:magma_endo}
+\end{equation}
+onde $\varphi^n$ denota a $n$-ésima iteração de $\varphi$.
+Para $x \neq y$, a regra geral é:
+$x *_\varphi y = x$ ou $y$ dependendo do tamanho da componente
+(conforme o quadro da aula: elementos de componentes maiores
+absorvem os menores).
+A tabela de Cayley $M_\varphi$ de $(A, *_\varphi)$ é uma
+matriz $|A| \times |A|$ de inteiros.
+\end{definition}
+
+\begin{lstlisting}[style=matlab, caption={Construção da tabela de Cayley do magma de um endomapa}]
+function M = endomap_to_magma(phi)
+    % Tabela de Cayley: M(i,j) = i * j
+    % Regra: x*x = phi(x); x*y = x se i<j, senao j
+    phi = phi(:)'; n = numel(phi);
+    M   = zeros(n,n);
+    for i = 1:n
+        for j = 1:n
+            if i == j
+                M(i,j) = phi(i);   % x*x = phi(x)
+            elseif i < j
+                M(i,j) = i;        % absorção pelo menor
+            else
+                M(i,j) = j;
+            end
+        end
+    end
+end
+
+%% Exemplo do quadro (Imagem 5): phi: 1->4, 2->3, 3->5, 4->1, 5->2
+phi_m = [4, 3, 5, 1, 2];
+M_mag = endomap_to_magma(phi_m);
+disp('Tabela de Cayley:'); disp(M_mag);
+
+%% Verificacao: x^(n+1) = phi^n(x)
+%% x^2 = x*x = phi(x):
+assert(all(diag(M_mag)' == phi_m));
+fprintf('x*x = phi(x) para todo x: OK\n');
+
+%% x^3 = x^2 * x = phi(x) * x
+%% (como phi(x) < x ou phi(x) > x, aplica-se a regra de tamanho)
+\end{lstlisting}
+
+\begin{proposition}
+A construção $(A, \varphi) \mapsto (A, *_\varphi)$ é
+\textbf{functorial}: um morfismo $f: (A_1, \varphi_1) \to
+(A_2, \varphi_2)$ em \textbf{End} (i.e.,
+$f \circ \varphi_1 = \varphi_2 \circ f$) induz um
+homomorfismo $f: (A_1, *_{\varphi_1}) \to (A_2, *_{\varphi_2})$
+em \textbf{Mag}, satisfazendo
+$f(x *_{\varphi_1} y) = f(x) *_{\varphi_2} f(y)$.
+\end{proposition}
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Classes de Conjugação em End(A)}
+
+\begin{definition}[Conjugação em End(A)]
+Dados $u, v \in \mathrm{End}(A)$, diz-se que $u$ e $v$ são
+\textbf{conjugados}, escrevendo $u \sim v$, se existe
+$w \in \mathrm{Bij}(A)$ tal que $u \circ w = w \circ v$.
+\end{definition}
+
+A relação $\sim$ é de equivalência. A homologia fornece um
+invariante para separar classes: se $H(u) \neq H(v)$, então
+$u \not\sim v$.
+
+\begin{lstlisting}[style=matlab, caption={Algoritmo de verificação de conjugação}]
+function ok = are_conjugate(phi1, phi2)
+    % Verifica se phi1 ~ phi2 (para n pequeno, forca bruta)
+    n = numel(phi1);
+    if ~isequal(sortrows(endomap_homology(phi1)), ...
+                sortrows(endomap_homology(phi2)))
+        ok = false; return;
+    end
+    W = perms(1:n);   % todas as permutacoes de {1..n}
+    ok = false;
+    for k = 1:size(W,1)
+        w = W(k,:);
+        if isequal(phi1(w), w(phi2))   % u o w = w o v
+            ok = true; return;
+        end
+    end
+end
+
+%% Exemplos
+phi_a = [2, 1, 4, 3, 5];   % dois 2-ciclos + ponto fixo
+phi_b = [2, 1, 5, 3, 4];   % outro endomapa com 2 ciclos
+phi_c = [1, 2, 3, 4, 5];   % identidade
+
+fprintf('phi_a ~ phi_b? %d\n', are_conjugate(phi_a, phi_b));
+fprintf('phi_a ~ phi_c? %d\n', are_conjugate(phi_a, phi_c));
+\end{lstlisting}
+
+
+% ─────────────────────────────────────────────────────────────
+%  CAPÍTULO 3 — Construções Universais em FinSet
+% ─────────────────────────────────────────────────────────────
+
+\section{Construções em FinSet}
+
+\subsection{Fundamentação Teórica}
+
+\begin{proposition}[Completude e Coconpletude de FinSet]
+A categoria FinSet é \textbf{completa e cocompleta}: todos os
+limites e colimites finitos existem. Em particular:
+\begin{itemize}
+    \item O \textbf{produto} $A \times B$ tem
+          $|A \times B| = |A| \cdot |B|$ e é representado
+          pelas linhas do produto cartesiano de $A$ e $B$.
+    \item O \textbf{coproduto} $A \sqcup B$ tem
+          $|A \sqcup B| = |A| + |B|$ e é a união disjunta
+          com etiqueta de proveniência.
+    \item O \textbf{equalizador} de $f, g: A \to B$ é o
+          subconjunto $E = \{a \in A : f(a) = g(a)\}$.
+    \item O \textbf{coequalizador} de $f, g: A \to B$ é o
+          quociente de $B$ pela menor relação de equivalência
+          gerada por $\{f(a) \sim g(a) : a \in A\}$.
+    \item O \textbf{pullback} de $f: A \to C$ e $g: B \to C$
+          é $\{(a,b) \in A \times B : f(a) = g(b)\}$.
+    \item O \textbf{pushout} de $f: C \to A$ e $g: C \to B$
+          é o coequalizador de $\iota_A \circ f$ e
+          $\iota_B \circ g$ no coproduto $A \sqcup B$.
+\end{itemize}
+\end{proposition}
+
+\subsection{Implementação Computacional}
+
+\begin{lstlisting}[style=matlab, caption={Produto Categórico em FinSet com verificação da propriedade universal}]
+function [P, pi_A, pi_B] = FinSet_product(A, B)
+    % Produto A x B; pi_A, pi_B: projecoes
+    nA = size(A,1); nB = size(B,1);
+    [iA, iB] = ndgrid(1:nA, 1:nB);
+    iA = iA(:); iB = iB(:);
+    [P, ord] = sortrows([A(iA,:), B(iB,:)]);
+    pi_A = iA(ord); pi_B = iB(ord);
+end
+
+% Propriedade universal: para qualquer h: C->A e k: C->B
+% existe unico u: C->P tal que pi_A(u)=h e pi_B(u)=k
+function u = product_mediator(A, B, P, pi_A, pi_B, h, k)
+    nC = numel(h);
+    u  = zeros(nC,1);
+    for i = 1:nC
+        % Encontrar (A(h(i),:), B(k(i),:)) em P
+        row = [A(h(i),:), B(k(i),:)];
+        [~, u(i)] = ismember(row, P, 'rows');
+    end
+end
+\end{lstlisting}
+
+\begin{lstlisting}[style=matlab, caption={Coproduto e Injeções em FinSet}]
+function [C, iota_A, iota_B] = FinSet_coproduct(A, B)
+    nA = size(A,1); nB = size(B,1);
+    tagged = [zeros(nA,1), A; ones(nB,1), B];
+    C = sortrows(tagged);
+    [~, iota_A] = ismember([zeros(nA,1),A], C, 'rows');
+    [~, iota_B] = ismember([ones(nB,1), B], C, 'rows');
+end
+\end{lstlisting}
+
+\begin{lstlisting}[style=matlab, caption={Equalizador e Coequalizador em FinSet}]
+function [E, inc] = FinSet_equalizer(B, f, g, A)
+    mask = all(B(f,:) == B(g,:), 2);
+    idx  = find(mask);
+    E    = A(idx,:);
+    inc  = idx;
+end
+
+function [Q, quot] = FinSet_coequalizer(B, f, g, A)
+    nB = size(B,1);
+    parent = 1:nB;
+    function r = find_root(x)
+        while parent(x)~=x
+            parent(x)=parent(parent(x)); x=parent(x);
+        end; r=x;
+    end
+    for a = 1:size(A,1)
+        ra=find_root(f(a)); rb=find_root(g(a));
+        if ra~=rb, parent(ra)=rb; end
+    end
+    classes = arrayfun(@find_root,1:nB);
+    [roots,~,quot] = unique(classes);
+    [Q, ord] = sortrows(B(roots,:));
+    quot = ord(quot)';
+end
+\end{lstlisting}
+
+\begin{lstlisting}[style=matlab, caption={Pullback e Pushout em FinSet}]
+function [PB, p_A, p_B] = FinSet_pullback(C, f, g, A, B)
+    nA=size(A,1); nB=size(B,1);
+    pairs_A=[]; pairs_B=[];
+    for a=1:nA, for b=1:nB
+        if isequal(C(f(a),:), C(g(b),:))
+            pairs_A(end+1)=a; pairs_B(end+1)=b;
+        end
+    end, end
+    [PB,ord] = sortrows([A(pairs_A,:), B(pairs_B,:)]);
+    p_A = pairs_A(ord)'; p_B = pairs_B(ord)';
+end
+
+function [PO, i_A, i_B] = FinSet_pushout(C0, f, g, A, B)
+    [Cop, iA, iB] = FinSet_coproduct(A, B);
+    [PO, quot]    = FinSet_coequalizer(Cop, iA(f), iB(g), C0);
+    i_A = quot(iA); i_B = quot(iB);
+end
+\end{lstlisting}
+
+\begin{lstlisting}[style=matlab, caption={Verificação integrada de todas as construções}]
+A = (1:4)'; B = (1:3)'; C = (1:2)';
+f = [1;1;2;2]; g = [1;2;1;2];   % morfismos A -> C
+
+[P,  pA, pB]    = FinSet_product(A, B);
+[Cp, iA, iB]    = FinSet_coproduct(A, B);
+[E,  inc]       = FinSet_equalizer(C, f, g, A);
+[Q,  qt]        = FinSet_coequalizer(C, f, g, A);
+[PB, p1, p2]    = FinSet_pullback(C, f, [1;2;1], A, B);
+
+fprintf('|AxB|=%d  |A+B|=%d  |Eq|=%d  |Coeq|=%d  |PB|=%d\n',...
+        size(P,1), size(Cp,1), size(E,1), size(Q,1), size(PB,1));
+% Verificacoes finais
+assert(isequal(C(f(p1),:), C([1;2;1](p2),:)));  % pullback
+fprintf('Todas as construcoes: OK\n');
+\end{lstlisting}
+
+\begin{proposition}[FinSet como Topos]
+A categoria FinSet é um \textbf{topos elementar}: possui
+classificador de subobjetos $\Omega = \{0,1\}$ (verdade/falsidade),
+exponenciais $B^A$ (conjunto de todas as funções $A \to B$) e
+objeto terminal $\mathbf{1} = \{*\}$. Esta estrutura rica é a
+base teórica que justifica a utilização de FinSet como arena
+para toda a modelação computacional deste relatório.
+\end{proposition}

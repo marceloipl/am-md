@@ -1,4 +1,4 @@
-\section{Funtor $G: Trees \to Struct$}
+\section{Funtor \texorpdfstring{$G: Trees \to Struct$}{G: Trees -> Struct}}
 \label{sec:functor-trees-struct}
 
 \subsection{Descrição das Categorias}
@@ -28,7 +28,7 @@ S.set = 1:5;
 S.rel = [1 2; 1 3; 2 4; 2 5]; % Relação de pai-filho
 \end{lstlisting}
 
-\subsection{Funtor Covariante $G: Trees \to Struct$ (Codificação como Conjunto Estruturado)}
+\subsection{Funtor Covariante \texorpdfstring{$G: Trees \to Struct$}{G: Trees -> Struct} (Codificação como Conjunto Estruturado)}
 
 O funtor $G: \mathbf{Trees} \to \mathbf{Struct}$ envia cada árvore $T$ a um conjunto estruturado $(X, R)$, onde $X$ é o conjunto de nós de $T$ e $R$ é a relação de pai-filho (ou seja, $(u, v) \in R$ se $u$ é pai de $v$ em $T$). Os morfismos em $\mathbf{Trees}$ são mapeados para morfismos em $\mathbf{Struct}$ que preservam a relação $R$.
 

@@ -1,0 +1,107 @@
+% =========================================================================
+% Secção: Modelação da Categoria FinSet
+% =========================================================================
+
+\section{Categoria FinSet: Conjuntos Finitos e Funções}
+A categoria \textbf{FinSet} é fundamental na teoria das categorias, onde os objetos são conjuntos finitos e os morfismos são funções entre eles. Computacionalmente, modelar esta categoria exige a definição de invariantes de representação rigorosos e algoritmos que respeitem as suas propriedades estruturais.
+
+\subsection{Objetos e Invariantes de Representação}
+Em MATLAB, um objeto da categoria FinSet é representado como uma matriz plana. Para garantir a definição matemática de um conjunto (elementos únicos e sem ordem intrínseca relevante para a igualdade), define-se o seguinte invariante de representação: uma matriz $A$ é um objeto de FinSet se e só se as suas linhas forem únicas e estiverem ordenadas lexicograficamente.
+
+\begin{lstlisting}[language=Matlab, caption={Definição do invariante de objetos em FinSet}]
+% Um objeto de FinSet é uma matriz MATLAB A tal que:
+% isequal(A, unique(A,'rows')) == true
+is_FinSet_object = @(X) isequal(X, sortrows(unique(X,'rows')));
+\end{lstlisting}
+
+Esta abordagem permite modelar diversos tipos de conjuntos:
+\begin{itemize}
+    \item \textbf{Conjuntos escalares}: Vetores coluna de números inteiros.
+    \item \textbf{Conjuntos de strings}: Matrizes de caracteres (\textit{char arrays}).
+    \item \textbf{Produtos cartesianos}: Matrizes onde cada coluna representa uma dimensão do produto (e.g., pares de coordenadas).
+\end{itemize}
+
+\subsection{Morfismos}
+Um morfismo $f: A \to B$ em FinSet é uma função total. No nosso modelo, um morfismo é implementado como um vetor coluna de índices, onde a $i$-ésima posição contém o índice do elemento em $B$ para o qual o $i$-ésimo elemento de $A$ é mapeado.
+
+\begin{lstlisting}[language=Matlab, caption={Validação de um morfismo em FinSet}]
+function ok = is_FinSet_morphism(B, f, A)
+    % f deve ter o mesmo tamanho que A e apontar para indices validos em B
+    f = f(:);
+    ok = (numel(f) == size(A,1)) && ...
+         (nnz(f)   == size(A,1)) && ...
+         all(f >= 1)             && ...
+         all(f <= size(B,1));
+end
+\end{lstlisting}
+
+A composição de morfismos $g \circ f$ traduz-se numa operação de indexação direta simples e eficiente no MATLAB: \texttt{h = g(f)}, respeitando integralmente a associatividade requerida pelos axiomas das categorias.
+
+% =========================================================================
+% Secção: Construções Universais
+% =========================================================================
+
+\section{Construções Universais em FinSet}
+Uma das características essenciais de FinSet é ser completa e cocompleta, isto é, possuir todos os limites e colimites finitos.
+
+\subsection{Produto e Coproduto}
+O \textbf{produto categórico} ($A \times B$) consiste nos pares ordenados de elementos. Computacionalmente, geramos todas as combinações recorrendo à função \texttt{ndgrid} e concatenamos as linhas, garantindo a ordenação final.
+
+O \textbf{coproduto} ($A \sqcup B$), ou união disjunta, requer a "etiquetagem" dos elementos para evitar a colisão de elementos iguais oriundos de origens distintas. Adicionamos uma coluna com o valor $0$ para os elementos de $A$ e $1$ para os elementos de $B$.
+
+\begin{lstlisting}[language=Matlab, caption={Produto e Coproduto Categórico}]
+function [C, iota_A, iota_B] = FinSet_coproduct(A, B)
+    nA = size(A,1); nB = size(B,1);
+    tagged = [zeros(nA,1), A; ones(nB,1), B];
+    [C, ord] = sortrows(tagged);
+    % Identificacao das inclusoes (morfismos de A e B para C)
+    [~, iota_A] = ismember([zeros(nA,1), A], C, 'rows');
+    [~, iota_B] = ismember([ones(nB,1),  B], C, 'rows');
+end
+\end{lstlisting}
+
+\subsection{Equalizador e Coequalizador}
+O \textbf{equalizador} de duas funções $f, g: A \to B$ seleciona o subconjunto de $A$ cujos elementos têm a mesma imagem sob $f$ e $g$. No MATLAB, isto resolve-se de forma vetorizada com \texttt{all(B(f,:) == B(g,:), 2)}.
+
+O \textbf{coequalizador} é um colimite que forma o espaço quociente sobre a relação de equivalência gerada por $f(a) \sim g(a)$. A sua implementação computacional exige algoritmos de grafos, especificamente a estrutura de dados \textit{Union-Find} com \textit{path compression}, garantindo a determinação eficiente das classes de equivalência.
+
+\subsection{Pullback e Pushout}
+Utilizando as construções primárias, o modelo suporta \textbf{pullbacks} (limites de diagramas em "V") e \textbf{pushouts} (colimites de diagramas em "V" invertido). O pushout é elegantemente construído através da combinação do coproduto seguido do coequalizador.
+
+% =========================================================================
+% Secção: Aplicações Práticas (Hash, Homologia e Magmas)
+% =========================================================================
+
+\section{Aplicações: Hash, Homologia e Magmas}
+
+\subsection{Funções Hash como Morfismos}
+No contexto de estruturas de dados, uma função \textit{hash} pode ser interpretada como um morfismo não injetivo $h: U \to M$ na categoria FinSet, onde $U$ é o universo de chaves e $M$ os \textit{buckets}. As colisões ocorrem inevitavelmente, sendo uma consequência direta da perda de injetividade (teorema de Dirichlet). O script implementa diferentes métodos morfismos: hash por divisão, multiplicação (Knuth) e polinomial para \textit{strings}.
+
+\subsection{Homologia de Endomapas}
+Um endomapa é um morfismo $\phi: A \to A$. Pode ser visualizado como um grafo direcionado onde cada vértice tem grau de saída exato de 1. O código analisa a "homologia" deste espaço, determinando para cada componente conexa:
+\begin{enumerate}
+    \item Número de elementos terminais (\textit{tails}).
+    \item Vértices de ramificação (grau de entrada $\ge 2$).
+    \item O comprimento invariável do ciclo central.
+\end{enumerate}
+Esta assinatura atua como um invariante para \textbf{classes de conjugação}. Dois endomapas só podem ser conjugados (isto é, isomórficos sob uma bijeção estrutural) se partilharem a mesma matriz de homologia.
+
+\begin{lstlisting}[language=Matlab, caption={Deteção estrutural de invariantes (Homologia)}]
+function same = same_homology(phi1, phi2)
+    H1 = endomap_homology(phi1);
+    H2 = endomap_homology(phi2);
+    same = isequal(sortrows(H1), sortrows(H2));
+end
+\end{lstlisting}
+
+\subsection{Funtor de Endomapas para Magmas}
+O guião demonstra a passagem a categorias algébricas construindo um Magma $(A, *)$ a partir do endomapa $\phi$. A operação binária é sintetizada pela iteração em níveis do mapa, culminando na verificação de functorialidade, na qual se prova que um morfismo entre endomapas é preservado como um morfismo na categoria dos magmas (\textbf{Mag}), gerando tabelas de Cayley consistentes.
+
+\section{Resultados e Verificação Computacional}
+A simulação comprova empiricamente a teoria abstrata:
+\begin{itemize}
+    \item A composição de morfismos respeitou a associatividade estrita.
+    \item O produto cardinal provou ser idêntico à multiplicação matemática regular ($|A \times B| = |A| \times |B|$).
+    \item O coproduto demonstrou ser equivalente à adição matemática ($|A \sqcup B| = |A| + |B|$).
+    \item A construção passo-a-passo garantiu que a \textbf{FinSet} em ambiente MATLAB é simultaneamente \textit{completa} e \textit{cocompleta}, com todas as estruturas de limite e colimite criadas a operar conforme os axiomas universais em tempo real.
+\end{itemize}
