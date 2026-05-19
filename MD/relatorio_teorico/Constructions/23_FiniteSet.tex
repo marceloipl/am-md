@@ -10,10 +10,9 @@
 
 \section{FinSet (Conjuntos Finitos como Matrizes Linha)}
 
-A categoria \textbf{FinSet} constitui a base computacional do
-trabalho desenvolvido neste relatório. Ao contrário da categoria
+Ao contrário da categoria
 \textbf{Fin} (Secção~2.1), onde os objetos são representados
-apenas pela sua cardinalidade, em FinSet cada objeto é uma
+apenas pela sua cardinalidade, em FinSet Computacional cada objeto é uma
 \emph{matriz linha de MATLAB/Octave com linhas únicas e ordenadas
 lexicograficamente}. Esta representação permite modelar conjuntos
 cujos elementos são registos multidimensionais — strings, vetores
@@ -82,13 +81,13 @@ Um \textbf{morfismo} em FinSet é um triplo $(B,\, f,\, A)$ onde:
     \item $f$ é um vetor de inteiros de comprimento $|A|$
           (i.e., \texttt{size(A,1)}) satisfazendo:
           \begin{equation}
-              \texttt{nnz(f) == size(A,1)}
+              \texttt{numel(f) == size(A,1)}
               \quad\text{e}\quad
               f(i) \in \{1, \ldots, |B|\},\;\forall i.
               \label{eq:finset_morph}
           \end{equation}
 \end{itemize}
-A condição \texttt{nnz(f) == size(A,1)} garante que $f$ é uma
+A condição \texttt{numel(f) == size(A,1)} garante que $f$ é uma
 \emph{função total}: todo o elemento do domínio tem exatamente
 uma imagem. A expressão \texttt{B(f,:)} devolve, para cada linha
 $i$ de $A$, a linha $f(i)$ de $B$, codificando assim
