@@ -20,6 +20,8 @@
 \usepackage{graphicx}               % Inclusão de imagens
 \usepackage{amsmath, amssymb}       % Símbolos matemáticos
 \usepackage[pdftex,unicode]{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{cd, babel}
 
 % --- 3. Configuração do Ambiente de Código (MATLAB) ---
 \usepackage{listings}
@@ -36,17 +38,31 @@
 	keywordstyle=\color{keyword_blue},
 	stringstyle=\color{string_purple},
 	basicstyle=\ttfamily\small,
-	breaklines=true,         
-	frame=single,            
-	showstringspaces=false,  
-	extendedchars=true,      
-	literate={á}{{\'a}}1 {ã}{{\~a}}1 {à}{{\`a}}1 {é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {õ}{{\~o}}1 {ú}{{\'u}}1 {ç}{{\c{c}}}1 {Á}{{\'A}}1 {Ã}{{\~A}}1 {À}{{\`A}}1 {É}{{\'E}}1 {Ê}{{\^E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Õ}{{\~O}}1 {Ú}{{\'U}}1 {Ç}{{\c{C}}}1
+	breaklines=true,
+	frame=single,
+	showstringspaces=false,
+	extendedchars=true,
+	mathescape=true,
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	stepnumber=1,
+	numbersep=10pt,
+	tabsize=4,
+	literate=
+	{á}{{\'a}}1 {ã}{{\~a}}1 {à}{{\`a}}1
+	{é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1
+	{ó}{{\'o}}1 {õ}{{\~o}}1 {ú}{{\'u}}1
+	{ç}{{\c{c}}}1
+	{Á}{{\'A}}1 {Ã}{{\~A}}1 {À}{{\`A}}1
+	{É}{{\'E}}1 {Ê}{{\^E}}1 {Í}{{\'I}}1
+	{Ó}{{\'O}}1 {Õ}{{\~O}}1 {Ú}{{\'U}}1
+	{Ç}{{\c{C}}}1
 	{⊆}{{$\subseteq$}}1
 	{∈}{{$\in$}}1
 	{×}{{$\times$}}1
-	{→}{{$\to$}}1,
+	{→}{{$\to$}}1
+	{∘}{{$\circ$}}1
 }
-
 % 2º: Definir o estilo específico que vai herdar/acrescentar ao lstset
 \lstdefinestyle{matlab}{
 	language=Matlab,
@@ -68,25 +84,8 @@
 \newtheorem{remark}{Observação}[section]
 \newtheorem{definition}{Definição}[section]
 \newtheorem{proposition}{Proposição}[section]
+\newtheorem{example}{Exemplo}[section]
 
-\lstset{
-    language=Matlab,
-    backgroundcolor=\color{back_gray},   
-    commentstyle=\color{comment_green},
-    keywordstyle=\color{keyword_blue},
-    stringstyle=\color{string_purple},
-    basicstyle=\ttfamily\small,
-    breaklines=true,         % Quebra linhas automáticas
-    frame=single,            % Moldura simples
-    showstringspaces=false,  % Não mostra espaços nas strings
-    extendedchars=true,      % Permite caracteres estendidos
-    % MAPA DE ACENTOS PARA O CÓDIGO (Resolve o erro de compilação)
-    literate={á}{{\'a}}1 {ã}{{\~a}}1 {à}{{\`a}}1 {é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {õ}{{\~o}}1 {ú}{{\'u}}1 {ç}{{\c{c}}}1 {Á}{{\'A}}1 {Ã}{{\~A}}1 {À}{{\`A}}1 {É}{{\'E}}1 {Ê}{{\^E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Õ}{{\~O}}1 {Ú}{{\'U}}1 {Ç}{{\c{C}}}1
-    {⊆}{{$\subseteq$}}1
-    {∈}{{$\in$}}1
-    {×}{{$\times$}}1
-    {→}{{$\to$}}1,
-}
 
 % --- 4. Personalização Visual ---
 \titleformat{\chapter}[display]
