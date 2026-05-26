@@ -1,0 +1,72 @@
+
+\chapter{MATLAB Code Analysis: \texttt{plane2sphere.m}}
+\date{}
+
+
+\maketitle
+
+\section{Code Overview}
+
+\textbf{What is the main purpose of this file?} \\
+The main purpose of this file is to map 2D plane coordinates to a 3D unit sphere. It takes points on a flat surface and wraps them onto a spherical surface using stereographic projection. 
+
+\textbf{What type of analysis or calculation does it perform?} \\
+It performs a geometric and algebraic coordinate transformation. It calculates the 3D cartesian coordinates $(x,y,z)$ on a sphere of radius 1 based on planar 2D coordinates $(X,Y)$ or a complex plane equivalent.
+
+\textbf{What is the mathematical/theoretical context?} \\
+The code is deeply rooted in spherical geometry, complex analysis, and conformal mapping. Specifically, it models the \textbf{Riemann sphere}, which visualizes the extended complex plane (including the point at infinity). Stereographic projection preserves angles (conformal) but not areas, smoothly mapping a flat continuous plane onto a sphere minus one point (typically the North Pole, which represents infinity).
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{1. Input Parsing and Complex Number Handling}
+\textbf{Explanation:} 
+This section handles the input arguments. The function is designed to be flexible: it can accept either two separate arrays ($X$ and $Y$) representing 2D Cartesian coordinates, or a single array containing complex numbers. The \texttt{try-catch} block checks if $Y$ is defined. If it is not (meaning the user passed a single complex variable), it catches the resulting error and extracts the real parts into $X$ and the imaginary parts into $Y$.
+
+\begin{lstlisting}[style=matlabstyle]
+try Y; % if Y is not given assume X is complex
+catch Y=imag(X); X=real(X); end
+\end{lstlisting}
+
+\subsection{2. Stereographic Projection Mapping}
+\textbf{Explanation:} 
+This is the mathematical core of the function. It calculates the common denominator $R$ based on the squared distances in the 2D plane. It then computes the 3D coordinates $x$, $y$, and $z$. The logic applies the inverse stereographic projection equations:
+$$R=1+X^2+Y^2$$
+$$x=\frac{2X}{R}$$
+$$y=\frac{2Y}{R}$$
+$$z=\frac{-1+X^2+Y^2}{R}$$
+This maps the origin $(0,0)$ to the South Pole $(0,0,-1)$, points on the unit circle to the equator $(z=0)$, and points further out towards the upper hemisphere.
+
+\begin{lstlisting}[style=matlabstyle]
+R=1+X.^2+Y.^2;
+x=2*X./R;
+y=2*Y./R;
+z=(-1+X.^2+Y.^2)./R;
+\end{lstlisting}
+
+\subsection{3. Singularity Handling (The Point at Infinity)}
+\textbf{Explanation:} 
+When points in the 2D plane extend to infinity (or if division by zero occurred prior resulting in \texttt{NaN} values for $z$), this block gracefully handles the mathematical singularity. In the context of the Riemann sphere, the "point at infinity" strictly corresponds to the top of the sphere (the North Pole). This section finds any \texttt{NaN} elements and manually maps them to $(0,0,1)$.
+
+\begin{lstlisting}[style=matlabstyle]
+I=find(isnan(z));
+x(I)=0;y(I)=0;z(I)=1;
+\end{lstlisting}
+
+\subsection{4. Output Aggregation}
+\textbf{Explanation:} 
+This final step concatenates the computed $x$, $y$, and $z$ coordinate column vectors horizontally into a single $N \times 3$ matrix $V$. The function outputs this matrix alongside the individual coordinate vectors, allowing the user flexibility in how they handle the returned 3D geometric data.
+
+\begin{lstlisting}[style=matlabstyle]
+V=[x y z];
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+
+Based on the commented-out execution blocks in the file, running the full script with the examples generates dynamic 3D visualizations in a MATLAB figure window. 
+
+\begin{itemize}
+    \item \textbf{The Plot Axes:} The graph utilizes a \texttt{plot3} environment with three Cartesian axes ($x$, $y$, and $z$) representing the bounding box of a 3D unit sphere (ranging from $-1$ to $1$ on all axes).
+    \item \textbf{Visual Representation of the Projection:} You will see distinct points (rendered as \texttt{*} markers) mapped directly onto the surface of an invisible sphere. 
+    \item \textbf{Geodesic Pathing:} The script utilizes Spherical Linear Interpolation (\texttt{slerp}) to calculate and draw curved 3D lines that strictly trace the surface of the sphere between the mapped points.
+    \item \textbf{Shape Animation and Transformation:} The block mapping the letters 'M' and 'V' visually demonstrates a complex transformation. As the loop progresses through the interpolation variable $t$, the figure will animate, showing paths or shapes smoothly morphing and wrapping around the curvature of the 3D sphere, translating abstract 2D text into a 3D topological manifold.
+\end{itemize}

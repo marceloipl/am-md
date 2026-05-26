@@ -1,0 +1,108 @@
+\chapter{MATLAB Script Analysis: Graph}
+
+\section{Overview}
+The main purpose of this file is to translate a directed graph structure defined in MATLAB into formatted \LaTeX\ code using the \textbf{TikZ} library. It acts as a bridge between computational graph theory and document preparation, allowing users to programmatically generate high-quality vector graphics of graphs.
+
+The file performs a \textbf{string formatting and coordinate transformation analysis}. It takes numerical data representing nodes and edges and maps them onto a 2D Cartesian plane based on provided coordinates.
+
+The mathematical context of this script is \textbf{Graph Theory} and \textbf{Binary Relations}. It specifically handles directed graphs (digraphs) defined by sets of domains and codomains. The provided examples in the comments also suggest its application in visualizing \textbf{Hasse Diagrams}, which represent partially ordered sets (posets), such as divisibility relations among integers.
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{Function Definition and Input Handling}
+\textbf{Explanation:} This section defines the function signature and initializes the dimensions of the graph. It handles optional arguments for node labels (\texttt{vL}) and edge labels (\texttt{eL}). If no labels are provided, it defaults to indexing the nodes from $1$ to $n$.
+\begin{lstlisting}
+function s = graph2latex(d, c, V, varargin)
+    n = size(V, 1);      % Number of nodes
+    m = numel(d);        % Number of edges
+
+    % Handle optional arguments
+    vL = 1:n;
+    eL = [];
+
+    if numel(varargin) >= 1
+        vL = varargin{1};
+    end
+    if numel(varargin) >= 2
+        eL = varargin{2};
+    end
+\end{lstlisting}
+
+\subsection{Coordinate Extraction}
+\textbf{Explanation:} This block processes the node positions \texttt{V}. It allows for two formats: a vector of complex numbers (where the real part is $x$ and the imaginary part is $y$) or an $N \times 2$ matrix of real coordinates. This flexibility is useful as some MATLAB graph layouts return coordinates as complex numbers.
+\begin{lstlisting}
+    % Determine coordinates
+    if isvector(V) && ~isreal(V)
+        x = real(V);
+        y = imag(V);
+    elseif size(V, 2) == 2
+        x = V(:, 1);
+        y = V(:, 2);
+    else
+        error('V must be Nx1 complex or Nx2 real matrix of coordinates');
+    end
+\end{lstlisting}
+
+\subsection{TikZ Header and Node Generation}
+\textbf{Explanation:} The script begins building the \LaTeX\ string. It initializes a \texttt{tikzpicture} environment with predefined styles (circles for nodes, arrows for paths). It then loops through each node, creating a \texttt{\\node} command with its specific $(x, y)$ coordinates and label.
+\begin{lstlisting}
+    % Header
+    header = {
+        '\begin{center}'
+        '\begin{tikzpicture}[scale=1.5, every node/.style={circle,draw}, every path/.style={->, thick}]'
+    };
+
+    % Nodes
+    nodes = cell(n, 1);
+    for i = 1:n
+        labelStr = num2str(vL(i));
+        nodes{i} = sprintf('\\node (n%d) at (%.2f, %.2f) {%s};', i, x(i), y(i), labelStr);
+    end
+\end{lstlisting}
+
+\subsection{Edge Generation}
+\textbf{Explanation:} This section iterates through the edge arrays \texttt{d} (source) and \texttt{c} (target). It constructs TikZ \texttt{\\path} commands. If edge labels (\texttt{eL}) exist, it adds a node midway along the path to display the label; otherwise, it draws a simple directed arrow between nodes.
+\begin{lstlisting}
+    % Edges
+    edges = cell(m, 1);
+    for i = 1:m
+        if isempty(eL)
+            edges{i} = sprintf('\\path (n%d) edge (n%d);', d(i), c(i));
+        else
+            labelStr = num2str(eL(i));
+            edges{i} = sprintf('\\path (n%d) edge node[midway, above] {%s} (n%d);', d(i), labelStr, c(i));
+        end
+    end
+\end{lstlisting}
+
+\subsection{Final Concatenation and Output}
+\textbf{Explanation:} The script wraps the TikZ code with a closing footer, joins all cell array strings with newline characters ($\backslash n$), and prints the resulting \LaTeX\ block to the MATLAB console while returning it as a string variable \texttt{s}.
+\begin{lstlisting}
+    % Footer
+    footer = {
+        '\end{tikzpicture}'
+        '\end{center}'
+    };
+
+    % Concatenate all lines
+    lines = [header; nodes; edges; footer];
+    s = strjoin(lines, '\n');
+
+    % Output to console
+    fprintf('%s\n', s);
+end
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+The code does not generate a graphical window within MATLAB itself. Instead, it generates a \textbf{text-based string} in the console. When this string is pasted into a \LaTeX\ compiler (with the \texttt{tikz} package loaded), it produces a visual graph.
+
+\subsection*{Visual Characteristics:}
+\begin{itemize}
+    \item \textbf{Nodes:} Represented as circles containing the labels from \texttt{vL}. Their positions are determined by the matrix \texttt{V}.
+    \item \textbf{Edges:} Represented as thick arrows (\texttt{->}) connecting the circles.
+    \item \textbf{Labels:} If \texttt{eL} is provided, numerical labels will appear floating above the midpoints of the arrows.
+    \item \textbf{Scaling:} The entire figure is scaled by a factor of $1.5$ relative to standard TikZ units.
+
+
+For the example provided in the comments (a 4-node cycle), the output would visually represent a square or diamond shape with directed arrows following the sequence $1 \to 2 \to 3 \to 4 \to 1$.
+\end{itemize}

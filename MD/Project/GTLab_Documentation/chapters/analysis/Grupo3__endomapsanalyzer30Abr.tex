@@ -1,0 +1,127 @@
+\chapter{Análise do Script MATLAB: Endomapsanalyser30Abr}
+
+\section{Visão Geral}
+
+\textbf{What is the main purpose of this file?} \\
+The main purpose of this MATLAB file is to generate, classify, and analyze specific binary relations (referred to as simplicial relations) acting on a finite set of endomaps (functions from a set to itself). Depending on an input parameter $k$, it constructs different relations based on subsets of maps (like invertible or monotone maps) and analyzes their structural properties.
+
+\textbf{What type of analysis or calculation does it perform?} \\
+It performs algebraic and combinatorial calculations. It computes bijections between linear indices and base-3 representations to generate all $3^3 = 27$ possible endomaps for a 3-element set. It then filters these to find permutations and order-preserving maps. By computing the composition of these maps, it builds a sparse adjacency matrix representing a simplicial relation. Finally, it calculates the equivalence closure of this relation and extracts the induced partial order on the resulting equivalence classes.
+
+\textbf{What is the mathematical/theoretical context?} \\
+The context lies deeply in Abstract Algebra, Grafo Theory, and Combinatorics. It deals with:
+\begin{itemize}
+    \item \textbf{Endomaps}: Funções mapping a finite set $X$ to itself.
+    \item \textbf{Binary Relations}: Represented as adjacency matrices.
+    \item \textbf{Equivalence Relations \& Quotients}: Grouping maps into equivalence classes.
+    \item \textbf{Partial Orders}: Visualized via Hasse diagrams.
+    \item \textbf{Homology / Grafo Structure}: Analyzing the connected components and cycles of the induced graphs.
+\end{itemize}
+
+\newpage
+\section{Step-by-Step Code Breakdown}
+
+\subsection{1. Título da Secção/Função: Initialization and Bijections}
+\textbf{Explanation:} 
+This section initializes the base parameters for the set $X$ where $n_X = 3$, leading to $n_A = 3^3 = 27$ possible endomaps. It defines two anonymous functions, \texttt{s2i} and \texttt{i2s}, which establish a mathematical bijection between a linear index ($1$ to $27$) and its corresponding endomap (represented as a vector of length 3 with values $1, 2, 3$). It then verifies that the bijection is perfectly invertible.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% The bijection between A and B^X with parameters
+s2i=@(nB,s) (s-1)*(nB.^((1:size(s,2))'-1))+1; % nX=size(s,2)
+i2s=@(i,nB,nX) mod(floor((i(:)-1)./nB.^((1:nX)-1)),nB)+1; 
+
+nB=3, nX=3, nA=nB^nX
+
+% The bijection between A and B^X for the specific case nX, nB and nA
+s2i=@(s) s2i(nB,s); 
+i2s=@(i) i2s(i,nB,nX);
+% checking bijection between A and B^X
+isequal((1:nA)',s2i(i2s(1:nA)))
+isequal(i2s(1:nA),i2s(s2i(i2s(1:nA))))
+\end{lstlisting}
+
+\subsection{2. Título da Secção/Função: Endomap Filtering and Composition Setup}
+\textbf{Explanation:} 
+Here, the script defines an anonymous function \texttt{composerows} to compute the composition of two endomaps using MATLAB's fast linear indexing. Next, it evaluates the entire space of 27 endomaps to identify two specific subsets using logical arrays: \texttt{Linv} flags the invertible maps (permutations, where the sorted array equals $[1, 2, 3]$), and \texttt{Lsort} flags the monotone (order-preserving) maps where the difference between adjacent elements is non-negative.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% the composition of endomaps as if they were row vectors
+composerows=@(A,J) A(sub2ind(size(J),repmat((1:size(J,1))',1,size(J,2)),J)); 
+
+Linv=all(sort(i2s(1:nA),2)==repmat(1:nX,nA,1),2); % invertible maps
+Lsort=all(diff(i2s(1:nA)')'>=0,2); % monotone maps
+\end{lstlisting}
+
+\subsection{3. Título da Secção/Função: Case Selection (Switch $k$)}
+\textbf{Explanation:} 
+Depending on the user input $k \in \{1, \dots, 6\}$, this block sets up the domain \texttt{d} and codomain \texttt{c} indices for the simplicial relation. For example, in Case 1, it uses the invertible maps (\texttt{Linv}), setting \texttt{d} to their indices and calculating \texttt{c} as the indices of their mathematical inverses. Other cases test combinations of inclusions, trivial maps, and projections against the monotone or invertible sets.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+switch k
+case 1 % Linv, d inclusion, c inverse
+L=Linv;
+d=find(L);
+% to compute c we observe:
+for i=1:nnz(L)
+invi=zeros(1,nX);
+invi(i2s(d(i)))=(1:nX);
+c(i)=s2i(invi);
+end
+% check for accurary
+[(1:nA)', i2s(1:nA) L full(sparse(d,1,d,nA,1)) full(sparse(d,1,c,nA,1))]
+...
+% (Cases 2 through 6 follow similar conditional logic)
+\end{lstlisting}
+
+\subsection{4. Título da Secção/Função: Simplicial Relation Matriz Construction}
+\textbf{Explanation:} 
+Using the \texttt{d} and \texttt{c} vectors generated in the previous step, this section mathematically applies the composition logic to define the simplicial relation. It determines which endomaps relate to one another via the selected subset of transformations. It outputs $S$, a $27 \times 27$ sparse logical adjacency matrix where $S(a,b) = 1$ if map $a$ relates to map $b$. 
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% given L logical vector of size nA, together with d and c
+% the simplicial relation is
+[a i]=ndgrid(1:nA,1:numel(d));
+b=s2i(composerows(i2s(d(i)), composerows(i2s(a),i2s(c(i)))));
+S=logical(sparse(a,b,1,nA,nA));
+\end{lstlisting}
+
+\subsection{5. Título da Secção/Função: Analysis and Visualization Pipeline}
+\textbf{Explanation:} 
+Finally, the script calls an external function \texttt{analyzerelation(S)} to compute the equivalence closure ($R_{star}$) and quotient maps ($p$, $q$). It displays the results visually: it draws the homology of the equivalence classes using \texttt{linkdraw}, visually plots the vector fields of the maps using \texttt{showmethemaps}, and computes the unique partial order induced by the relation, displaying it via a Hasse diagram using \texttt{hasse}.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+[Rstar,p,q]=analyzerelation(S);
+disp('Analyzing the smallest equivalence relation containing S...')
+q(:)'
+linkdraw(homology(q),q);
+pause
+SM=sortrows([q, (1:nA)' i2s(1:nA)]);
+showmethemaps(SM);
+pause
+subplot(1,1,1)
+disp('Analyzing the partial order induced by S...')
+u=unique(p);
+Rfull=full(Rstar(u,u))
+[x,y]=hasse(Rfull,u);
+\end{lstlisting}
+
+\newpage
+\section{Saídas e Elementos Visuais Esperados}
+
+When this script is executed, the user will experience a progression of console outputs and graphical windows:
+
+\begin{itemize}
+    \item \textbf{Console Saída:} The command window will print matrices checking the accuracy of the bijection and the domain/codomain calculations. It will also print the linear indices of the quotient map $q$, showing which equivalence class each of the 27 endomaps belongs to. Finally, it prints the adjacency matrix \texttt{Rfull} representing the extracted partial order.
+    
+    \item \textbf{Figure 1 (Homology Grafo):} The script triggers \texttt{linkdraw}, which generates a standard node-and-edge directed graph mapping out the components, cycles, and trees formed by the equivalence relation $q$. 
+    
+    \item \textbf{Figure 2 (Endomap Vetor Fields):} Initiated by \texttt{showmethemaps}, this will open a grid of subplots (up to $6 \times 5$). Each subplot represents one of the 27 endomaps drawn as a discrete vector field (points on a circle with arrows showing where each element maps to).
+    
+    \item \textbf{Figure 3 (Hasse Diagram):} Triggered by the \texttt{hasse} function, this plot visually represents the partial order \texttt{Rfull}. The plot will have no standard axes (axes turned off). The nodes (representing the unique equivalence classes) will be distributed vertically based on their hierarchical rank in the partial order, with directed edges pointing upwards (or downwards, based on standard conventions) showing the covering relations between the classes.
+\end{itemize}
+

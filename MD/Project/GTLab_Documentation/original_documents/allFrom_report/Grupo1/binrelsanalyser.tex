@@ -1,0 +1,124 @@
+
+\chapter{MATLAB Code Analysis: \texttt{binrelsanalyser.m}}
+\author{Expert Software Engineer}
+\date{\today}
+\maketitle
+
+\section{Initial Overview}
+
+\textbf{What is the main purpose of this file?} \\
+The main purpose of this MATLAB function is to analyze a binary relation (represented by an adjacency matrix) and classify it based on its fundamental mathematical properties: reflexivity, transitivity, symmetry, and anti-symmetry. Additionally, it computes corrective transformations, generating a transitive closure if the relation lacks transitivity, or condensing it into a partial order (quotient set) if it is a preorder lacking anti-symmetry.
+
+\textbf{What type of analysis or calculation does it perform?} \\
+It performs matrix-based logical analysis on a sparse adjacency matrix. The calculations rely heavily on matrix multiplication (to test path connectivity), logical indexing, matrix transposition, and identity matrix comparisons to test structural relation rules.
+
+\textbf{What is the mathematical/theoretical context?} \\
+This file operates within the realms of \textbf{Graph Theory} and \textbf{Order Theory}. It mathematically evaluates binary relations ($R \subseteq V \times V$), identifying specific structures like \textit{preorders} (reflexive and transitive), \textit{equivalence relations} (preorders that are symmetric), and \textit{partial orders} (preorders that are anti-symmetric). The transformation to \texttt{Ranti} implicitly uses the category theory concept of a \textit{coequalizer} to build a quotient space $R/{\sim}$.
+
+\vspace{1em}
+
+\vspace{1em}
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{1. Section/Function Title: Variable Initialization and Squareness Check}
+\textbf{Explanation:} \\
+This section initializes the default property output (\texttt{prop = 6}, representing an unclassified state) and empty arrays for the transformed matrices. It then checks if the input matrix $R$ is square ($n_1 = n_2$). A binary relation on a single set $V$ must map $V \to V$, requiring a square adjacency matrix. If it is not square, the function alerts the user, sets \texttt{prop = 0}, and terminates early.
+
+\begin{lstlisting}[language=Matlab]
+prop=6; Rtran=[]; Ranti=[];
+[n1,n2]=size(R); idV=(1:n1)'; 
+
+if ~isequal(n1,n2),
+    disp('R is not a square matrix')
+    prop=0;
+    return
+end
+\end{lstlisting}
+
+\subsection{2. Section/Function Title: Reflexivity Check}
+\textbf{Explanation:} \\
+This block evaluates whether the relation is reflexive. A relation is reflexive if every element relates to itself ($\forall x \in V, xRx$). In an adjacency matrix, this means the main diagonal must consist entirely of ones. The code compares the extracted diagonal \texttt{diag(R)} with a column vector of ones. It assigns \texttt{prop = 1} if true.
+
+\begin{lstlisting}[language=Matlab]
+if ~isequal(diag(R),ones(n1,1))
+    disp('R is not relexive')
+    prop=0;
+else
+    disp('R is reflexive')
+    prop=1;
+end
+\end{lstlisting}
+
+\subsection{3. Section/Function Title: Transitivity Check and Transitive Closure Computation}
+\textbf{Explanation:} \\
+This section checks for transitivity. Mathematically, transitivity dictates that if $aRb$ and $bRc$, then $aRc$. In matrix terms, the square of the adjacency matrix ($R^2$) must be a subset of $R$ (\texttt{logical(R\textasciicircum 2) <= R}). If the relation is reflexive but not transitive, it computes the \textit{transitive closure} ($R^+$) using a loop that iteratively adds connections (\texttt{Rn + Rn*R}) until the matrix stops changing (a variant of the Warshall algorithm). If it is already transitive and reflexive, it is classified as a \textit{preorder} (\texttt{prop = 2}).
+
+\vspace{1em}
+
+\vspace{1em}
+
+\begin{lstlisting}[language=Matlab]
+if ~(all(all(logical(R^2)<=R))) && prop==1
+    disp('R is not transitive, the output Rtran is its transitive closure')
+    Rn=R; 
+    Rtran=logical(Rn+Rn*R);
+    while ~isequal(Rn,Rtran)
+        Rn=Rtran;
+        Rtran=logical(Rn+Rn*R);
+    end    
+elseif prop==1
+    prop=2;
+    disp('R is reflexive and transitive (also called a preorder)')
+end
+\end{lstlisting}
+
+\subsection{4. Section/Function Title: Symmetry Check and Equivalence Classification}
+\textbf{Explanation:} \\
+Here, the code checks if the relation is symmetric by comparing the matrix $R$ to its transpose $R'$ (\texttt{isequal(R, R')}). If it is symmetric, and previously established as a preorder (\texttt{prop == 2}), it is classified as an \textit{equivalence relation} (\texttt{prop = 3}). 
+
+\begin{lstlisting}[language=Matlab]
+if isequal(R,R')
+    disp('R is symmetric')
+    if prop==2, prop=3; disp('R is an equivalence relation') end
+\end{lstlisting}
+
+\subsection{5. Section/Function Title: Anti-Symmetry Check and Partial Order Condensation}
+\textbf{Explanation:} \\
+If the relation is not symmetric, it tests for anti-symmetry. An anti-symmetric matrix has no overlapping 1s across its main diagonal, except on the diagonal itself (\texttt{R \& R' == eye}). 
+If the relation is neither symmetric nor anti-symmetric, but is a preorder, the code "forces" anti-symmetry. It finds bidirectional connections (\texttt{find(R \& R')}), uses a \texttt{coequalizer} function to define equivalent classes ($x \sim y$), and constructs a quotient space matrix (\texttt{Ranti}), effectively converting the preorder into a \textit{partial order}. If it was natively anti-symmetric and a preorder, it is classified as a partial order (\texttt{prop = 4}).
+
+\begin{lstlisting}[language=Matlab]
+elseif ~isequal((R & R'),eye(size(R)))
+    disp('R is not symmetric (hence not an equivalence relation) nor anti-symmetric (hence not a partial order)')
+    if prop==2 
+        prop=5;
+        disp('but it is a preorder (reflexive and transitive), so, forcing anti-symmetry by identifying x~y iff R(x,y) and R(y,x), a partial order is obtained,')
+        disp('Ranti is the adjacency matrix of the partial order R/~')
+        [s,t]=find(R & R');   
+        q=coequalizer(s,t);  
+        Ranti=R(q==idV,q==idV);
+    end
+else
+    disp('R is anti-symmetric')
+    if prop==2, prop=4; disp('R is a partial order'), end
+end
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+
+Although this specific script does not natively call \texttt{plot} or \texttt{digraph} functions to draw figures on the screen, its mathematical outputs map directly to standard visual representations in graph theory.
+
+\textbf{Console Outputs:} \\
+The script primarily prints strings to the MATLAB Command Window tracking the logical flow. Expect statements like \texttt{'R is reflexive and transitive (also called a preorder)'} or \texttt{'R is not transitive, the output Rtran is its transitive closure'}, serving as a real-time diagnostic log.
+
+\textbf{Variable Outputs translated to Graphs:}
+\begin{itemize}
+    \item \textbf{Initial Adjacency Matrix ($R$):} Translates to a standard directed graph (digraph). The vertices (axes/nodes) represent the elements $1$ to $n_1$. An edge exists from node $i$ to $j$ if $R(i,j) = 1$.
+    \item \textbf{Transitive Closure ($R_{tran}$):} Visually, this graph looks identical to the original graph $R$, but with all possible "shortcut" edges drawn. If there is a path from node $A$ to node $C$ through node $B$, $R_{tran}$ visually adds a direct edge from $A \to C$.
+    \item \textbf{Quotient Partial Order ($R_{anti}$):} If you were to plot this, you would see a \textit{Directed Acyclic Graph (DAG)} or a \textit{Hasse Diagram}. Visually, clusters of nodes that previously had 2-way arrows (cycles indicating $A \to B$ and $B \to A$) are condensed/collapsed into a single representative "super-node" by the coequalizer. The axes of this new matrix no longer represent the original vertices, but rather the equivalence classes (partitions) of the vertices.
+\end{itemize}
+
+\vspace{1em}
+
+

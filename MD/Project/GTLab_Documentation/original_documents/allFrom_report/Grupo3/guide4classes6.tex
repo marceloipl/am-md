@@ -1,0 +1,111 @@
+\chapter{MATLAB Script Analysis: Guide4classes6}
+
+\section{Overview}
+The provided MATLAB script, titled "Aula MDPL25", is designed to study the algebraic and categorical properties of **endomorphisms** (functions from a set to itself) on a finite set $X = \{1, 2, 3\}$. 
+
+\subsection{Main Purpose}
+The primary goal of the file is to construct the set of all possible endomaps of a three-element set, analyze their composition structure (monoid structure), and identify specific subsets such as the identity element and the group of permutations (invertible elements). Furthermore, it defines an equivalence relation based on **conjugation** by permutations and computes the resulting quotient set.
+
+\subsection{Mathematical Context}
+\begin{itemize}
+    \item \textbf{Endomorphisms:} Maps $f: X \to X$.
+    \item \textbf{Monoids:} The script constructs a multiplication table (Cayley table) for the composition of these maps.
+    \item \textbf{Group Theory:} It identifies the symmetric group $S_3$ (permutations) within the set of endomaps.
+    \item \textbf{Category Theory/Algebra:} It uses the concept of a \textit{coequalizer} to determine the number of orbits (equivalence classes) under the action of the symmetric group by conjugation.
+\end{itemize}
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{Section 1: Initial Testing of Value Replacement}
+\textbf{Explanation:} This block demonstrates a logic for filling or replacing specific values in an array. It uses \texttt{ndgrid} to generate combinations and then maps negative indices to specific stored values. This serves as a precursor to the \texttt{fillzeros} logic used later.
+
+\begin{lstlisting}
+A0=[0 2 0 -1]
+A1=A0(:)
+z=find(A1==0)
+nz=numel(z)
+[a b]=ndgrid([1 3], 1:3)
+ab=[a(:) b(:)]
+A=repmat(A1,1,size(ab,1))
+A(z,:)=ab'
+A(A1<0,:)=A(z(abs(A1(A1<0))),:);
+\end{lstlisting}
+
+\subsection{Section 2: Generation of All Endomaps}
+\textbf{Explanation:} The script generates all $3^3 = 27$ possible endomaps of the set $\{1, 2, 3\}$. These are stored as columns in the matrix $A$.
+\begin{lstlisting}
+% A is the collection of all endomaps of X=1:3
+A=fillzeros([0 0 0]',1:3)
+\end{lstlisting}
+
+\subsection{Section 3: Construction of the Composition Table (Circ)}
+\textbf{Explanation:} This section computes the "multiplication" table for the monoid of endomaps. For every pair of maps $u_i$ and $u_j$, it calculates the composition $u_{ij} = u_i \circ u_j$ and finds the index of this resulting map within the collection $A$.
+\begin{lstlisting}
+Circ=zeros(27,27);
+for i=1:27
+    for j=1:27
+        ui=A(:,i);
+        uj=A(:,j);
+        uij=ui(uj);
+        Circ(i,j)=find(ismember(A',uij(:)','rows'));
+    end
+end
+\end{lstlisting}
+
+\subsection{Section 4: Identification of Identity and Invertible Elements}
+\textbf{Explanation:} The code identifies the identity map (neutral element $[1, 2, 3]^T$) and the permutations. It checks for invertibility both by looking at the mapping values in $A$ and by verifying which rows in the multiplication table \texttt{Circ} contain all elements from $1$ to $27$.
+\begin{lstlisting}
+% identify the neutral element:
+find(ismember(A',[1 2 3],'rows'))
+find(ismember(Circ,1:27,'rows'))
+
+% identify the invertible elements (i.e. permutations):
+ismember(sort(A)',[1 2 3],'rows')'
+ismember(sort(Circ,2),1:27,'rows')'
+
+% another possibility is
+Perm=perms(1:3)'
+Inv=find(ismember(A',Perm','rows'))
+\end{lstlisting}
+
+\subsection{Section 5: Conjugation Relation and Quotient Computation}
+\textbf{Explanation:} This is the core analytical part of the script. It defines a relation $R$ where two endomaps $u$ and $v$ are related if there exists a permutation $p$ such that $p \circ u = v \circ p$ (conjugation). It then uses a \texttt{coeq} (coequalizer) function to find the unique equivalence classes (orbits) under this group action.
+\begin{lstlisting}
+R=zeros(27,27);
+for i=1:27
+    for j=1:27
+        for k=1:6
+            u=A(:,i);
+            v=A(:,j);
+            p=Perm(:,k);
+            if p(u)==v(p), R(i,j)=1; end
+        end
+    end
+end
+
+% to extract the graph associated with the relation R we do:
+[d,c]=find(R);
+
+% And the quotient A/R is computed with the coequalizer
+q=coeq(d,c)
+
+% The number of equivalence classes is:
+numel(unique(q))
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+While the script does not call \texttt{plot()} or \texttt{imshow()}, it generates significant data in the MATLAB Command Window:
+
+\begin{itemize}
+    \item \textbf{The Matrix \texttt{Circ}:} A $27 \times 27$ grid of integers representing the Cayley table of the endomap monoid.
+    \item \textbf{Neutral Element Index:} A single integer (usually the index where $A$ equals $[1, 2, 3]^T$).
+    \item \textbf{Permutation Indices:} A vector of 6 indices corresponding to the elements of $S_3$.
+    \item \textbf{Equivalence Classes (\texttt{q}):} A vector of length 27 where elements belonging to the same conjugation class share the same integer ID.
+    \item \textbf{Final Count:} The result of \texttt{numel(unique(q))}, which provides the number of distinct types of endomaps on 3 elements (topological/algebraic "shapes" of the mappings).
+\end{itemize}
+
+\vspace{1cm}
+\begin{center}
+    \textit{End of Analysis.}
+\end{center}
+

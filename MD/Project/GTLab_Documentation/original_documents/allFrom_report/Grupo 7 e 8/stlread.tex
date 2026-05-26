@@ -1,0 +1,148 @@
+
+\chapter{MATLAB Code Analysis: \texttt{stlread.m}}
+\date{}
+
+
+\maketitle
+
+\section{Initial Overview}
+
+\textbf{What is the main purpose of this file?} \\
+The primary purpose of \texttt{stlread.m} is to read and parse a binary STL (Stereolithography) file, extracting the 3D geometry data (vertices and faces) and optional color information into MATLAB matrices. These matrices are formatted specifically to be compatible with MATLAB's \texttt{patch} function for 3D rendering.
+
+\textbf{What type of analysis or calculation does it perform?} \\
+The script performs binary file parsing, byte-offset calculations, and data vectorization. It reads packed binary data using precise byte sizes, calculates memory offsets to skip unnecessary data (like face normals), and performs matrix transposition and reshaping. Additionally, it executes bitwise operations (masking and shifting) to decode 16-bit integer color data into discrete Red, Green, and Blue (RGB) channels.
+
+\textbf{What is the mathematical/theoretical context?} \\
+The theoretical context lies in 3D computational geometry and discrete surface representation. Specifically, it deals with triangular surface meshes (a type of simplicial complex or polygonal graph). The ``vertices'' represent coordinate points in $\mathbb{R}^3$, and the ``faces'' represent 3-tuples of vertex indices defining triangular planar bounds that enclose a 3D volume. 
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{1. Function Initialization and Argument Processing}
+\textbf{Explanation:} \\
+This section defines the function signature, allowing up to three outputs: \texttt{vertices}, \texttt{faces}, and \texttt{color}. It validates the number of requested outputs (\texttt{nargout}), throwing an error if more than three are requested. It also uses \texttt{nargout} to set a boolean flag (\texttt{use\_color}) that determines if the script should spend computational resources extracting color data.
+
+\begin{lstlisting}
+function [vertices, faces, color] = stlread(filename)
+read_norm = 0; % whether we want to read the face normals
+
+if nargout > 3
+    error('Too many output arguments');
+end
+use_color = ( nargout == 3 );
+\end{lstlisting}
+
+
+\subsection{2. File Opening and Header Extraction}
+\textbf{Explanation:} \\
+The code opens the target file in binary read mode (\texttt{'r'}). If the file cannot be found, it throws an error. It then reads the standard 80-byte STL header using \texttt{fread} and extracts the total number of triangular facets (a 32-bit integer). It immediately prints the title and facet count to the MATLAB console for user feedback.
+
+\begin{lstlisting}
+if ( fid = fopen(filename, 'r') ) == -1;
+    error('File could not be opened, check name or path.')
+end
+
+ftitle = fread(fid, 80, 'uchar=>schar'); % Read file title
+num_facet = fread(fid, 1, 'int32'); % Read number of Facets
+
+fprintf('\nTitle: %s\n', char(ftitle'));
+fprintf('Num Facets: %d\n', num_facet);
+\end{lstlisting}
+
+
+\subsection{3. Memory Preallocation}
+\textbf{Explanation:} \\
+To optimize performance and prevent dynamic memory reallocation overhead inside loops (or during large vector assignments), the script preallocates the necessary matrices with zeros. The \texttt{vertices} matrix is preallocated as a $(3N \times 3)$ matrix, \texttt{faces} as an $(N \times 3)$ matrix, and \texttt{color} as a $(3 \times N)$ array of 8-bit unsigned integers, where $N$ is \texttt{num\_facet}.
+
+\begin{lstlisting}
+vertices = zeros( 3 * num_facet, 3 );
+faces    = zeros(     num_facet, 3 );
+if use_color
+    color = uint8( zeros( 3, num_facet ) );
+end
+\end{lstlisting}
+
+
+\subsection{4. Binary Data Extraction (Vertices and Colors)}
+\textbf{Explanation:} \\
+This is the core data extraction block. It calculates byte intervals: 12 bytes for coordinates (3x \texttt{float32}) and 2 bytes for color (1x \texttt{uint16}). It establishes the starting byte position of the data block. Instead of reading face-by-face in a slow loop, it uses vectorized \texttt{fread} with a \texttt{skip} argument to jump over unneeded data (like face normals). It extracts all vertices into a single flattened array (\texttt{face\_vertices}) and, if requested, extracts the color block (\texttt{col}).
+
+\begin{lstlisting}
+coord_sz = 3*32/8; % [bytes] size of vertex coordinates
+color_sz = 1*16/8; % [bytes] size of color data
+block_sz = 4*coord_sz + color_sz; % [bytes] 
+
+fid_face_data_start = ftell( fid );
+start_offset = 0;
+
+if read_norm
+	norm = fread( fid, [3, num_facet], '3*float32', block_sz - coord_sz );
+end
+start_offset = start_offset + 1*coord_sz;
+
+fseek( fid, fid_face_data_start + start_offset );
+face_vertices = fread( fid, [3*3, num_facet], '9*float32', block_sz - 3*coord_sz );
+start_offset = start_offset + 3*coord_sz;
+
+if use_color
+	fseek( fid, fid_face_data_start + start_offset );
+	col  = fread( fid, num_facet, '1*uint16', block_sz - 1*color_sz );
+end
+\end{lstlisting}
+
+
+\subsection{5. Geometric Reshaping and Graph Construction}
+\textbf{Explanation:} \\
+The extracted \texttt{face\_vertices} array is 1-dimensional. This block uses \texttt{reshape} and transposition (\texttt{'}) to transform it into the final $3N \times 3$ \texttt{vertices} matrix, where each row represents an $(x, y, z)$ coordinate. Concurrently, it builds the \texttt{faces} matrix. Because the vertices were read in sequential order corresponding to each triangle, the faces matrix is simply a sequence from $1$ to $3N$, reshaped so each row holds three indices linking to the \texttt{vertices} matrix.
+
+\begin{lstlisting}
+vertices = reshape(face_vertices(:), 3, [])';
+
+faces = reshape( 1:3*num_facet, 3, [])';
+\end{lstlisting}
+
+
+\subsection{6. Bitwise Color Decoding}
+\textbf{Explanation:} \\
+If color data exists, this block decodes the 16-bit integer arrays. It checks the 16th bit to ensure the color is valid. It then isolates the Red, Green, and Blue channels using a bitwise AND mask (\texttt{bitand}) corresponding to 5 bits per channel ($2^5-1$), and shifts the bits to the right (\texttt{bitshift}) to normalize the values. Invalid colors are zeroed out (set to black) using element-wise multiplication with the \texttt{valid} logical array. The file is subsequently closed.
+
+\begin{lstlisting}
+if use_color && any(col)
+	valid = bitget(col,16) == 1;
+	r = bitshift( bitand(2^16-1, col), -10 );
+	g = bitshift( bitand(2^11-1, col), -5  );
+	b = bitand(2^6-1, col);
+
+	color = [r g b] .* valid;
+end
+
+fclose(fid);
+\end{lstlisting}
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+\section{Expected Outputs and Visuals}
+
+While the script itself does not plot the data, it strictly parses and formats the mathematical structures required for visualization. 
+
+\subsection*{Console Outputs}
+Upon execution, the script will output two lines of text directly to the MATLAB Command Window:
+\begin{itemize}
+    \item \textbf{Title:} The 80-byte header string extracted from the binary STL (e.g., \texttt{Title: SolidWorks generated STL}).
+    \item \textbf{Num Facets:} An integer representing the total number of triangles in the 3D mesh (e.g., \texttt{Num Facets: 14502}).
+\end{itemize}
+
+\subsection*{Visual Representation (Via \texttt{patch})}
+The return variables (\texttt{vertices}, \texttt{faces}, \texttt{color}) are meant to be passed into MATLAB's \texttt{patch('Faces', faces, 'Vertices', vertices, ...)} command. If plotted, the visual output will be:
+\begin{itemize}
+    \item \textbf{Axes:} Standard 3D Cartesian coordinate axes (X, Y, Z) mapping to the spatial dimensions of the physical object.
+    \item \textbf{The Plot:} A 3D polygonal surface mesh representing the object modeled in the original CAD software. It will look like a solid or wireframe 3D shape constructed entirely of interlocking triangles.
+    \item \textbf{Colors:} If the STL contained non-standard color bits (such as those output by Materialise Magics or VisCAM), the faces of the 3D model will be shaded according to the decoded RGB values. Otherwise, it will default to MATLAB's standard patch coloring.
+\end{itemize}
+

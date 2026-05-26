@@ -1,0 +1,61 @@
+
+\chapter{Technical Analysis of MATLAB Script: \texttt{linkprod2surf.m}}
+\date{}
+
+\maketitle
+
+\section{Overview}
+
+The \texttt{linkprod2surf.m} file is a MATLAB function designed to generate a 3-dimensional surface mesh by calculating the Cartesian product of two link structures.
+
+\begin{itemize}
+\item \textbf{Main Purpose}: To construct a 3D surface by treating one link structure as a planar path (the direction of slicing) and another family of link structures as contour slices oriented along that path.
+\item \textbf{Type of Analysis}: The script performs coordinate mapping and vector orientation analysis. It calculates "turning angles" along a path to correctly orient 2D contours into 3D space and identifies quadrangular face connectivity for surface rendering.
+\item \textbf{Mathematical/Theoretical Context}: The file operates within the context of \textbf{Discrete Differential Geometry} and \textbf{Mesh Topology}. It uses complex numbers to represent planar positions and transformations and organizes vertices into a quadrangular manifold based on adjacency mappings (endomorphisms).
+\end{itemize}
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{Section 1: Vector Orientation and Turning Logic}
+\textbf{Explanation}: This section determines the 3D orientation of the contour slices by analyzing the local geometry of the direction curve \texttt{d}. It computes normalized direction vectors between consecutive points and calculates a "turning direction" (\texttt{turn}) by evaluating the square root of the ratio between consecutive direction vectors. This ensures that as the path turns in the xy-plane, the cross-sectional contour is rotated to remain orthogonal to the path.
+
+\begin{lstlisting}
+dir=d(alpha)-d; % direction vectors for the direction curve
+dir=dir./(abs(dir));
+dirac=dir(alpha)./dir; %dir and acceleration
+turn=dir.*sqrt(dirac); % turning direction
+turn=circshift(turn,1);
+turn(isnan(turn))=0;
+\end{lstlisting}
+
+\subsection{Section 2: Quadrangular Face Connectivity (Q-Matrix)}
+\textbf{Explanation}: This block establishes the topology of the surface mesh. It uses \texttt{ndgrid} to iterate through all slice levels (\texttt{u}) and contour points (\texttt{v}). By mapping these indices to linear identifiers using \texttt{sub2ind}, it defines quadrangular faces (\texttt{Q}) that connect a vertex to its neighbor on the same slice and their corresponding neighbors on the adjacent slice level.
+
+\begin{lstlisting}
+n=numel(alpha); m=numel(Phi)/n;
+[u,v]=ndgrid(1:n,1:m);
+q1=sub2ind([n,m],u,v);
+q2=sub2ind([n,m],u,Phi);
+q3=sub2ind([n,m],alpha(u),Phi);
+q4=sub2ind([n,m],alpha(u),v);
+Q=[q1(:),q2(:),q3(:),q4(:)];
+\end{lstlisting}
+
+\subsection{Section 3: 3D Vertex Coordinate Calculation (V-Matrix)}
+\textbf{Explanation}: This section calculates the final Cartesian coordinates for every vertex. The complex variable \texttt{P} computes the xy-planar position by taking the base path \texttt{d(u)} and adding the rotated real components of the slice geometry. The z-coordinate is derived from the imaginary part of the contour slice \texttt{G}. This transforms the family of 2D complex link structures into a unified 3D vertex array \texttt{V}.
+
+\begin{lstlisting}
+P=d(u)+F.turn(u)+1ireal(G).*turn(u);
+x=real(P); y=imag(P); z=imag(G).*abs(turn(u));
+V=[x(:),y(:),z(:)];
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+
+The function returns a quadrangular face matrix \texttt{Q} and a vertex coordinate matrix \texttt{V}, which are typically visualized using the \texttt{tetramesh} function as shown in the provided examples.
+
+\begin{itemize}
+\item \textbf{Axes}: The plot uses standard x, y, and z Cartesian axes. The x and y axes represent the planar path and rotated contour widths, while the z-axis represents the height or depth of the contour slices.
+\item \textbf{Plot Content}: The output is a 3D swept surface. For example, if the path \texttt{d} is an arc and the contour \texttt{G} is a circle, the plot will resemble a curved tube or section of a torus.
+\item \textbf{Visual Translation}: The \texttt{turn} logic prevents the surface from "twisting" unnaturally as the path curves. If the function \texttt{F} is non-zero, it introduces additional offsets, making the contour "non-planar" relative to the slicing direction.
+\end{itemize}

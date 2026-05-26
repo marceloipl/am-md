@@ -1,0 +1,98 @@
+
+\chapter{Análise do Código MATLAB: \texttt{digraph.m}}
+\author{Expert Software Engineer}
+\section{Visão Geral}
+
+\textbf{What is the main purpose of this file?} \
+The main purpose of this MATLAB file is to convert a geometric representation of a directed graph into an indexed matrix representation. It takes lists of source and target coordinates (points in Euclidean space) and maps them to unique integer indices, filtering out edges whose target nodes do not exist in the defined source nodes.
+
+\textbf{What type of analysis or calculation does it perform?} \
+It performs set-based calculations and logical indexing to identify unique nodes from a coordinate list. It then filters edges, cross-referencing target coordinates against the set of source coordinates, and constructs sparse adjacency matrices mapping the connections.
+
+\textbf{What is the mathematical/theoretical context?} \
+The context is Grafo Theory, specifically regarding directed graphs (digraphs) and Adjacency Matrices. It transforms a spatial/geometric mapping of vertices (vectors in Rn) into a purely topological representation.
+
+\section{Análise Passo a Passo do Código}
+
+\subsection{1. Função Definition and Entrada Validation}
+\textbf{Explanation:}
+This section defines the function signature and validates the inputs. The function \texttt{digraph} takes three inputs: \texttt{source} (matrix of starting coordinates), \texttt{target} (matrix of ending coordinates), and \texttt{nE} (number of edges). It returns five outputs: \texttt{s} (source indices), \texttt{t} (target indices), \texttt{u} (unique nodes), \texttt{Adj} (adjacency matrix), and \texttt{Edges} (edge state matrix). It begins by verifying that the \texttt{source} and \texttt{target} matrices share the same dimensional space (same number of columns).
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+function [s,t,u,Adj,Edges]=digraph(source,target,nE)
+if ~isequal(size(source,2),size(target,2)), error('LinksToolbox error: source and target must have the same number of columns'), end
+\end{lstlisting}
+
+\subsection{2. Edge Initialization and Extraction}
+\textbf{Explanation:}
+This block handles the extraction of the domain (\texttt{dom}) and codomain (\texttt{cod}) coordinates for the specified number of edges \texttt{nE}. It uses a \texttt{try-catch} block to handle potential out-of-bounds errors. If \texttt{nE} exceeds the actual dimensions of the matrices, it catches the error and automatically adjusts the edge count to the minimum available rows between the \texttt{source} and \texttt{target} matrices.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+try
+E=(1:nE)';
+dom=source(E,:);
+cod=target(E,:); disp('yes')
+catch
+E=(1:min(size(source,1),size(target,1)))';
+dom=source(E,:);
+cod=target(E,:);
+fprintf('Linkstoolbox: the number of edges considered was: %d \n ', numel(E))
+end
+\end{lstlisting}
+
+\subsection{3. Unique Node Identification and Edge Filtering}
+\textbf{Explanation:}
+This is the core mathematical logic. \texttt{unique(dom, 'rows')} identifies the distinct vertex coordinates (\texttt{u}), providing a mapping \texttt{d} from the original domain to the unique list. The \texttt{ismember} function then checks which target coordinates (\texttt{cod}) actually exist in the unique source list \texttt{u}. The logical array \texttt{k} acts as a filter to keep only valid edges. Finally, \texttt{s} and \texttt{t} are assigned the corresponding integer indices of the validated source and target nodes.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+[u,e_,d]=unique(dom,'rows');
+[k,c]=ismember(cod,u,'rows');
+s=d(k);
+t=c(k);
+\end{lstlisting}
+
+\subsection{4. Adjacency and Edge Matriz Construction}
+\textbf{Explanation:}
+This section builds sparse matrices to represent the graph. \texttt{Adj} is formed using the filtered source (\texttt{s}) and target (\texttt{t}) indices, populating the entries with the original edge index \texttt{E(k)}. The \texttt{Edges} matrix is constructed to categorize every domain element with a state value (\texttt{cval}): 1 if the edge is valid, -1 if invalid (target not in source set), and 2 indicating a chosen unique representative edge.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+Adj=sparse(s,t,E(k));
+cval=zeros(size(k)); cval(k)=1; cval(~k)=-1; cval(e_)=2;
+Edges=sparse(d,E,cval);
+
+end  % end of function
+\end{lstlisting}
+
+\subsection{5. Exemplo e Bloco de Teste}
+\textbf{Explanation:}
+Appended after the function end is an informal testing script. It defines arbitrary source and target matrices to test the logic. It also attempts to dynamically generate a 3D cube graph using mathematical distance logic (dot products) to find adjacent vertices. Nota: This section references undefined external functions like \texttt{digraph24} and \texttt{fillzeros}, indicating it is a loose testing sandbox rather than part of the main functional API.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+disp(example)
+source=[1 2; 2 3; 3 4; 2 3 ; 3 4]
+target=[3 4; 3 4; 1 2; 3 2 ; 2 3]
+[s t u Adj,Edges]=digraph24(source,target)
+
+% generating a cube
+% ... [snippet truncated for brevity] ...
+[s_ t_ u_ Adj,Edges]=digraph24(source,target);
+disp([s t s_ t_])
+disp([u, u_])
+full(Adj)
+\end{lstlisting}
+
+\section{Saídas e Elementos Visuais Esperados}
+
+This specific MATLAB code does not invoke any plotting or graphical rendering functions (such as \texttt{plot}, \texttt{gplot}, or \texttt{plot3}). Therefore, it does not produce visual graphs or charts.
+
+Instead, the expected output consists entirely of \textbf{console data outputs}:
+\begin{itemize}
+\item \textbf{Status Messages:} The console will print \texttt{'yes'} if the \texttt{try} block succeeds, or a formatted string \texttt{'Linkstoolbox: the number of edges considered was: X'} if the \texttt{catch} block triggers.
+\item \textbf{Matriz Displays:} When the example script runs, the console will output the dense numeric representations of the indices and coordinates via the \texttt{disp([s t s\_ t\_])} and \texttt{disp([u, u\_])} commands.
+\item \textbf{Adjacency Matriz Saída:} The command \texttt{full(Adj)} at the very end will print a dense square matrix to the console representing the connections of the generated cube graph, where rows and columns represent unique node indices, and nonzero elements represent the edge indices connecting them.
+\end{itemize}

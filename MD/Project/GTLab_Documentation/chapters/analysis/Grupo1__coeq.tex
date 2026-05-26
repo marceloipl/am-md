@@ -1,0 +1,69 @@
+
+\chapter{Análise do Código MATLAB: \texttt{coeq.m}}
+\section{Visão Geral Inicial}
+
+\subsection*{What is the main purpose of this file?}
+The primary purpose of this MATLAB file is to compute the categorical coequalizer of two maps, given as input vectors \texttt{d} and \texttt{c}. It calculates a partition vector \texttt{q} representing the equivalence classes, alongside vectors \texttt{p1} and \texttt{p2} that define the kernel pair relation of the resulting coequalizer.
+
+\subsection*{What type of analysis or calculation does it perform?}
+The script performs graph-theoretic and boolean matrix calculations. It constructs a sparse adjacency matrix from the input maps, makes it symmetric, and then iteratively computes the reflexive and transitive closure using logical matrix multiplication to find connected components.
+
+\subsection*{What is the mathematical/theoretical context?}
+The context is rooted in \textbf{Category Theory} (specifically the computation of coequalizers), \textbf{Grafo Theory} (treating maps as directed edges and finding connected components), and \textbf{Order Theory/Binary Relations} (computing transitive closures and kernel pair equivalence relations). 
+\section{Análise Passo a Passo do Código}
+
+\subsection{Função Definition and Surjectivity Check}
+\textbf{Explanation}: This block defines the function and its expected inputs and outputs. It identifies the size of the codomain \texttt{B} by finding the maximum value in the map \texttt{d}. It then verifies if the map \texttt{d} is surjective (i.e., its unique elements perfectly match the codomain \texttt{B}). If not, it prints a warning to the console, as surjectivity is a standard requirement to guarantee a true categorical coequalizer.
+
+\begin{lstlisting}[caption={Function Definition and Input Validation}]
+function [q,p1,p2]=coeq(d,c)
+nB=max(d); B=(1:nB)';
+if ~isequal(unique(d),B)
+    fprintf('Warning: d is not surjective, q is not guaranteed to be a coequalizer \n');
+end
+\end{lstlisting}
+
+\subsection{Adjacency Matriz Initialization}
+\textbf{Explanation}: This section transforms the input maps into a graph representation. It creates a sparse matrix \texttt{R0} of size \texttt{nB} by \texttt{nB}, placing a 1 wherever there is a directed edge from \texttt{d(i)} to \texttt{c(i)}. Next, it creates \texttt{R1} as an upper-triangular symmetric representation of the relation by adding \texttt{R0} to its transpose \texttt{R0'}, establishing undirected connectivity between the elements.
+
+\begin{lstlisting}[caption={Adjacency Matrix Initialization}]
+R0=sparse(d,c,1,nB,nB);
+R1=triu(R0+R0');
+\end{lstlisting}
+
+\subsection{Transitive Closure Computation}
+\textbf{Explanation}: This block computes the transitive closure of the initial connectivity matrix \texttt{R1}. It uses a \texttt{while} loop to iteratively add connections: if A is connected to B, and B to C, it explicitly connects A to C. It updates the transitive matrix \texttt{Rtran} via logical indexing of $R + R \times R_1$. The loop terminates when the matrix stops changing, meaning all equivalence classes are fully interconnected.
+
+\begin{lstlisting}[caption={Transitive Closure Computation}]
+R=R1; % Get the transitive closure of R1
+Rtran=logical(R+R*R1);
+while ~isequal(R,Rtran)
+    R=Rtran;
+    Rtran=logical(R+R*R1);
+end
+\end{lstlisting}
+
+\subsection{Saída Extraction: Par de Kernel e Partição}
+\textbf{Explanation}: The final section extracts the results from the fully closed matrix \texttt{R}. It adds the identity matrix \texttt{eye(nB)} to ensure reflexivity, then uses \texttt{find} to extract the row (\texttt{s}) and column (\texttt{t}) indices of all non-zero entries. These index pairs form the kernel pair relation \texttt{p1} and \texttt{p2} after being sorted. Finally, it constructs the coequalizer vector \texttt{q} by mapping each element to its corresponding representative equivalence class.
+
+\begin{lstlisting}[caption={Output Extraction}]
+[s,t]=find(R+eye(nB));
+E=[s,t]; Erows=sortrows(E);
+p1=Erows(:,1); p2=Erows(:,2);
+q(p1)=p2; q=q(:);
+end % of function
+\end{lstlisting}
+
+\section{Saídas e Elementos Visuais Esperados}
+
+This function evaluates algebraic logic and does not inherently generate visual plots such as graphs or 2D coordinate maps. However, it provides the following deterministic outputs:
+
+\begin{itemize}
+    \item \textbf{Console Saídas/Avisos}: If the condition of surjectivity fails, the script will output the following string to the command window: \texttt{Aviso: d is not surjective, q is not guaranteed to be a coequalizer}.
+    \item \textbf{Example Evaluations}: The commented-out example sections indicate that the expected numeric outputs are matrices combining the input, the partitioned set, and the kernel pairs. If an example is executed, MATLAB will print arrays structured as:
+    \begin{itemize}
+        \item \texttt{[d c]}: A side-by-side $N \times 2$ matrix of the maps.
+        \item \texttt{[(1:max(d))' q]}: A lookup table mapping an original ID to its equivalence class ID.
+        \item \texttt{[(1:numel(p1))' p1 p2]}: A list indexing every explicitly defined connection mapping an element in \texttt{p1} to its equivalent in \texttt{p2}.
+    \end{itemize}
+\end{itemize}

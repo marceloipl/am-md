@@ -1,0 +1,88 @@
+
+\chapter{Análise do Código MATLAB: \texttt{thecomplexplane.m}}
+\section{Visão Geral}
+
+\paragraph{What is the main purpose of this file?}
+The main purpose of this script is to define and compute a complex-valued mapping for every possible function from a finite set $X$ to a finite set $B$. It establishes bijections between a 1D scalar index array and the set of all possible base-$nB$ digit combinations of length $nX$, and then maps each of these combinations to a specific coordinate in the complex plane using scaled roots of unity.
+
+\paragraph{What type of analysis or calculation does it perform?}
+It performs a combinatorial calculation paired with a complex functional transformation. Specifically, it computes the Cartesian power of sets (combinations with repetition), translates these combinations into vectors using modular arithmetic (base-$nB$ expansion), and applies a spatial mapping calculation where the vectors are scaled by alternating powers of 3 and projected into the 2D complex plane.
+
+\paragraph{What is the mathematical/theoretical context?}
+The context lies heavily in \textbf{Combinatorics} (specifically the set of all mappings $B^X$, which has cardinality $|B|^{|X|}$), \textbf{Bijection/Isomorphism} (translating between a well-ordered integer set $\mathbb{N}$ and the set of mappings $B^X$), and \textbf{Complex Geometry/Discrete Fractals}. The final mapping $F: A \to \mathbb{C}$ resembles the construction of a self-similar fractal or a discrete representation of a complex base expansion, where "digits" are complex roots of unity and the "base" scaling factor is 3.
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+\section{Análise Passo a Passo do Código}
+
+\subsection{1. Título da Secção/Função: Cardinality Initialization}
+\textbf{Explanation:} This section calculates the total number of possible mappings from set $X$ to set $B$. Mathematically, if set $B$ has $nB$ elements and set $X$ has $nX$ elements, the number of unique functions (or sequences of length $nX$ with values from $B$) is $nB^{nX}$. The input arguments are $nB$ and $nX$, and it outputs $nA$, the cardinality of the index set $A$.
+\begin{lstlisting}
+nA=nB^nX;
+\end{lstlisting}
+
+
+\subsection{2. Título da Secção/Função: Bijections ($i2s$ and $s2i$)}
+\textbf{Explanation:} This block creates two anonymous functions that serve as mathematical bijections (one-to-one and onto mappings) between the scalar indices and the vector space. 
+\begin{itemize}
+    \item \texttt{i2s}: Maps a scalar index $i \in \{1, \dots, nA\}$ to a state vector $s$ of length $nX$. It uses `bsxfun` and modular arithmetic to calculate the base-$nB$ representation of the index $i-1$, effectively generating the $i$-th combination of elements.
+    \item \texttt{s2i}: The inverse map. It takes a vector $s$ and converts it back into a unique scalar index $i \in \{1, \dots, nA\}$ using polynomial evaluation (dot product with powers of $nB$).
+\end{itemize}
+\begin{lstlisting}
+% the bijection
+i2s=@(i) mod(floor(bsxfun(@rdivide,i(:)-1,nB.^((1:nX)-1))),nB)+1;
+s2i=@(s) (s-1)*(nB.^((1:nX)'-1))+1;
+\end{lstlisting}
+
+
+\subsection{3. Título da Secção/Função: Auxiliary Map $f: X \to \mathbb{Z}$}
+\textbf{Explanation:} This block creates an array $f$ of length $nX$ that acts as a sequence of alternating integers. For odd indices ($x=1, 3, 5 \dots$), it calculates $(x-1)/2$ yielding $\{0, 1, 2 \dots\}$. For even indices ($x=2, 4, 6 \dots$), it calculates $-x/2$ yielding $\{-1, -2, -3 \dots\}$. The resulting sequence is $f = [0, -1, 1, -2, 2, \dots]$. This will be used later as exponents for a scaling factor.
+\begin{lstlisting}
+% construct the map f:X-->Integers
+f=zeros(1,nX); % inicialize f with zeros
+f(2:2:end)=-(2:2:nX)/2; % f(x) if x is even
+f(1:2:end)=((1:2:nX)-1)/2 % f(x) if x is odd
+\end{lstlisting}
+
+
+\subsection{4. Título da Secção/Função: Auxiliary Map $g: B \to \mathbb{C}$}
+\textbf{Explanation:} This section defines a mapping $g$ from the elements of set $B$ to the complex plane. It generates $nB-1$ points evenly spaced on the unit circle (roots of unity) using Euler's formula $e^{i\theta}$, and sets the final $nB$-th element exactly to $0$. This creates the "alphabet" of complex values used to plot the points.
+\begin{lstlisting}
+% construct the map g:B-->Complex
+g=[exp(2*pi*1i*(nB-(1:nB-1))/(nB-1)), 0]
+\end{lstlisting}
+
+
+\subsection{5. Título da Secção/Função: The Complex Map $F: A \to \mathbb{C}$}
+\textbf{Explanation:} This defines the main transformation function $F$ as an anonymous function. It takes a matrix of vectors $s$ (representing maps from $X$ to $B$) and evaluates them. It maps each element in $s$ to its complex representation using $g(s)$, and then scales it by $3^{f(x)}$. The `sum(..., 2)` operation sums these values across the $nX$ dimensions. Mathematically, it evaluates $F(s) = \sum_{x=1}^{nX} g(s_x) 3^{f(x)}$.
+\begin{lstlisting}
+% construct the map F:A-->Complex
+F=@(s) sum(g(s).*3.^repmat(f,size(s,1),1),2);
+\end{lstlisting}
+
+
+\subsection{6. Título da Secção/Função: Example Execution and Plotting}
+\textbf{Explanation:} This block demonstrates how to use the previously defined functions. It sets $nB = 7$ and $nX = 3$, meaning there are $7^3 = 343$ points. It computes the bijections and the total number of points $nA$. Then, it calculates the complex coordinates for all $nA$ points by nesting $F(i2s(1:nA))$ and plots them.
+\begin{lstlisting}
+% Examples of application
+
+[F,i2s,s2i,nA]=thecomplexplane(7,3);
+plot(F(i2s(1:nA)),'.')
+\end{lstlisting}
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+\section{Saídas e Elementos Visuais Esperados}
+
+Running the script and the example block will open a MATLAB Figure window displaying a 2D scatter plot.
+
+\begin{itemize}
+    \item \textbf{Axes representation:} The X-axis represents the \textbf{Real part} ($\Re$) of the complex output $F(s)$, while the Y-axis represents the \textbf{Imaginary part} ($\Im$) of $F(s)$.
+    \item \textbf{Visual Structure:} The plot will display exactly 343 distinct points represented by dots (`.`). 
+    \item \textbf{Geometric Pattern:} Because the mapping relies on roots of unity scaled by powers of 3 (specifically $3^0=1$, $3^{-1}=1/3$, and $3^1=3$ for $nX=3$), the visual output will resemble a discrete, rotationally symmetric, fractal-like starburst or cluster. 
+    \item \textbf{Symmetry:} Since $nB=7$, the roots of unity will form 6 outer branches or clusters (from the 6 roots of unity) radiating from central clusters (caused by the $0$ value in the mapping $g$). The geometry is self-similar, visually translating the combinatorial base-7 expansion into a complex spatial constellation.
+\end{itemize}

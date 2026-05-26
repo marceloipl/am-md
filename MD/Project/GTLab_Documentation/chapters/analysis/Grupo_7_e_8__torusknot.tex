@@ -1,0 +1,94 @@
+
+\chapter{MATLAB Ficheiro Analysis: \texttt{torusknot.m}}
+\section*{Visão Geral Inicial}
+
+\textbf{Objetivo Principal:} This file generates the 3D geometry (vertices and connectivity data) for a $(p,q)$-torus knot. It constructs a tubular mesh around a mathematical knot trajectory and outputs it as a triangulated surface that can be readily plotted in MATLAB.
+
+\textbf{Tipo de Análise/Calculation:} The file performs 3D geometric modeling and mesh generation. It evaluates parametric trigonometric equations to define a continuous 3D curve, calculates a circular cross-section, sweeps that cross-section along the curve to create a quadrangular mesh, and finally calculates the topological conversion of those quadrilaterals into a triangular mesh.
+
+\textbf{Mathematical/Theoretical Context:} The context is rooted in differential geometry and knot theory. Specifically, it deals with 1D manifolds (curves) embedded in 3D space, mapping a 2D surface (a torus) via parametric equations. The mathematical generation of the mesh relies on discretizing continuous domains (intervals $[0, 2\pi]$) into discrete point sets and utilizing connectivity matrices to represent surface topology. 
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+\section*{Step-by-Step Code Breakdown}
+
+\subsection*{1. Título da Secção/Função: Função Definition and Variable Initialization}
+\textbf{Explanation:} This section defines the main function signature and handles the input arguments. It uses a \texttt{switch nargin} block to provide default values if the user omits any parameters. The function takes the knot parameters ($p, q$), the grid resolution ($n1, n2$), and the tube radius (\texttt{radii}). It also defines internal scaling and shaping constants $a$ and $e$ for the cross-section's modulation.
+
+\begin{lstlisting}
+function [T,V]=torusknot(p,q,n1,n2,radii)
+
+a=3;
+e=1/3; 
+
+switch nargin
+case 0
+    p=0; q=1; n1=12; n2=6; radii=NaN;
+case 1
+    q=1; n1=12; n2=6; radii=NaN;
+case 2
+    n1=12; n2=6; radii=NaN;
+case 3
+    n2=6; radii=NaN;
+case 4
+    radii=NaN;
+end
+\end{lstlisting}
+
+\subsection*{2. Título da Secção/Função: Parameterization Grids}
+\textbf{Explanation:} This block generates the discrete parameter vectors $t1$ and $t2$. The array $t1$ represents the angular steps along the main trajectory of the knot, driven by the resolution parameter $n1$. The array $t2$ represents the angular steps around the tube's cross-section, driven by $n2$. Both span from slightly above $0$ to $2\pi$.
+
+\begin{lstlisting}
+t1=linspace(1/n1,1,n1)*2*pi;
+t2=linspace(1/n2,1,n2)*2*pi;
+\end{lstlisting}
+
+\subsection*{3. Título da Secção/Função: Main Curve (Torus Knot) Trajectory}
+\textbf{Explanation:} Here, the actual mathematical coordinates of the knot's spine are calculated. It uses parametric equations where $\rho$ is the radial distance from the origin in the XY plane, modulated by $a$, $e$, and the frequency $p$. The Cartesian coordinates $x$, $y$, and $z$ are then evaluated utilizing the frequencies $p$ and $q$, forming the characteristic intertwining loops of the torus knot.
+
+\begin{lstlisting}
+rho=a*(1+e*cos(p*t1));
+x=rho.*cos(q*t1);
+y=rho.*sin(q*t1); 
+z=q*sin(p*t1);
+\end{lstlisting}
+
+\subsection*{4. Título da Secção/Função: Cross-section and Surface Meshing}
+\textbf{Explanation:} This section prepares the inputs required to sweep a tube around the calculated trajectory. The $x$ and $y$ coordinates are combined into a complex array $g1$. A default tube radius is dynamically calculated if one isn't provided (using $1/\log(q+3)$). The cross-section boundary $g2$ is created as a circle in the complex plane. Finally, an external helper function \texttt{links2surf} is called to combine these 1D paths into a 3D quadrangular mesh (Vertices $V$ and Quads $Q$).
+
+\begin{lstlisting}
+g1=x+1i*y;
+phi1=[2:n1,1];
+
+if isnan(radii), radii=1./log(q+3); end 
+g2=radii*exp(1i*t2); 
+phi2=[2:n2,1]; 
+C0=1i*z; 
+C1=1+0*g1; 
+
+[V,Q]=links2surf(phi1,g1,phi2,g2,C0,C1); 
+\end{lstlisting}
+
+\subsection*{5. Título da Secção/Função: Quadrangulation to Triangulation Conversion}
+\textbf{Explanation:} The output mesh $Q$ from \texttt{links2surf} is a matrix of quadrilaterals (each row has 4 vertex indices). MATLAB's standard \texttt{trimesh} or \texttt{trisurf} plotting functions require triangles. This line splits every quadrilateral into two triangles by separating the $4$-vertex sets into two overlapping $3$-vertex sets, concatenating them vertically to form the final triangulation matrix $T$.
+
+\begin{lstlisting}
+T=[[Q(:,1) Q(:,2) Q(:,3)] ; [Q(:,1) Q(:,3) Q(:,4)]];
+\end{lstlisting}
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+\section*{Saídas e Elementos Visuais Esperados}
+
+When the output of this function is passed to a plotting command like \texttt{trimesh(T, V(:,1), V(:,2), V(:,3))} accompanied by \texttt{axis equal}, the following visual output is expected:
+
+\begin{itemize}
+    \item \textbf{The Plot:} A 3D continuous, intertwining tubular structure resembling a physical knotted rope. 
+    \item \textbf{Visual Representation:} If inputs are $p=3$ and $q=2$, the output will visually be the classic Trefoil knot. The structure is a closed loop that wraps around a theoretical torus geometry $p$ times in one direction and $q$ times in the other before reconnecting with itself.
+    \item \textbf{The Axes:} The X, Y, and Z axes represent the spatial Cartesian coordinates. Due to \texttt{axis equal}, the spatial proportions will be uniform, preventing the knot from looking stretched or squashed. 
+    \item \textbf{The Surface:} The surface will be faceted based on the resolution inputs ($n1$ and $n2$). A higher $n1$ results in a smoother curve along the knot, while a higher $n2$ results in a smoother, rounder tube cross-section. The surface will be drawn as a wireframe mesh of triangles unless shaded using a command like \texttt{trisurf} combined with \texttt{shading interp}.
+\end{itemize}

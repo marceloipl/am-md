@@ -1,0 +1,102 @@
+\chapter{Análise do Código MATLAB: \texttt{isoslice.m}}
+\section{Visão Geral}
+
+\textbf{What is the main purpose of this file?} \
+The main purpose of \texttt{isoslice.m} is to compute horizontal slices (chords) across the faces of a planar graph embedded in the complex plane. Given a set of edges and a set of real $x$-values, it identifies where these vertical lines intersect the graph's edges and pairs these intersections to create directed line segments (slices) completely contained within identically colored faces.
+
+\textbf{What type of analysis or calculation does it perform?} \
+It performs computational geometry calculations, specifically line-segment intersection and linear interpolation. It uses logical indexing and matrix operations to find where vertical lines intersect the complex edges, calculates the exact intersection points, and then sorts and matches these points based on their geometric orientation and face assignment.
+
+\textbf{What is the mathematical/theoretical context?} \
+The context lies in computational geometry and planar graph theory. The graph is represented using complex numbers ($z = x + iy$) for 2D coordinate embeddings. The algorithm relies on parameterization of line segments and topological tracking (orientations of edges around faces, identified by ``colors'').
+
+\section{Análise Passo a Passo do Código}
+
+\subsection*{1. Título da Secção/Função: Função Definition and Entrada Vetorization}
+\textbf{Explanation:} This section defines the function signature, returning the matched edge indices (\texttt{a0}, \texttt{a1}), the slice level index (\texttt{ilevel}), the complex coordinates of the slice endpoints (\texttt{z0}, \texttt{z1}), and the fractional distances along the edges (\texttt{t0}, \texttt{t1}). It forces all input arrays into column vectors to ensure dimensional consistency for subsequent vectorized matrix operations.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+function [a0,a1,ilevel,z0,z1,t0,t1]=isoslice(dom,cod,color,xval)
+% forcing column vectors
+d=dom(:); c=cod(:); x=xval(:); q=color(:);
+\end{lstlisting}
+
+\subsection*{2. Título da Secção/Função: Matriz Expansion for Vetorized Comparisons}
+\textbf{Explanation:} To avoid slow loops, the code replicates the edge data (\texttt{d}, \texttt{c}) and the slicing values (\texttt{x}) into 2D matrices of size $A \times I$ (where $A$ is the number of edges and $I$ is the number of slice levels). This sets up a grid where every edge can be compared against every $x$-value simultaneously.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% defining  A-by-I matrices
+dI=repmat(d,1,numel(x));
+cI=repmat(c,1,numel(x));
+Ax=repmat(x',numel(d),1);
+\end{lstlisting}
+
+\subsection*{3. Título da Secção/Função: Intersection Filtering and Computation}
+\textbf{Explanation:} This block identifies which edges cross which $x$-values. It separates crossings into "up" (crossing from left to right) and "down" (crossing from right to left). It then uses the \texttt{find} function to extract the indices of these intersections. Finally, it computes the exact complex coordinate of the intersection (\texttt{zup}, \texttt{zdown}) using linear interpolation based on the real parts of the segments.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% filtering A-by-I matrices
+up=(real(dI)<=Ax & Ax<real(cI));
+down=(real(cI)<=Ax & Ax<real(dI));
+[aup,iup]=find(up);
+[adown,idown]=find(down);
+tup=(x(iup)-real(d(aup)))./real(c(aup)-d(aup));
+tdown=(x(idown)-real(d(adown)))./real(c(adown)-d(adown));
+zup=d(aup)+tup.*(c(aup)-d(aup));
+zdown=d(adown)+tdown.*(c(adown)-d(adown));
+\end{lstlisting}
+
+\subsection*{4. Título da Secção/Função: Sorting and Chaining}
+\textbf{Explanation:} To form valid slices across a face, a "down" crossing must be paired with an "up" crossing. The code sorts the intersections by face color (\texttt{q}), slice level index (\texttt{iup}/\texttt{idown}), and then the imaginary part of the intersection ($y$-coordinate). Because the matrices align perfectly after sorting, they can be concatenated horizontally into \texttt{domcod}, pairing the start (\texttt{a0}) and end (\texttt{a1}) edges of each slice.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% the sorting and chaining process
+upsort=sortrows([q(aup) iup imag(zup) aup]);
+downsort=sortrows([q(adown) idown imag(zdown) adown]);
+% checking that faces and levels are consistent in upsort and downsort
+all(upsort(:,1:2)==downsort(:,1:2))
+domcod=[downsort, upsort(:,3:4)];
+\end{lstlisting}
+
+\subsection*{5. Título da Secção/Função: Final Saída Calculation}
+\textbf{Explanation:} Extracts the paired edge indices and computes the exact complex endpoints (\texttt{z0}, \texttt{z1}) of the generated slices. It then calculates the parametric variables \texttt{t0} and \texttt{t1}, representing the normalized distance ($0$ to $1$) along the edges \texttt{a0} and \texttt{a1} where the intersection occurs.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+a0=domcod(:,4);
+a1=domcod(:,6);
+ilevel=domcod(:,2);
+z0=x(ilevel)+1i*domcod(:,3);
+z1=x(ilevel)+1i*domcod(:,5);
+
+t0=(z0-dom(a0))./(cod(a0)-dom(a0));
+t1=(z1-dom(a1))./(cod(a1)-dom(a1));
+\end{lstlisting}
+
+\subsection*{6. Título da Secção/Função: Example Application Block}
+\textbf{Explanation:} The commented block at the end demonstrates how to use the function. It defines a graph shaped like the letter "A", adds a "hat", rotates it in the complex plane by 45 degrees, and executes \texttt{isoslice}. It uses external functions like \texttt{linkfigs} and \texttt{linkdraw} (assumed to be part of the user's broader toolkit) to set up and visualize the topological data.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+%g=g.*exp(1i*45/360*2*pi); % rotate 45
+dom=g; cod=g(phi);
+xval=linspace(-2,1,15);
+faces=[1 1 2];
+color=faces(orbits(phi))
+
+% calling isoslice
+[a0,a1,ilevel,z0,z1]=isoslice(dom,cod,color,xval);
+\end{lstlisting}
+
+\section{Saídas e Elementos Visuais Esperados}
+When the example application block is executed with \texttt{Draw=1}, the script generates a 2D plot.
+\begin{itemize}
+\item \textbf{The Grafo:} The plot displays a planar graph forming the shape of a capital letter "A" with an additional triangle ("hat") on top. This shape is rotated by 45 degrees.
+\item \textbf{The Axes:} The x-axis represents the real parts of the complex coordinates, and the y-axis represents the imaginary parts.
+\item \textbf{The Slices (Quiver Plot):} Overlaid on the graph are multiple horizontal arrows generated using the \texttt{quiver} function. These arrows represent the computed slices. They originate at \texttt{z0} (on one edge) and point to \texttt{z1} (on an opposing edge), completely contained within the internal faces of the "A" shape.
+\item \textbf{Text Labels:} Each horizontal arrow has a numeric text label situated roughly at its midpoint, representing the index of the slice, visually confirming the ordered grouping of the calculated segments.
+\end{itemize}

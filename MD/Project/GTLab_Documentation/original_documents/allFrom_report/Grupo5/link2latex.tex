@@ -1,0 +1,27 @@
+
+\chapter{Technical Analysis of \texttt{link2latex.m}}
+\date{March 10, 2026}
+
+\maketitle
+
+\section{Overview}
+The \texttt{link2latex.m} file is a MATLAB function designed to automate the generation of \LaTeX\ TikZ code for visualizing directed graphs[cite: 1]. It transforms numerical data—node positions and connectivity—into a format for professional vector graphics[cite: 1].
+
+\section{Step-by-Step Analysis}
+
+\subsection{Section 1: Target Mapping Calculation}
+The code determines the target node indices $c$ by indexing the domain vector $d$ with the endomap $\phi$[cite: 1].
+\begin{lstlisting}
+c = d(phi);
+\end{lstlisting}
+
+\subsection{Section 2: Node Generation}
+This section iterates through nodes to generate TikZ strings, assigning unique identifiers and placing them at $(x, y)$ coordinates derived from the complex vector $g$[cite: 1].
+\begin{lstlisting}
+for i = 1:n
+    nodes{i} = sprintf('\\node (n%d) at (%.2f, %.2f) {%d};', i, x(i), y(i), D(i));
+end
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+The final output is a TikZ source code block[cite: 1]. When compiled, it represents a directed graph where nodes are circles and edges are directed arrows reflecting the mapping $\phi$[cite: 1].

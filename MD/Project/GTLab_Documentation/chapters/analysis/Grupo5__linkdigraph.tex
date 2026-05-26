@@ -1,0 +1,24 @@
+
+\chapter{Análise Técnica of \texttt{linkdigraph.m}}
+\date{March 10, 2026}
+
+\section{Visão Geral}
+The \texttt{linkdigraph.m} file finds a linking map $\phi$ between the edges of a directed graph such that $c = d(\phi)$[cite: 3]. It performs structural graph analysis and combinatorial mapping[cite: 3].
+
+\section{Step-by-Step Analysis}
+
+\subsection{Section 1: Digraph Completion}
+The code identifies vertices with zero out-degree and adds self-loops to ensure a continuous linking map is possible[cite: 3].
+\begin{lstlisting}
+Out0=find(Out==0);
+d_=[d(:); Out0]; c_=[c(:); Out0];
+\end{lstlisting}
+
+\subsection{Section 2: Linking Map Computation}
+Modular arithmetic is used to distribute target edges to available source edges, satisfying the structural requirement $c\_ = d\_(\phi)$[cite: 3].
+\begin{lstlisting}
+phi(sc)=sd(mod((1:numel(sd))'-Incum(cs)-1,Out(cs))+1+Outcum(cs));
+\end{lstlisting}
+
+\section{Saídas e Elementos Visuais Esperados}
+The output is the vector \texttt{phi}[cite: 3]. A successful execution returns a logical check of \texttt{1} (true) for the relation $c\_ = d\_(\phi)$[cite: 3].
