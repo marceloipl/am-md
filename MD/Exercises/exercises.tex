@@ -1,0 +1,2828 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Pacotes Essenciais ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+% Nota: substitua 'english' por 'portuges' se a sua distribuicao LaTeX
+% incluir o suporte babel para portugues (pacote texlive-lang-portuguese).
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{mdframed}
+
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm, headheight=15pt}
+
+% --- Cabeçalho e rodapé ---
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textit{Resoluções Detalhadas}}
+\lhead{\textit{Teoria dos Conjuntos, Relações e Funções}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- Formatação de secções ---
+\titleformat{\section}[block]{\large\bfseries\color{blue!70!black}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}[runin]{\bfseries}{}{0em}{}[.\enspace]
+
+% --- Ambiente para conceitos teóricos ---
+\newmdenv[
+  backgroundcolor=blue!5,
+  linecolor=blue!40!black,
+  linewidth=1pt,
+  roundcorner=4pt,
+  innertopmargin=6pt,
+  innerbottommargin=6pt,
+  innerleftmargin=10pt,
+  innerrightmargin=10pt
+]{teoribox}
+
+% --- Ambiente para notas ---
+\newmdenv[
+  backgroundcolor=orange!8,
+  linecolor=orange!60!black,
+  linewidth=1pt,
+  roundcorner=4pt,
+  innertopmargin=6pt,
+  innerbottommargin=6pt,
+  innerleftmargin=10pt,
+  innerrightmargin=10pt
+]{notabox}
+
+% --- Pacotes e definições adicionais vindos de main 2.tex ---
+\usepackage{array}
+\usepackage[colorlinks=false, pdfborder={0 0 0}]{hyperref}
+
+\definecolor{azul}{RGB}{0,70,140}
+\definecolor{verde}{RGB}{0,100,60}
+\definecolor{fundoteoria}{RGB}{240,248,255}
+\definecolor{fundoex}{RGB}{250,250,240}
+
+\newmdenv[backgroundcolor=fundoteoria,linecolor=azul,linewidth=1.2pt,
+          leftmargin=0pt,rightmargin=0pt,innerleftmargin=10pt,
+          innerrightmargin=10pt,innertopmargin=8pt,innerbottommargin=8pt]{teoriacaixa}
+
+\newmdenv[backgroundcolor=fundoex,linecolor=verde,linewidth=1pt,
+          leftmargin=0pt,rightmargin=0pt,innerleftmargin=10pt,
+          innerrightmargin=10pt,innertopmargin=6pt,innerbottommargin=6pt]{exemplocaixa}
+
+\newcommand{\keyword}[1]{\textbf{\textcolor{azul}{#1}}}
+\newcommand{\passo}[1]{\medskip\noindent\textcolor{verde}{\textbf{Passo #1.}}\;}
+
+
+% --- Título combinado ---
+\title{%
+  \vspace{-1cm}
+  {\Large \textbf{Matemática Discreta}}\\[0.4em]
+  {\large Resoluções e Explicações Detalhadas}\\[0.3em]
+  {\normalsize Capítulos 1, 2, 3, 10, 12, 13, 14, 15 e Apêndice B}
+}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{fancy}
+
+\tableofcontents
+\newpage
+
+% =============================================================
+\section*{Capítulo 1 --- Teoria dos Conjuntos}
+\addcontentsline{toc}{section}{Capítulo 1 --- Teoria dos Conjuntos}
+% =============================================================
+
+% --------------------------------------------------
+\section*{Exercício 1.1}
+\addcontentsline{toc}{subsection}{Exercício 1.1}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Quais dos seguintes conjuntos são iguais?
+$\{x, y, z\}$, $\{z, y, z, x\}$, $\{y, x, y, z\}$, $\{y, z, x, y\}$.
+
+\begin{teoribox}
+\textbf{Conceito fundamental:} Dois conjuntos são \emph{iguais} se e só se contêm exactamente os mesmos elementos. Por definição, a \textbf{ordem} em que os elementos são listados é irrelevante e a \textbf{repetição} de elementos não altera o conjunto.
+\end{teoribox}
+
+\textbf{Resolução detalhada:}
+
+Analisemos cada conjunto, eliminando repetições e ignorando a ordem:
+\begin{itemize}
+  \item $\{x, y, z\}$ --- elementos distintos: $x$, $y$, $z$.
+  \item $\{z, y, z, x\}$ --- o elemento $z$ repete-se. Eliminando a repetição: $\{z, y, x\} = \{x, y, z\}$.
+  \item $\{y, x, y, z\}$ --- o elemento $y$ repete-se. Eliminando: $\{y, x, z\} = \{x, y, z\}$.
+  \item $\{y, z, x, y\}$ --- o elemento $y$ repete-se. Eliminando: $\{y, z, x\} = \{x, y, z\}$.
+\end{itemize}
+
+Após normalizar os quatro conjuntos, todos resultam em $\{x, y, z\}$. Portanto, \textbf{todos os quatro conjuntos são iguais}.
+
+% --------------------------------------------------
+\section*{Exercício 1.2}
+\addcontentsline{toc}{subsection}{Exercício 1.2}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Liste os elementos de cada conjunto, onde $\mathbb{N} = \{1, 2, 3, \ldots\}$.
+
+\begin{teoribox}
+\textbf{Notação de construção de conjuntos (set-builder notation):} $\{x \in A \mid P(x)\}$ denota o conjunto de todos os $x$ em $A$ que satisfazem a propriedade $P(x)$. Este método de definir conjuntos é chamado de \emph{compreensão}.
+\end{teoribox}
+
+\textbf{(a)} $A = \{x \in \mathbb{N} \mid 3 < x < 9\}$
+
+A condição pede os inteiros positivos estritamente maiores que 3 e estritamente menores que 9. Os inteiros nesse intervalo aberto $(3,9)$ são $4, 5, 6, 7, 8$. Logo:
+\[
+A = \{4, 5, 6, 7, 8\}
+\]
+
+\textbf{(b)} $B = \{x \in \mathbb{N} \mid x \text{ é par},\, x < 11\}$
+
+Procuramos os inteiros positivos pares menores que 11. Os números pares em $\mathbb{N}$ são $2, 4, 6, 8, 10, 12, \ldots$ e os que satisfazem $x < 11$ são os primeiros cinco. Logo:
+\[
+B = \{2, 4, 6, 8, 10\}
+\]
+
+\textbf{(c)} $C = \{x \in \mathbb{N} \mid 4 + x = 3\}$
+
+A equação $4 + x = 3$ implica $x = -1$. Como $-1 \notin \mathbb{N}$ (os inteiros positivos começam em 1), nenhum elemento de $\mathbb{N}$ satisfaz esta condição. Logo:
+\[
+C = \emptyset \quad \text{(o conjunto vazio)}
+\]
+
+% --------------------------------------------------
+\section*{Exercício 1.3}
+\addcontentsline{toc}{subsection}{Exercício 1.3}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Seja $A = \{2, 3, 4, 5\}$.
+
+\begin{teoribox}
+\textbf{Subconjunto ($\subseteq$) e subconjunto próprio ($\subsetneq$):}
+\begin{itemize}
+  \item $A \subseteq B$ significa que \emph{todo} elemento de $A$ também pertence a $B$.
+  \item Para mostrar que $A \not\subseteq B$, basta encontrar \emph{um único} elemento $a \in A$ tal que $a \notin B$.
+  \item $A \subsetneq B$ (subconjunto próprio) significa $A \subseteq B$ e $A \neq B$, ou seja, existe pelo menos um elemento em $B$ que não está em $A$.
+\end{itemize}
+\end{teoribox}
+
+\textbf{(a)} Mostrar que $A$ não é subconjunto de $B = \{x \in \mathbb{N} \mid x \text{ é par}\}$.
+
+Para refutar $A \subseteq B$, precisamos de encontrar um elemento de $A$ que não pertença a $B$. O conjunto $B$ contém apenas números pares. Verificamos:
+\[
+3 \in A \quad \text{e} \quad 3 \text{ é ímpar} \Rightarrow 3 \notin B
+\]
+Como existe um elemento ($3$) em $A$ que não está em $B$, concluímos $A \not\subseteq B$.
+
+\textbf{(b)} Mostrar que $A$ é subconjunto próprio de $C = \{1, 2, 3, \ldots, 9\}$.
+
+Primeiro verificamos $A \subseteq C$: cada elemento de $A$ é um inteiro entre 2 e 5, portanto pertence a $C = \{1,\ldots,9\}$:
+\[
+2, 3, 4, 5 \in C \quad \checkmark
+\]
+De seguida, verificamos que $A \neq C$: o elemento $1 \in C$ mas $1 \notin A$. Assim $A \subsetneq C$.
+
+% --------------------------------------------------
+\section*{Exercício 1.4}
+\addcontentsline{toc}{subsection}{Exercício 1.4}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Seja $U = \{1,2,\ldots,9\}$ o conjunto universal, e sejam dados os conjuntos $A, B, C, D, E, F$. Calcular uniões e intersecções.
+
+\begin{teoribox}
+\textbf{Operações de conjuntos:}
+\begin{itemize}
+  \item \textbf{União:} $X \cup Y = \{x \mid x \in X \text{ ou } x \in Y\}$ --- todos os elementos que estão em pelo menos um dos conjuntos.
+  \item \textbf{Intersecção:} $X \cap Y = \{x \mid x \in X \text{ e } x \in Y\}$ --- apenas os elementos comuns a ambos.
+  \item \textbf{Teorema 1.4:} Se $F \subseteq D$, então $D \cup F = D$ e $D \cap F = F$.
+\end{itemize}
+\end{teoribox}
+
+Dados: $A = \{1,2,3,4,5\}$, $B = \{4,5,6,7\}$, $C = \{5,6,7,8,9\}$, $D = \{1,3,5,7,9\}$, $F = \{1,5,9\}$.
+
+\textbf{(a)}
+\begin{align*}
+A \cup B &= \{1,2,3,4,5\} \cup \{4,5,6,7\} = \{1,2,3,4,5,6,7\} \\
+A \cap B &= \{4,5\} \quad \text{(elementos comuns a } A \text{ e } B\text{)}
+\end{align*}
+
+\textbf{(b)}
+\begin{align*}
+A \cup C &= \{1,2,3,4,5\} \cup \{5,6,7,8,9\} = \{1,2,3,4,5,6,7,8,9\} = U \\
+A \cap C &= \{5\}
+\end{align*}
+
+\textbf{(c)} Observemos que $F = \{1,5,9\} \subseteq \{1,3,5,7,9\} = D$. Pelo Teorema 1.4:
+\begin{align*}
+D \cup F &= D = \{1,3,5,7,9\} \\
+D \cap F &= F = \{1,5,9\}
+\end{align*}
+
+% --------------------------------------------------
+\section*{Exercício 1.5}
+\addcontentsline{toc}{subsection}{Exercício 1.5}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Considerar os conjuntos do Exercício 1.4. Calcular complementos, diferenças e diferenças simétricas.
+
+\begin{teoribox}
+\textbf{Operações adicionais:}
+\begin{itemize}
+  \item \textbf{Complemento:} $X^c = \{x \in U \mid x \notin X\}$ --- elementos do universo que não estão em $X$.
+  \item \textbf{Diferença:} $X \setminus Y = \{x \mid x \in X \text{ e } x \notin Y\}$ --- elementos de $X$ que não pertencem a $Y$.
+  \item \textbf{Diferença simétrica:} $X \oplus Y = (X \setminus Y) \cup (Y \setminus X)$ --- elementos que estão num ou noutro, mas não em ambos.
+\end{itemize}
+\end{teoribox}
+
+Com $U = \{1,2,\ldots,9\}$, $A=\{1,2,3,4,5\}$, $B=\{4,5,6,7\}$, $D=\{1,3,5,7,9\}$, $E=\{2,4,6,8\}$, $F=\{1,5,9\}$.
+
+\textbf{(a) Complementos} (elementos de $U$ que faltam em cada conjunto):
+\begin{align*}
+A^c &= U \setminus A = \{6,7,8,9\} \\
+B^c &= U \setminus B = \{1,2,3,8,9\} \\
+D^c &= U \setminus D = \{2,4,6,8\} = E \\
+E^c &= U \setminus E = \{1,3,5,7,9\} = D
+\end{align*}
+Note a dualidade: $D^c = E$ e $E^c = D$, o que significa que $D$ e $E$ são complementares em $U$.
+
+\textbf{(b) Diferenças}:
+\begin{align*}
+A \setminus B &= \{1,2,3,4,5\} \setminus \{4,5,6,7\} = \{1,2,3\} \\
+B \setminus A &= \{4,5,6,7\} \setminus \{1,2,3,4,5\} = \{6,7\} \\
+D \setminus E &= \{1,3,5,7,9\} \setminus \{2,4,6,8\} = \{1,3,5,7,9\} = D
+\end{align*}
+O último resultado confirma que $D \cap E = \emptyset$ (conjuntos disjuntos).
+
+\textbf{(c) Diferenças simétricas}:
+\begin{align*}
+A \oplus B &= \{1,2,3\} \cup \{6,7\} = \{1,2,3,6,7\} \\
+C \oplus D &= (C \setminus D) \cup (D \setminus C) = \{6,8\} \cup \{1,3\} = \{1,3,6,8\} \\
+E \oplus F &= (E \setminus F) \cup (F \setminus E) = \{2,4,6,8\} \cup \{1,5,9\} = E \cup F
+\end{align*}
+O último resultado ocorre porque $E \cap F = \emptyset$, pelo que $E \oplus F = E \cup F$.
+
+% --------------------------------------------------
+\section*{Exercício 1.6}
+\addcontentsline{toc}{subsection}{Exercício 1.6}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Mostrar por exemplo que: (a) $A \cap B = A \cap C$ não implica $B = C$; (b) $A \cup B = A \cup C$ não implica $B = C$.
+
+\begin{teoribox}
+\textbf{Estratégia:} Para refutar uma implicação geral, basta construir um \emph{contra-exemplo} --- um caso concreto onde a hipótese é verdadeira mas a conclusão é falsa.
+\end{teoribox}
+
+\textbf{(a)} Tomemos $A = \{1,2\}$, $B = \{2,3\}$, $C = \{2,4\}$. Então:
+\[
+A \cap B = \{2\} = A \cap C \quad \text{mas} \quad B = \{2,3\} \neq \{2,4\} = C
+\]
+A intersecção com $A$ ``filtra'' apenas os elementos de $A$; o que $B$ e $C$ têm fora de $A$ é irrelevante para a intersecção, mas distingue-os.
+
+\textbf{(b)} Tomemos $A = \{1,2\}$, $B = \{1,3\}$, $C = \{2,3\}$. Então:
+\[
+A \cup B = \{1,2,3\} = A \cup C \quad \text{mas} \quad B = \{1,3\} \neq \{2,3\} = C
+\]
+O conjunto $A$ ``cobre'' a diferença entre $B$ e $C$ na união, tornando os resultados iguais apesar de $B \neq C$.
+
+% --------------------------------------------------
+\section*{Exercício 1.7}
+\addcontentsline{toc}{subsection}{Exercício 1.7}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Provar que $B \setminus A = B \cap A^c$.
+
+\begin{teoribox}
+\textbf{Método:} Para provar igualdade de dois conjuntos $X = Y$, mostramos que cada elemento de $X$ pertence a $Y$ e vice-versa. Equivalentemente, usamos a lógica proposicional para traduzir as definições em condições equivalentes.
+\end{teoribox}
+
+\textbf{Demonstração} (por dupla inclusão via definições):
+
+Um elemento $x$ pertence a $B \setminus A$ se e só se satisfaz simultaneamente:
+\[
+x \in B \quad \text{e} \quad x \notin A
+\]
+A condição $x \notin A$ é, por definição do complemento, equivalente a $x \in A^c$. Portanto:
+\[
+x \in B \setminus A \iff x \in B \text{ e } x \notin A \iff x \in B \text{ e } x \in A^c \iff x \in B \cap A^c
+\]
+Como a cadeia de equivalências é válida para qualquer $x$, conclui-se $B \setminus A = B \cap A^c$. \hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 1.8}
+\addcontentsline{toc}{subsection}{Exercício 1.8}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Provar o Teorema 1.4: as seguintes afirmações são equivalentes: $A \subseteq B$,\ $A \cap B = A$,\ $A \cup B = B$.
+
+\begin{teoribox}
+\textbf{Equivalência de três afirmações:} Para provar que $P \Leftrightarrow Q \Leftrightarrow R$, basta demonstrar a cadeia $P \Rightarrow Q \Rightarrow R \Rightarrow P$ (ou qualquer outra cadeia cíclica).
+\end{teoribox}
+
+\textbf{($A \subseteq B \Rightarrow A \cap B = A$):} Suponha $A \subseteq B$. Provamos $A \cap B = A$ mostrando dupla inclusão.
+\begin{itemize}
+  \item $A \cap B \subseteq A$: sempre verdade por definição de intersecção.
+  \item $A \subseteq A \cap B$: seja $x \in A$. Como $A \subseteq B$, temos $x \in B$. Logo $x \in A \cap B$.
+\end{itemize}
+
+\textbf{($A \cap B = A \Rightarrow A \subseteq B$):} Suponha $A \cap B = A$. Seja $x \in A$. Então $x \in A \cap B$, o que implica $x \in B$. Logo $A \subseteq B$.
+
+\textbf{($A \subseteq B \Rightarrow A \cup B = B$):} Suponha $A \subseteq B$.
+\begin{itemize}
+  \item $B \subseteq A \cup B$: sempre verdade.
+  \item $A \cup B \subseteq B$: seja $x \in A \cup B$. Então $x \in A$ ou $x \in B$. Se $x \in A$, então $x \in B$ pois $A \subseteq B$. Em ambos os casos $x \in B$.
+\end{itemize}
+
+\textbf{($A \cup B = B \Rightarrow A \subseteq B$):} Seja $x \in A$. Então $x \in A \cup B = B$, logo $x \in B$. \hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 1.9}
+\addcontentsline{toc}{subsection}{Exercício 1.9}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Ilustrar a Lei de De Morgan $(A \cup B)^c = A^c \cap B^c$ usando diagramas de Venn.
+
+\begin{teoribox}
+\textbf{Leis de De Morgan:}
+\[
+(A \cup B)^c = A^c \cap B^c \qquad \text{e} \qquad (A \cap B)^c = A^c \cup B^c
+\]
+Estas leis estabelecem uma dualidade entre uniões e intersecções quando aplicado o complemento.
+\end{teoribox}
+
+\textbf{Raciocínio:}
+
+O lado esquerdo, $(A \cup B)^c$, representa a região fora da reunião de $A$ e $B$, ou seja, tudo no universo $U$ que não pertence a $A$ \emph{nem} a $B$.
+
+O lado direito, $A^c \cap B^c$, representa a intersecção das regiões exteriores a $A$ e a $B$ individualmente, ou seja, os pontos que estão simultaneamente fora de $A$ \emph{e} fora de $B$.
+
+Descrevendo logicamente: um ponto $x$ pertence a $(A \cup B)^c$ se e só se $x \notin A \cup B$, o que significa $x \notin A$ e $x \notin B$, que é exactamente a condição para $x \in A^c \cap B^c$.
+
+Num diagrama de Venn, ambas as expressões sombreiam a mesma região --- o exterior ao círculo que abrange $A$ e $B$ --- confirmando geometricamente a igualdade.
+
+% --------------------------------------------------
+\section*{Exercício 1.10}
+\addcontentsline{toc}{subsection}{Exercício 1.10}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Provar a Lei Distributiva: $A \cap (B \cup C) = (A \cap B) \cup (A \cap C)$.
+
+\begin{teoribox}
+\textbf{Analogia lógica:} Esta lei é o espelho da distributividade lógica $p \land (q \lor r) \equiv (p \land q) \lor (p \land r)$, onde $\cap$ corresponde a ``e'' ($\land$) e $\cup$ a ``ou'' ($\lor$).
+\end{teoribox}
+
+\textbf{Demonstração} (usando definições de conjunto via lógica):
+\begin{align*}
+A \cap (B \cup C) &= \{x \mid x \in A \text{ e } x \in B \cup C\} \\
+&= \{x \mid x \in A \text{ e } (x \in B \text{ ou } x \in C)\} \\
+&= \{x \mid (x \in A \text{ e } x \in B) \text{ ou } (x \in A \text{ e } x \in C)\} \\
+&= (A \cap B) \cup (A \cap C)
+\end{align*}
+O terceiro passo usa a distributividade lógica: $p \land (q \lor r) \equiv (p \land q) \lor (p \land r)$. \hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 1.11}
+\addcontentsline{toc}{subsection}{Exercício 1.11}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Escrever o dual de: (a) $(U \cap A) \cup (B \cap A) = A$;\quad (b) $(A \cap U) \cap (\emptyset \cup A^c) = \emptyset$.
+
+\begin{teoribox}
+\textbf{Princípio de Dualidade:} Numa identidade de teoria dos conjuntos, se trocarmos sistematicamente $\cup \leftrightarrow \cap$ e $U \leftrightarrow \emptyset$ (mantendo complementos), obtemos outra identidade válida --- o seu \emph{dual}.
+\end{teoribox}
+
+Aplicando a troca $\cup \leftrightarrow \cap$ e $U \leftrightarrow \emptyset$:
+
+\textbf{(a)} $(U \cap A) \cup (B \cap A) = A$ \quad torna-se:
+\[
+(\emptyset \cup A) \cap (B \cup A) = A
+\]
+
+\textbf{(b)} $(A \cap U) \cap (\emptyset \cup A^c) = \emptyset$ \quad torna-se:
+\[
+(A \cup \emptyset) \cup (U \cap A^c) = U
+\]
+
+% --------------------------------------------------
+\section*{Exercício 1.12}
+\addcontentsline{toc}{subsection}{Exercício 1.12}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Provar que $(A \cup B) \setminus (A \cap B) = (A \setminus B) \cup (B \setminus A)$.
+
+\begin{teoribox}
+\textbf{Diferença simétrica:} Ambos os membros da igualdade são definições equivalentes de $A \oplus B$. A prova usa $X \setminus Y = X \cap Y^c$ (Exercício 1.7) e as Leis de De Morgan.
+\end{teoribox}
+
+\textbf{Demonstração:}
+\begin{align*}
+(A \cup B) \setminus (A \cap B) &= (A \cup B) \cap (A \cap B)^c \\
+&= (A \cup B) \cap (A^c \cup B^c) \quad \text{(De Morgan)} \\
+&= \bigl[(A \cup B) \cap A^c\bigr] \cup \bigl[(A \cup B) \cap B^c\bigr] \quad \text{(Distributiva)} \\
+&= \bigl[(A \cap A^c) \cup (B \cap A^c)\bigr] \cup \bigl[(A \cap B^c) \cup (B \cap B^c)\bigr] \\
+&= \bigl[\emptyset \cup (B \cap A^c)\bigr] \cup \bigl[(A \cap B^c) \cup \emptyset\bigr] \\
+&= (B \cap A^c) \cup (A \cap B^c) \\
+&= (B \setminus A) \cup (A \setminus B) = (A \setminus B) \cup (B \setminus A)
+\end{align*}
+\hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 1.13}
+\addcontentsline{toc}{subsection}{Exercício 1.13}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Determinar a validade do argumento:
+\begin{itemize}
+  \item $S_1$: Todos os meus amigos são músicos.
+  \item $S_2$: John é meu amigo.
+  \item $S_3$: Nenhum dos meus vizinhos é músico.
+  \item Conclusão $S$: John não é meu vizinho.
+\end{itemize}
+
+\begin{teoribox}
+\textbf{Raciocínio por diagramas de conjuntos:} Num diagrama de Venn, as premissas $S_1$ e $S_3$ colocam restrições geométricas. $S_1$ diz que o conjunto dos Amigos está contido no conjunto dos Músicos. $S_3$ diz que o conjunto dos Vizinhos é disjunto do conjunto dos Músicos. Pela transitividade, Amigos e Vizinhos são disjuntos.
+\end{teoribox}
+
+\textbf{Análise:}
+
+\textit{Passo 1 ---} De $S_1$: $\text{Amigos} \subseteq \text{Músicos}$.
+
+\textit{Passo 2 ---} De $S_3$: $\text{Vizinhos} \cap \text{Músicos} = \emptyset$.
+
+\textit{Passo 3 ---} Das duas premissas conjuntamente: como Amigos $\subseteq$ Músicos, e Músicos $\cap$ Vizinhos $= \emptyset$, então também Amigos $\cap$ Vizinhos $= \emptyset$.
+
+\textit{Passo 4 ---} De $S_2$: John $\in$ Amigos. Como Amigos $\cap$ Vizinhos $= \emptyset$, John $\notin$ Vizinhos.
+
+Portanto, a conclusão $S$ é uma consequência lógica válida das premissas. O \textbf{argumento é válido}.
+
+% --------------------------------------------------
+\section*{Exercício 1.14}
+\addcontentsline{toc}{subsection}{Exercício 1.14}
+% --------------------------------------------------
+
+\textbf{Enunciado:} 140 estudantes; 60 completaram $A$, 45 completaram $B$, 20 completaram ambos. Encontrar: (a) pelo menos um; (b) exactamente um; (c) nenhum.
+
+\begin{teoribox}
+\textbf{Princípio da Inclusão-Exclusão (para dois conjuntos):}
+\[
+n(A \cup B) = n(A) + n(B) - n(A \cap B)
+\]
+A subtracção de $n(A \cap B)$ corrige a dupla contagem dos elementos que foram contados tanto em $A$ como em $B$.
+\end{teoribox}
+
+\textbf{(a) Pelo menos um} ($= n(A \cup B)$):
+\[
+n(A \cup B) = n(A) + n(B) - n(A \cap B) = 60 + 45 - 20 = 85
+\]
+
+\textbf{(b) Exactamente um} ($= n(A \oplus B)$):
+
+O número de estudantes que completaram $A$ mas não $B$: $60 - 20 = 40$.
+O número que completaram $B$ mas não $A$: $45 - 20 = 25$. Logo:
+\[
+n(A \oplus B) = 40 + 25 = 65
+\]
+
+\textbf{(c) Nenhum} ($= n(A^c \cap B^c)$):
+\[
+n((A \cup B)^c) = n(U) - n(A \cup B) = 140 - 85 = 55
+\]
+
+% --------------------------------------------------
+\section*{Exercício 1.15}
+\addcontentsline{toc}{subsection}{Exercício 1.15}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Num inquérito de 120 pessoas, com dados sobre leitores de Newsweek ($N$), Time ($T$) e Fortune ($F$). Encontrar: (a) lêem pelo menos uma; (b) distribuição por regiões do diagrama de Venn; (c) lêem exactamente uma.
+
+\begin{teoribox}
+\textbf{Princípio da Inclusão-Exclusão (para três conjuntos):}
+\[
+n(N \cup T \cup F) = n(N) + n(T) + n(F) - n(N \cap T) - n(N \cap F) - n(T \cap F) + n(N \cap T \cap F)
+\]
+\end{teoribox}
+
+\textbf{(a)} Dados: $n(N)=65$, $n(T)=45$, $n(F)=42$, $n(N\cap T)=20$, $n(N\cap F)=25$, $n(T\cap F)=15$, $n(N\cap T\cap F)=8$.
+\begin{align*}
+n(N \cup T \cup F) &= 65 + 45 + 42 - 20 - 25 - 15 + 8 = 100
+\end{align*}
+
+\textbf{(b)} Preenchemos o diagrama de Venn de ``dentro para fora'':
+\begin{align*}
+\text{Só em } N \cap T \cap F &= 8 \\
+\text{Em } N \cap T \text{, excluindo o centro} &= 20 - 8 = 12 \\
+\text{Em } N \cap F \text{, excluindo o centro} &= 25 - 8 = 17 \\
+\text{Em } T \cap F \text{, excluindo o centro} &= 15 - 8 = 7 \\
+\text{Só em } N &= 65 - 12 - 8 - 17 = 28 \\
+\text{Só em } T &= 45 - 12 - 8 - 7 = 18 \\
+\text{Só em } F &= 42 - 17 - 8 - 7 = 10 \\
+\text{Nenhuma} &= 120 - 100 = 20
+\end{align*}
+
+\textbf{(c)} Exactamente uma revista: $28 + 18 + 10 = 56$ pessoas.
+
+% --------------------------------------------------
+\section*{Exercício 1.16}
+\addcontentsline{toc}{subsection}{Exercício 1.16}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Provar o Teorema 1.9: Se $A$ e $B$ são finitos, então $n(A \cup B) = n(A) + n(B) - n(A \cap B)$.
+
+\textbf{Demonstração:}
+
+Ao contar $n(A) + n(B)$, cada elemento de $A \cup B$ é contado uma vez se estiver apenas em $A$ ou apenas em $B$. Porém, cada elemento de $A \cap B$ é contado \emph{duas vezes} --- uma vez ao contar $A$ e outra ao contar $B$. Para corrigir esta dupla contagem, subtraímos $n(A \cap B)$ uma vez:
+\[
+n(A \cup B) = n(A) + n(B) - n(A \cap B)
+\]
+\hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 1.17}
+\addcontentsline{toc}{subsection}{Exercício 1.17}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Seja $\mathcal{A} = [\{1,2,3\}, \{4,5\}, \{6,7,8\}]$. (a) Listar elementos; (b) Encontrar $n(\mathcal{A})$.
+
+\begin{teoribox}
+\textbf{Classes de conjuntos:} Uma classe (ou família) de conjuntos é um conjunto cujos elementos são eles próprios conjuntos. A cardinalidade de uma classe conta o número de conjuntos que a compõem, não o número de elementos desses conjuntos.
+\end{teoribox}
+
+\textbf{(a)} $\mathcal{A}$ tem três elementos: os conjuntos $\{1,2,3\}$, $\{4,5\}$ e $\{6,7,8\}$.
+
+\textbf{(b)} $n(\mathcal{A}) = 3$ (há três conjuntos na família, independentemente de quantos elementos eles têm internamente).
+
+% --------------------------------------------------
+\section*{Exercício 1.18}
+\addcontentsline{toc}{subsection}{Exercício 1.18}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Determinar o conjunto das partes $\mathcal{P}(A)$ de $A = \{a,b,c,d\}$.
+
+\begin{teoribox}
+\textbf{Conjunto das Partes:} $\mathcal{P}(A)$ (ou $2^A$) é o conjunto de todos os subconjuntos de $A$, incluindo $\emptyset$ e o próprio $A$. Se $n(A) = n$, então $n(\mathcal{P}(A)) = 2^n$.
+\end{teoribox}
+
+Como $n(A) = 4$, o conjunto das partes tem $2^4 = 16$ elementos. Listando por cardinalidade crescente:
+
+\begin{align*}
+\mathcal{P}(A) = \{&\emptyset, \\
+&\{a\}, \{b\}, \{c\}, \{d\}, \\
+&\{a,b\}, \{a,c\}, \{a,d\}, \{b,c\}, \{b,d\}, \{c,d\}, \\
+&\{a,b,c\}, \{a,b,d\}, \{a,c,d\}, \{b,c,d\}, \\
+&\{a,b,c,d\}\}
+\end{align*}
+
+% --------------------------------------------------
+\section*{Exercício 1.19}
+\addcontentsline{toc}{subsection}{Exercício 1.19}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Seja $S = \{a,b,c,d,e,f,g\}$. Determinar quais são partições de $S$.
+
+\begin{teoribox}
+\textbf{Partição de um conjunto:} Uma colecção $\{A_i\}$ de subconjuntos não vazios de $S$ é uma partição se e só se:
+\begin{enumerate}[label=(\roman*)]
+  \item Os subconjuntos são dois a dois disjuntos: $A_i \cap A_j = \emptyset$ para $i \neq j$.
+  \item A reunião cobre $S$: $\bigcup_i A_i = S$ (todo elemento de $S$ pertence a alguma célula).
+\end{enumerate}
+\end{teoribox}
+
+\textbf{(a)} $P_1 = [\{a,c,e\}, \{b\}, \{d,g\}]$: o elemento $f \in S$ não pertence a nenhuma célula. \textbf{Não é partição.}
+
+\textbf{(b)} $P_2 = [\{a,e,g\}, \{c,d\}, \{b,e,f\}]$: o elemento $e$ aparece nas células $\{a,e,g\}$ e $\{b,e,f\}$. \textbf{Não é partição.}
+
+\textbf{(c)} $P_3 = [\{a,b,e,g\}, \{c\}, \{d,f\}]$: verificando --- $a,b,e,g$ na 1ª célula; $c$ na 2ª; $d,f$ na 3ª. Todos os 7 elementos de $S$ aparecem exactamente uma vez. \textbf{É uma partição.}
+
+\textbf{(d)} $P_4 = [\{a,b,c,d,e,f,g\}]$: partição em uma única célula que é o próprio $S$. \textbf{É uma partição (trivial).}
+
+% --------------------------------------------------
+\section*{Exercício 1.20}
+\addcontentsline{toc}{subsection}{Exercício 1.20}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Encontrar todas as partições de $S = \{a,b,c,d\}$.
+
+\textbf{Resolução:} Organizamos por número de células:
+
+\textbf{1 célula:} $[\{a,b,c,d\}]$ --- 1 partição.
+
+\textbf{2 células:} Uma célula de tamanho 1 e outra de tamanho 3, ou duas células de tamanho 2. Há $\binom{4}{1} = 4$ formas de escolher a célula de tamanho 1, e $\binom{4}{2}/2! \cdot 2! = 3$ formas de dividir em dois pares. Total: $4 + 3 = 7$ partições.
+
+\textbf{3 células:} Duas células de tamanho 1 e uma de tamanho 2. Há $\binom{4}{2} = 6$ formas de escolher o par. Total: 6 partições.
+
+\textbf{4 células:} $[\{a\},\{b\},\{c\},\{d\}]$ --- 1 partição.
+
+Total geral: $1 + 7 + 6 + 1 = \mathbf{15}$ partições distintas. (Este número é o 4º número de Bell, $B_4 = 15$.)
+
+% --------------------------------------------------
+\section*{Exercício 1.21}
+\addcontentsline{toc}{subsection}{Exercício 1.21}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Para $A_n = \{n, 2n, 3n, \ldots\}$ (múltiplos de $n$), calcular: (a) $A_3 \cap A_5$; (b) $A_4 \cap A_6$; (c) $\bigcup_{i \in Q} A_i$ onde $Q$ é o conjunto dos primos.
+
+\begin{teoribox}
+\textbf{Relação entre múltiplos e mínimo múltiplo comum (m.m.c.):} Um número pertence a $A_m \cap A_n$ se e só se é múltiplo de ambos $m$ e $n$, ou seja, é múltiplo do m.m.c.$(m,n)$. Logo $A_m \cap A_n = A_{\text{m.m.c.}(m,n)}$.
+\end{teoribox}
+
+\textbf{(a)} $A_3 \cap A_5$: m.m.c.$(3,5) = 15$ (já que $\text{m.d.c.}(3,5)=1$). Logo $A_3 \cap A_5 = A_{15}$.
+
+\textbf{(b)} $A_4 \cap A_6$: m.m.c.$(4,6) = 12$. Logo $A_4 \cap A_6 = A_{12}$.
+
+\textbf{(c)} $\bigcup_{p \in Q} A_p$ é o conjunto de todos os inteiros positivos que são múltiplos de pelo menos um primo. Pelo Teorema Fundamental da Aritmética, todo inteiro $n > 1$ tem pelo menos um factor primo, logo $n \in \bigcup_{p \in Q} A_p$. O único inteiro positivo que não é múltiplo de qualquer primo é o $1$. Portanto:
+\[
+\bigcup_{p \in Q} A_p = \{2, 3, 4, \ldots\} = \mathbb{N} \setminus \{1\}
+\]
+
+% --------------------------------------------------
+\section*{Exercício 1.22}
+\addcontentsline{toc}{subsection}{Exercício 1.22}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Seja $\{A_i \mid i \in I\}$ uma família indexada. Provar que para qualquer $i_0 \in I$:
+\[
+\bigcap_{i \in I} A_i \subseteq A_{i_0} \subseteq \bigcup_{i \in I} A_i
+\]
+
+\begin{teoribox}
+\textbf{Intuição:} A intersecção de toda a família é o subconjunto mais ``restrito'' (só os elementos comuns a \emph{todos}), enquanto a reunião é o mais ``abrangente'' (tudo o que está em \emph{algum}). Qualquer membro individual da família está entre estes dois extremos.
+\end{teoribox}
+
+\textbf{Demonstração da inclusão à esquerda} ($\bigcap_{i \in I} A_i \subseteq A_{i_0}$):
+
+Seja $x \in \bigcap_{i \in I} A_i$. Por definição da intersecção indexada, $x \in A_i$ para \emph{todo} $i \in I$. Em particular, para $i = i_0$, temos $x \in A_{i_0}$. Logo $\bigcap_{i \in I} A_i \subseteq A_{i_0}$.
+
+\textbf{Demonstração da inclusão à direita} ($A_{i_0} \subseteq \bigcup_{i \in I} A_i$):
+
+Seja $y \in A_{i_0}$. Como $i_0 \in I$, o conjunto $A_{i_0}$ é um dos conjuntos na reunião. Logo $y \in \bigcup_{i \in I} A_i$. Portanto $A_{i_0} \subseteq \bigcup_{i \in I} A_i$. \hfill$\square$
+
+\newpage
+
+% =============================================================
+\section*{Capítulo 2 --- Relações}
+\addcontentsline{toc}{section}{Capítulo 2 --- Relações}
+% =============================================================
+
+% --------------------------------------------------
+\section*{Exercício 2.1}
+\addcontentsline{toc}{subsection}{Exercício 2.1}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Dados $A=\{1,2\}$, $B=\{x,y,z\}$, $C=\{3,4\}$. Encontrar $A \times B \times C$.
+
+\begin{teoribox}
+\textbf{Produto Cartesiano:} $A \times B \times C = \{(a,b,c) \mid a \in A,\, b \in B,\, c \in C\}$. A cardinalidade satisfaz $n(A \times B \times C) = n(A) \cdot n(B) \cdot n(C)$.
+\end{teoribox}
+
+Para obter sistematicamente todos os triplos, fixamos cada $a \in A$, depois cada $b \in B$, e por fim cada $c \in C$:
+\[
+A \times B \times C = \{(1,x,3),(1,x,4),(1,y,3),(1,y,4),(1,z,3),(1,z,4),(2,x,3),(2,x,4),(2,y,3),(2,y,4),(2,z,3),(2,z,4)\}
+\]
+A cardinalidade é $2 \times 3 \times 2 = 12$, confirmando os 12 elementos listados.
+
+% --------------------------------------------------
+\section*{Exercício 2.2}
+\addcontentsline{toc}{subsection}{Exercício 2.2}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Encontrar $x$ e $y$ dados $(2x, x+y) = (6, 2)$.
+
+\begin{teoribox}
+\textbf{Igualdade de pares ordenados:} $(a,b) = (c,d)$ se e só se $a = c$ \emph{e} $b = d$ (coordenada a coordenada).
+\end{teoribox}
+
+Igualando as coordenadas:
+\begin{align*}
+2x &= 6 \Rightarrow x = 3 \\
+x + y &= 2 \Rightarrow 3 + y = 2 \Rightarrow y = -1
+\end{align*}
+
+Verificação: $(2 \cdot 3,\, 3 + (-1)) = (6, 2)$ \checkmark
+
+% --------------------------------------------------
+\section*{Exercício 2.3}
+\addcontentsline{toc}{subsection}{Exercício 2.3}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Encontrar o número de relações de $A = \{a,b,c\}$ para $B = \{1,2\}$.
+
+\begin{teoribox}
+\textbf{Relação binária:} Uma relação de $A$ para $B$ é um \emph{subconjunto} de $A \times B$. O número total de subconjuntos de um conjunto de $n$ elementos é $2^n$.
+\end{teoribox}
+
+O produto $A \times B$ tem $n(A) \cdot n(B) = 3 \times 2 = 6$ elementos. Cada subconjunto de $A \times B$ define uma relação. Logo, o número de relações é:
+\[
+2^{n(A \times B)} = 2^6 = 64
+\]
+
+% --------------------------------------------------
+\section*{Exercício 2.4}
+\addcontentsline{toc}{subsection}{Exercício 2.4}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Para $A=\{1,2,3,4\}$, $B=\{x,y,z\}$ e $R = \{(1,y),(1,z),(3,y),(4,x),(4,z)\}$: (a) matriz; (b) grafo; (c) inversa $R^{-1}$; (d) domínio e imagem.
+
+\begin{teoribox}
+\textbf{Representações de uma relação:}
+\begin{itemize}
+  \item \textbf{Matriz:} Matriz booleana $M_R$ onde $(M_R)_{ij} = 1$ se $(a_i, b_j) \in R$, e $0$ caso contrário.
+  \item \textbf{Relação inversa:} $R^{-1} = \{(b,a) \mid (a,b) \in R\}$ --- inverte cada par.
+  \item \textbf{Domínio:} $\text{Dom}(R) = \{a \mid \exists b: (a,b) \in R\}$.
+  \item \textbf{Imagem (Range):} $\text{Ran}(R) = \{b \mid \exists a: (a,b) \in R\}$.
+\end{itemize}
+\end{teoribox}
+
+\textbf{(a) Matriz de $R$} (linhas = elementos de $A$, colunas = elementos de $B$):
+\[
+M_R = \begin{array}{c|ccc}
+ & x & y & z \\ \hline
+1 & 0 & 1 & 1 \\
+2 & 0 & 0 & 0 \\
+3 & 0 & 1 & 0 \\
+4 & 1 & 0 & 1
+\end{array}
+\]
+
+\textbf{(c) Inversa:} Inverte-se cada par ordenado de $R$:
+\[
+R^{-1} = \{(y,1),(z,1),(y,3),(x,4),(z,4)\}
+\]
+
+\textbf{(d) Domínio e imagem:}
+\[
+\text{Dom}(R) = \{1, 3, 4\}, \qquad \text{Ran}(R) = \{x, y, z\}
+\]
+Note que o elemento $2 \in A$ não aparece em nenhum par de $R$, pelo que $2 \notin \text{Dom}(R)$.
+
+% --------------------------------------------------
+\section*{Exercício 2.5}
+\addcontentsline{toc}{subsection}{Exercício 2.5}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Com $R = \{(1,b),(2,a),(2,c)\}$ e $S = \{(a,y),(b,x),(c,y),(c,z)\}$: (a) encontrar $R \circ S$; (b) comparar $M_{R \circ S}$ com $M_R M_S$.
+
+\begin{teoribox}
+\textbf{Composição de relações:} $(a,c) \in R \circ S$ se e só se existe $b$ tal que $(a,b) \in R$ e $(b,c) \in S$. O produto de matrizes booleanas $M_R M_S$ tem a mesma estrutura de zeros que $M_{R \circ S}$.
+\end{teoribox}
+
+\textbf{(a)} Para cada par $(a,b) \in R$, procuramos todos os $(b,c) \in S$:
+\begin{align*}
+(1,b) \in R &\text{ e } (b,x) \in S \Rightarrow (1,x) \in R \circ S \\
+(2,a) \in R &\text{ e } (a,y) \in S \Rightarrow (2,y) \in R \circ S \\
+(2,c) \in R &\text{ e } (c,y),(c,z) \in S \Rightarrow (2,y),(2,z) \in R \circ S
+\end{align*}
+Portanto: $R \circ S = \{(1,x),(2,y),(2,z)\}$.
+
+\textbf{(b)} As matrizes são:
+\[
+M_R = \begin{pmatrix} 0&1&0 \\ 1&0&1 \\ 0&0&0 \end{pmatrix}, \quad
+M_S = \begin{pmatrix} 0&1&0 \\ 1&0&0 \\ 0&1&1 \end{pmatrix}, \quad
+M_{R \circ S} = \begin{pmatrix} 1&0&0 \\ 0&1&1 \\ 0&0&0 \end{pmatrix}
+\]
+O produto aritmético $M_R M_S$ produz:
+\[
+M_R M_S = \begin{pmatrix} 1&0&0 \\ 0&2&1 \\ 0&0&0 \end{pmatrix}
+\]
+Observa-se que $M_{R \circ S}$ e $M_R M_S$ têm exactamente as mesmas entradas \emph{nulas}, confirmando que os zeros do produto de matrizes correspondem às ausências de ligação na composição.
+
+% --------------------------------------------------
+\section*{Exercício 2.6}
+\addcontentsline{toc}{subsection}{Exercício 2.6}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Para $R = \{(1,1),(2,2),(2,3),(3,2),(4,2),(4,4)\}$ em $A = \{1,2,3,4\}$: (a) grafo dirigido; (b) $R^2 = R \circ R$.
+
+\begin{teoribox}
+\textbf{Composição $R^2$:} $(a,c) \in R^2$ se existe $b$ com $(a,b) \in R$ e $(b,c) \in R$.
+\end{teoribox}
+
+\textbf{(b)} Para cada $(a,b) \in R$, procuramos todos $(b,c) \in R$:
+\begin{align*}
+(1,1): &\quad (1,1) \in R \Rightarrow (1,1) \in R^2 \\
+(2,2): &\quad (2,2),(2,3) \in R \Rightarrow (2,2),(2,3) \in R^2 \\
+(2,3): &\quad (3,2) \in R \Rightarrow (2,2) \in R^2 \text{ (já contado)} \\
+(3,2): &\quad (2,2),(2,3) \in R \Rightarrow (3,2),(3,3) \in R^2 \\
+(4,2): &\quad (2,2),(2,3) \in R \Rightarrow (4,2),(4,3) \in R^2 \\
+(4,4): &\quad (4,4) \in R \Rightarrow (4,4) \in R^2
+\end{align*}
+Portanto: $R^2 = \{(1,1),(2,2),(2,3),(3,2),(3,3),(4,2),(4,3),(4,4)\}$.
+
+% --------------------------------------------------
+\section*{Exercício 2.7}
+\addcontentsline{toc}{subsection}{Exercício 2.7}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Com $R = \{(1,1),(1,2),(2,3),(3,1),(3,3)\}$ e $S = \{(1,2),(1,3),(2,1),(3,3)\}$ em $A = \{1,2,3\}$. Calcular $R \cup S$, $R \cap S$, $R^c$, $R \circ S$, $S^2$.
+
+\textbf{(a) Operações de conjunto em $R$ e $S$:}
+\begin{align*}
+R \cap S &= \{(1,2),(3,3)\} \\
+R \cup S &= \{(1,1),(1,2),(1,3),(2,1),(2,3),(3,1),(3,3)\} \\
+R^c &= (A \times A) \setminus R = \{(1,3),(2,1),(2,2),(3,2)\}
+\end{align*}
+Para $R^c$, o universo é $A \times A$ com 9 pares. $R$ tem 5 pares, logo $R^c$ tem $9 - 5 = 4$ pares.
+
+\textbf{(b) Composição $R \circ S$:}
+
+Para cada $(a,b) \in R$, encontramos $(b,c) \in S$:
+\begin{align*}
+(1,1) \in R, (1,2),(1,3) \in S &\Rightarrow (1,2),(1,3) \in R \circ S \\
+(1,2) \in R, (2,1) \in S &\Rightarrow (1,1) \in R \circ S \\
+(2,3) \in R, (3,3) \in S &\Rightarrow (2,3) \in R \circ S \\
+(3,1) \in R, (1,2),(1,3) \in S &\Rightarrow (3,2),(3,3) \in R \circ S \\
+(3,3) \in R, (3,3) \in S &\Rightarrow (3,3) \in R \circ S
+\end{align*}
+$R \circ S = \{(1,1),(1,2),(1,3),(2,3),(3,2),(3,3)\}$
+
+\textbf{(c)} $S^2 = S \circ S = \{(1,1),(1,3),(2,2),(2,3),(3,3)\}$
+
+% --------------------------------------------------
+\section*{Exercício 2.8}
+\addcontentsline{toc}{subsection}{Exercício 2.8}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Provar o Teorema 2.1: $(R \circ S) \circ T = R \circ (S \circ T)$ (associatividade da composição).
+
+\begin{teoribox}
+\textbf{Estratégia:} Prova-se dupla inclusão. Para cada direcção, segue-se a cadeia de existência dos ``intermediários''.
+\end{teoribox}
+
+\textbf{Demonstração} ($\subseteq$): Suponha $(a,d) \in (R \circ S) \circ T$. Então existe $c$ tal que:
+\[
+(a,c) \in R \circ S \quad \text{e} \quad (c,d) \in T
+\]
+Como $(a,c) \in R \circ S$, existe $b$ tal que $(a,b) \in R$ e $(b,c) \in S$.
+
+Como $(b,c) \in S$ e $(c,d) \in T$, temos $(b,d) \in S \circ T$.
+
+Como $(a,b) \in R$ e $(b,d) \in S \circ T$, temos $(a,d) \in R \circ (S \circ T)$.
+
+Logo $(R \circ S) \circ T \subseteq R \circ (S \circ T)$. A outra inclusão é simétrica. \hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 2.9}
+\addcontentsline{toc}{subsection}{Exercício 2.9}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Para cinco relações em $A = \{1,2,3\}$, determinar reflexividade, simetria, transitividade e antisimetria.
+
+\begin{teoribox}
+\textbf{Propriedades de relações em $A$:}
+\begin{itemize}
+  \item \textbf{Reflexiva:} $(a,a) \in R$ para todo $a \in A$.
+  \item \textbf{Simétrica:} $(a,b) \in R \Rightarrow (b,a) \in R$.
+  \item \textbf{Transitiva:} $(a,b) \in R$ e $(b,c) \in R \Rightarrow (a,c) \in R$.
+  \item \textbf{Antissimétrica:} $(a,b) \in R$ e $(b,a) \in R \Rightarrow a = b$.
+\end{itemize}
+\end{teoribox}
+
+Relações: $R = \{(1,1),(1,2),(1,3),(3,3)\}$, $S = \{(1,1),(1,2),(2,1),(2,2),(3,3)\}$, $T = \{(1,1),(1,2),(2,2),(2,3)\}$, $\emptyset$, $A \times A$.
+
+\textbf{(a) Reflexividade:} Precisamos de $(1,1),(2,2),(3,3)$ em cada relação.
+\begin{itemize}
+  \item $R$: falta $(2,2)$ --- \textbf{não reflexiva}.
+  \item $S$: tem $(1,1),(2,2),(3,3)$ --- \textbf{reflexiva}.
+  \item $T$: falta $(3,3)$ --- \textbf{não reflexiva}.
+  \item $\emptyset$: faltam todos os pares diagonais --- \textbf{não reflexiva}.
+  \item $A \times A$: contém todos os pares possíveis --- \textbf{reflexiva}.
+\end{itemize}
+
+\textbf{(b) Simetria:}
+\begin{itemize}
+  \item $R$: $(1,2) \in R$ mas $(2,1) \notin R$ --- \textbf{não simétrica}.
+  \item $S$: para cada par $(a,b) \in S$ temos $(b,a) \in S$ --- \textbf{simétrica}.
+  \item $T$: $(1,2) \in T$ mas $(2,1) \notin T$ --- \textbf{não simétrica}.
+  \item $\emptyset$: vacuamente \textbf{simétrica} (não há pares para violar a condição).
+  \item $A \times A$: contém todos os pares --- \textbf{simétrica}.
+\end{itemize}
+
+\textbf{(c) Transitividade:}
+\begin{itemize}
+  \item $R$: verificar todas as cadeias: $(1,2)$ e $(2,?)$ --- não há $(2,x) \in R$. $(1,3)$ e $(3,3) \Rightarrow (1,3) \in R$ \checkmark. \textbf{Transitiva}.
+  \item $S$: \textbf{transitiva} (verificação detalhada: cada cadeia $a \to b \to c$ em $S$ tem $(a,c) \in S$).
+  \item $T$: $(1,2),(2,3) \in T$ mas $(1,3) \notin T$ --- \textbf{não transitiva}.
+  \item $\emptyset$: vacuamente \textbf{transitiva}.
+  \item $A \times A$: \textbf{transitiva}.
+\end{itemize}
+
+\textbf{(d) Antisimetria:}
+\begin{itemize}
+  \item $S$: $1 \neq 2$, mas $(1,2),(2,1) \in S$ --- \textbf{não antissimétrica}.
+  \item $A \times A$: igualmente --- \textbf{não antissimétrica}.
+  \item $R$, $T$, $\emptyset$: \textbf{antissimétricas} (não existem pares $a \neq b$ com $(a,b)$ e $(b,a)$ ambos presentes).
+\end{itemize}
+
+% --------------------------------------------------
+\section*{Exercício 2.10}
+\addcontentsline{toc}{subsection}{Exercício 2.10}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Dar exemplos de relações em $A = \{1,2,3\}$ com propriedades específicas.
+
+\textbf{(a) Simétrica e antissimétrica:} $R = \{(1,1),(2,2)\}$.
+
+Simétrica: $(1,1) \Rightarrow (1,1)$ \checkmark; $(2,2) \Rightarrow (2,2)$ \checkmark. Antissimétrica: os únicos pares têm $a = b$, logo a condição é satisfeita vacuamente para $a \neq b$.
+
+\textbf{(b) Nem simétrica nem antissimétrica:} $R = \{(1,2),(2,3)\}$.
+
+Não simétrica: $(1,2) \in R$ mas $(2,1) \notin R$. Não antissimétrica: não tem pares $(a,b)$ e $(b,a)$ com $a \neq b$ simultaneamente, mas também não é simétrica.
+
+\begin{notabox}
+\textit{Nota:} Simetria e antisimetria não são opostos! Uma relação pode ser ambas (ex.: a identidade) ou nenhuma.
+\end{notabox}
+
+\textbf{(c) Transitiva mas $R \cup R^{-1}$ não transitiva:} $R = \{(1,2)\}$.
+
+$R$ é transitiva (não há cadeias de comprimento 2). $R^{-1} = \{(2,1)\}$. Então $R \cup R^{-1} = \{(1,2),(2,1)\}$, que \emph{não} é transitiva pois $(1,2),(2,1) \in R \cup R^{-1}$ mas $(1,1) \notin R \cup R^{-1}$.
+
+% --------------------------------------------------
+\section*{Exercício 2.11}
+\addcontentsline{toc}{subsection}{Exercício 2.11}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Seja $\mathcal{C}$ uma colecção de relações em $A$ e $T = \bigcap \{S \mid S \in \mathcal{C}\}$. Provar: (a) se todo $S$ é simétrico, $T$ é simétrico; (b) se todo $S$ é transitivo, $T$ é transitivo.
+
+\textbf{(a) Simetria de $T$:}
+
+Suponha $(a,b) \in T$. Por definição da intersecção, $(a,b) \in S$ para todo $S \in \mathcal{C}$. Como cada $S$ é simétrico, $(b,a) \in S$ para todo $S$. Logo $(b,a) \in \bigcap S = T$. \hfill$\square$
+
+\textbf{(b) Transitividade de $T$:}
+
+Suponha $(a,b) \in T$ e $(b,c) \in T$. Então $(a,b),(b,c) \in S$ para todo $S \in \mathcal{C}$. Como cada $S$ é transitivo, $(a,c) \in S$ para todo $S$. Logo $(a,c) \in T$. \hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 2.12}
+\addcontentsline{toc}{subsection}{Exercício 2.12}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Seja $P$ uma propriedade de relações ``$R$-fechável'' se: (1) existe uma $P$-relação $S \supseteq R$; (2) a intersecção de $P$-relações é uma $P$-relação. (a) Mostrar que simetria e transitividade são $R$-fecháveis; (b) definir $P(R)$.
+
+\textbf{(a)} A relação universal $A \times A$ é tanto simétrica como transitiva, e satisfaz $R \subseteq A \times A$ para qualquer $R$. Isso garante (1). O Exercício 2.11 garante (2). Logo, ambas as propriedades são $R$-fecháveis.
+
+\textbf{(b)} Definindo $P(R) = \bigcap \{S \mid S \text{ é uma } P\text{-relação e } R \subseteq S\}$:
+
+Este conjunto é não vazio (por (1)) e é uma $P$-relação (por (2)). Contém $R$ (pois cada $S$ na intersecção contém $R$). É a \emph{menor} $P$-relação contendo $R$ (a $P$-closure de $R$).
+
+% --------------------------------------------------
+\section*{Exercício 2.13}
+\addcontentsline{toc}{subsection}{Exercício 2.13}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Para $R = \{(a,a),(a,b),(b,c),(c,c)\}$ em $A = \{a,b,c\}$, encontrar os fechos reflexivo, simétrico e transitivo.
+
+\begin{teoribox}
+\textbf{Fechos de uma relação:}
+\begin{itemize}
+  \item \textbf{Fecho reflexivo:} $R \cup \{(a,a) \mid a \in A\}$ --- adicionar os pares diagonais em falta.
+  \item \textbf{Fecho simétrico:} $R \cup R^{-1}$ --- adicionar o inverso de cada par.
+  \item \textbf{Fecho transitivo:} $R \cup R^2 \cup R^3 \cup \cdots$ (para $|A| = n$, basta $R \cup R^2 \cup \cdots \cup R^n$).
+\end{itemize}
+\end{teoribox}
+
+\textbf{(a) Fecho reflexivo:}
+
+$R$ já contém $(a,a)$ e $(c,c)$ mas não $(b,b)$. Adicionando $(b,b)$:
+\[
+\text{reflexivo}(R) = \{(a,a),(a,b),(b,b),(b,c),(c,c)\}
+\]
+
+\textbf{(b) Fecho simétrico:}
+
+$R^{-1} = \{(a,a),(b,a),(c,b),(c,c)\}$. Os pares novos são $(b,a)$ e $(c,b)$:
+\[
+\text{simétrico}(R) = \{(a,a),(a,b),(b,a),(b,c),(c,b),(c,c)\}
+\]
+
+\textbf{(c) Fecho transitivo:}
+
+Calculamos $R^2 = R \circ R$: para cada $(x,y) \in R$, procuramos $(y,z) \in R$:
+\begin{align*}
+(a,a),(a,b) \in R &\Rightarrow (a,a),(a,b) \in R^2 \\
+(a,b),(b,c) \in R &\Rightarrow (a,c) \in R^2 \\
+(b,c),(c,c) \in R &\Rightarrow (b,c) \in R^2 \\
+(c,c),(c,c) \in R &\Rightarrow (c,c) \in R^2
+\end{align*}
+$R^2 = \{(a,a),(a,b),(a,c),(b,c),(c,c)\}$
+
+$R^3 = R^2 \circ R = \{(a,a),(a,b),(a,c),(b,c),(c,c)\}$ (igual a $R^2$, pois estabilizou).
+
+\[
+\text{transitivo}(R) = R \cup R^2 \cup R^3 = \{(a,a),(a,b),(a,c),(b,c),(c,c)\}
+\]
+
+% --------------------------------------------------
+\section*{Exercício 2.14}
+\addcontentsline{toc}{subsection}{Exercício 2.14}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Mostrar que $x \equiv y \pmod{m}$ define uma relação de equivalência em $\mathbb{Z}$.
+
+\begin{teoribox}
+\textbf{Relação de Equivalência:} Uma relação $R$ é de equivalência se for \emph{reflexiva}, \emph{simétrica} e \emph{transitiva}. Definição: $x \equiv y \pmod{m}$ significa $m \mid (x - y)$, i.e., $x - y = km$ para algum $k \in \mathbb{Z}$.
+\end{teoribox}
+
+\textbf{(i) Reflexividade:} $x - x = 0 = 0 \cdot m$, logo $m \mid 0$. Assim $x \equiv x \pmod{m}$.
+
+\textbf{(ii) Simetria:} Se $x \equiv y \pmod{m}$, então $m \mid (x - y)$, i.e., $x - y = km$. Logo $y - x = (-k)m$, pelo que $m \mid (y - x)$, i.e., $y \equiv x \pmod{m}$.
+
+\textbf{(iii) Transitividade:} Se $x \equiv y \pmod{m}$ e $y \equiv z \pmod{m}$, então $x - y = km$ e $y - z = lm$. Somando:
+\[
+x - z = (x - y) + (y - z) = km + lm = (k + l)m
+\]
+Logo $m \mid (x - z)$, i.e., $x \equiv z \pmod{m}$. \hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 2.15}
+\addcontentsline{toc}{subsection}{Exercício 2.15}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Em $A \times A$ (com $A$ conjunto de inteiros não nulos), definir $(a,b) \approx (c,d)$ se $ad = bc$. Provar que $\approx$ é de equivalência.
+
+\begin{notabox}
+\textit{Motivação:} Esta relação captura a igualdade de fracções: $(a,b)$ representa $\frac{a}{b}$, e $\frac{a}{b} = \frac{c}{d}$ se e só se $ad = bc$.
+\end{notabox}
+
+\textbf{(i) Reflexividade:} $(a,b) \approx (a,b)$ pois $ab = ba$ (comutatividade da multiplicação).
+
+\textbf{(ii) Simetria:} Se $(a,b) \approx (c,d)$, então $ad = bc$. Por comutatividade, $cb = da$, logo $(c,d) \approx (a,b)$.
+
+\textbf{(iii) Transitividade:} Se $(a,b) \approx (c,d)$ e $(c,d) \approx (e,f)$, então $ad = bc$ e $cf = de$. Multiplicando:
+\[
+(ad)(cf) = (bc)(de) \Rightarrow af \cdot cd = be \cdot cd
+\]
+Como $c \neq 0$ e $d \neq 0$, podemos cancelar $cd$:
+\[
+af = be \Rightarrow (a,b) \approx (e,f)
+\]
+\hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 2.16}
+\addcontentsline{toc}{subsection}{Exercício 2.16}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Dada a relação de equivalência $R$ em $A = \{1,2,3,4,5,6\}$, encontrar a partição induzida.
+
+\begin{teoribox}
+\textbf{Classes de equivalência:} Para uma relação de equivalência $R$ em $A$, a classe de equivalência de $a$ é $[a] = \{x \in A \mid (a,x) \in R\}$. O conjunto quociente $A/R = \{[a] \mid a \in A\}$ forma uma partição de $A$.
+\end{teoribox}
+
+\textbf{Método:} Para encontrar $[a]$, olhamos para todos os $x$ tais que $(a,x) \in R$.
+
+Da relação $R$ dada, verificamos:
+\begin{itemize}
+  \item Pares começando em $1$: $(1,1),(1,5)$ --- logo $[1] = \{1,5\}$.
+  \item Pares começando em $2$: $(2,2),(2,3),(2,6)$ --- logo $[2] = \{2,3,6\}$.
+  \item O único elemento restante é $4$: $(4,4)$ --- logo $[4] = \{4\}$.
+\end{itemize}
+
+Partição de $A$ induzida por $R$: $\{\{1,5\},\{2,3,6\},\{4\}\}$.
+
+% --------------------------------------------------
+\section*{Exercício 2.17}
+\addcontentsline{toc}{subsection}{Exercício 2.17}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Provar o Teorema 2.6: se $R$ é de equivalência em $A$, então $A/R$ é uma partição. Especificamente: (i) $a \in [a]$; (ii) $[a] = [b] \Leftrightarrow (a,b) \in R$; (iii) $[a] \neq [b] \Rightarrow [a] \cap [b] = \emptyset$.
+
+\textbf{(i)} Como $R$ é reflexiva, $(a,a) \in R$, logo $a \in [a]$.
+
+\textbf{(ii) ($\Rightarrow$):} Suponha $(a,b) \in R$. Para qualquer $x \in [b]$: $(b,x) \in R$. Por transitividade com $(a,b) \in R$: $(a,x) \in R$, logo $x \in [a]$. Assim $[b] \subseteq [a]$. Por simetria de $R$: $(b,a) \in R$, e analogamente $[a] \subseteq [b]$. Logo $[a] = [b]$.
+
+\textbf{($\Leftarrow$):} Se $[a] = [b]$, por (i) $b \in [b] = [a]$, logo $(a,b) \in R$.
+
+\textbf{(iii)} Prova por contrapositivo: se $[a] \cap [b] \neq \emptyset$, existe $x \in [a] \cap [b]$. Logo $(a,x) \in R$ e $(b,x) \in R$. Por simetria $(x,b) \in R$, e por transitividade com $(a,x) \in R$: $(a,b) \in R$. Por (ii), $[a] = [b]$. \hfill$\square$
+
+% --------------------------------------------------
+\section*{Exercício 2.18}
+\addcontentsline{toc}{subsection}{Exercício 2.18}
+% --------------------------------------------------
+
+\textbf{Enunciado:} A inclusão de conjuntos $\subseteq$ é uma ordem parcial?
+
+\begin{teoribox}
+\textbf{Ordem Parcial:} Uma relação é uma ordem parcial (ou \emph{poset}) se for reflexiva, antissimétrica e transitiva.
+\end{teoribox}
+
+Para quaisquer conjuntos $A$, $B$, $C$:
+\begin{itemize}
+  \item \textbf{Reflexividade:} $A \subseteq A$ --- sempre verdade.
+  \item \textbf{Antisimetria:} Se $A \subseteq B$ e $B \subseteq A$, então $A = B$ (por axioma da extensionalidade).
+  \item \textbf{Transitividade:} Se $A \subseteq B$ e $B \subseteq C$, então $A \subseteq C$.
+\end{itemize}
+\textbf{Sim}, a inclusão de conjuntos é uma ordem parcial.
+
+% --------------------------------------------------
+\section*{Exercício 2.19}
+\addcontentsline{toc}{subsection}{Exercício 2.19}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Em $\mathbb{Z}$, definir $aRb$ por $b = a^r$ para algum inteiro positivo $r$. Mostrar que $R$ é ordem parcial.
+
+\textbf{(a) Reflexividade:} $a = a^1$, logo $aRa$ (tome $r = 1$).
+
+\textbf{(b) Antisimetria:} Suponha $aRb$ e $bRa$, com $b = a^r$ e $a = b^s$. Então:
+\[
+a = b^s = (a^r)^s = a^{rs}
+\]
+Daí $a^{rs-1} = 1$. Há três casos:
+\begin{itemize}
+  \item $rs = 1$: como $r,s$ são inteiros positivos, $r = s = 1$, logo $a = b$.
+  \item $a = 1$: então $b = 1^r = 1 = a$.
+  \item $a = -1$: então $b = (-1)^r \in \{-1,1\}$; como $b = a = -1$ ou $b = 1$ e $1 = (-1)^s$ implica $s$ par, mas então $a = 1^s = 1 \neq -1$, contradição. Logo $b = -1 = a$.
+\end{itemize}
+Em todos os casos $a = b$.
+
+\textbf{(c) Transitividade:} Se $b = a^r$ e $c = b^s$, então $c = (a^r)^s = a^{rs}$. Como $rs$ é inteiro positivo, $aRc$. \hfill$\square$
+
+\newpage
+
+% =============================================================
+\section*{Capítulo 3 --- Funções e Algoritmos}
+\addcontentsline{toc}{section}{Capítulo 3 --- Funções e Algoritmos}
+% =============================================================
+
+% --------------------------------------------------
+\section*{Exercício 3.1}
+\addcontentsline{toc}{subsection}{Exercício 3.1}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Seja $X = \{1,2,3,4\}$. Determinar se cada relação é uma função de $X$ em $X$.
+
+\begin{teoribox}
+\textbf{Definição de função:} Um subconjunto $f \subseteq X \times X$ é uma função $f: X \to X$ se e só se cada elemento $a \in X$ aparece como \emph{primeira coordenada em exactamente um} par ordenado em $f$. Isto é:
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Existência (totalidade):} todo $a \in X$ aparece em algum par.
+  \item \textbf{Unicidade:} não existem dois pares distintos com a mesma primeira coordenada.
+\end{enumerate}
+\end{teoribox}
+
+\textbf{(a)} $f = \{(2,3),(1,4),(2,1),(3,2),(4,4)\}$
+
+O elemento $2$ aparece em dois pares distintos: $(2,3)$ e $(2,1)$. Viola a unicidade. \textbf{Não é função.}
+
+\textbf{(b)} $g = \{(3,1),(4,2),(1,1)\}$
+
+O elemento $2 \in X$ não aparece como primeira coordenada em nenhum par de $g$. Viola a totalidade. \textbf{Não é função.}
+
+\textbf{(c)} $h = \{(2,1),(3,4),(1,4),(2,1),(4,4)\}$
+
+Embora $2$ apareça duas vezes como primeira coordenada, os pares são \emph{idênticos}: $(2,1) = (2,1)$. Portanto, como conjunto, $h = \{(2,1),(3,4),(1,4),(4,4)\}$. Cada elemento de $X$ aparece exactamente uma vez. \textbf{É função.}
+
+% --------------------------------------------------
+\section*{Exercício 3.2}
+\addcontentsline{toc}{subsection}{Exercício 3.2}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Esboçar o gráfico de: (a) $f(x) = x^2 + x - 6$;\quad (b) $g(x) = x^3 - 3x^2 - x + 3$.
+
+\begin{teoribox}
+\textbf{Método:} Para esboçar um gráfico, calculamos pares $(x, f(x))$ para vários valores de $x$, plotamos os pontos no plano cartesiano e traçamos uma curva suave. Para polinómios, é útil encontrar as raízes (zeros) e analisar o comportamento assimptótico.
+\end{teoribox}
+
+\textbf{(a) Raízes de $f(x) = x^2 + x - 6$:}
+
+Factorizando: $f(x) = (x+3)(x-2)$. Logo as raízes são $x = -3$ e $x = 2$.
+
+O vértice da parábola fica em $x = -\frac{1}{2}$ com $f(-\frac{1}{2}) = \frac{1}{4} - \frac{1}{2} - 6 = -\frac{25}{4}$.
+
+Tabela de valores relevantes:
+\[
+\begin{array}{c|cccccc}
+x & -4 & -3 & -1 & 0 & 2 & 3 \\\hline
+f(x) & 6 & 0 & -6 & -6 & 0 & 6
+\end{array}
+\]
+
+\textbf{(b) Raízes de $g(x) = x^3 - 3x^2 - x + 3$:}
+
+Factorizando por agrupamento:
+\[
+g(x) = x^2(x-3) - 1(x-3) = (x^2-1)(x-3) = (x-1)(x+1)(x-3)
+\]
+Raízes: $x = -1$, $x = 1$, $x = 3$.
+
+Tabela de valores:
+\[
+\begin{array}{c|cccccc}
+x & -2 & -1 & 0 & 1 & 3 & 4 \\\hline
+g(x) & -15 & 0 & 3 & 0 & 0 & 15
+\end{array}
+\]
+
+% --------------------------------------------------
+\section*{Exercício 3.3}
+\addcontentsline{toc}{subsection}{Exercício 3.3}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Com $f = \{(a,y),(b,x),(c,y)\}$ e $g = \{(x,s),(y,t),(z,r)\}$, encontrar (a) $g \circ f$; (b) $\text{Im}(f)$, $\text{Im}(g)$, $\text{Im}(g \circ f)$.
+
+\begin{teoribox}
+\textbf{Composição de funções:} $(g \circ f)(a) = g(f(a))$ --- aplica-se primeiro $f$, depois $g$ ao resultado. \textbf{Imagem (Im):} o conjunto de todos os valores efectivamente atingidos pela função.
+\end{teoribox}
+
+\textbf{(a)} Calculamos $(g \circ f)$ elemento a elemento:
+\begin{align*}
+(g \circ f)(a) &= g(f(a)) = g(y) = t \\
+(g \circ f)(b) &= g(f(b)) = g(x) = s \\
+(g \circ f)(c) &= g(f(c)) = g(y) = t
+\end{align*}
+Logo $g \circ f = \{(a,t),(b,s),(c,t)\}$.
+
+\textbf{(b) Imagens:}
+\begin{align*}
+\text{Im}(f) &= \{y, x\} = \{x, y\} \quad \text{(apenas os valores atingidos por } f\text{; } z \text{ não é atingido)} \\
+\text{Im}(g) &= \{s, t, r\} \quad \text{(} g \text{ é sobrejectiva em } \{r,s,t\}\text{)} \\
+\text{Im}(g \circ f) &= \{t, s\} = \{s, t\} \quad \text{(} r \text{ não é atingido pois } z \notin \text{Im}(f)\text{)}
+\end{align*}
+
+\begin{notabox}
+\textit{Observação:} $\text{Im}(g \circ f) \subseteq \text{Im}(g)$, e a igualdade só ocorre quando $\text{Im}(f)$ cobre todo o domínio de $g$.
+\end{notabox}
+
+% --------------------------------------------------
+\section*{Exercício 3.4}
+\addcontentsline{toc}{subsection}{Exercício 3.4}
+% --------------------------------------------------
+
+\textbf{Enunciado:} Com $f(x) = 2x+1$ e $g(x) = x^2-2$, encontrar a fórmula de $g \circ f$.
+
+\begin{teoribox}
+\textbf{Composição de funções reais:} $(g \circ f)(x) = g(f(x))$. Substitui-se a expressão de $f(x)$ no lugar de $x$ em $g$.
+\end{teoribox}
+
+\textbf{Método directo (substituição):}
+\begin{align*}
+(g \circ f)(x) &= g(f(x)) = g(2x+1) \\
+&= (2x+1)^2 - 2 \\
+&= 4x^2 + 4x + 1 - 2 \\
+&= 4x^2 + 4x - 1
+\end{align*}
+
+\textbf{Método alternativo (eliminação de variável auxiliar):}
+
+Defina $y = f(x) = 2x + 1$ e $z = g(y) = y^2 - 2$. Eliminando $y$:
+\[
+z = y^2 - 2 = (2x+1)^2 - 2 = 4x^2 + 4x - 1
+\]
+
+Ambos os métodos conduzem ao mesmo resultado:
+\[
+\boxed{(g \circ f)(x) = 4x^2 + 4x - 1}
+\]
+
+\begin{notabox}
+\textit{Nota:} A composição de funções \textbf{não é comutativa} em geral. Comparar:
+\[
+(f \circ g)(x) = f(g(x)) = f(x^2 - 2) = 2(x^2 - 2) + 1 = 2x^2 - 3 \neq g \circ f
+\]
+\end{notabox}
+
+% =============================================================
+\newpage
+\part*{Continuação --- Capítulos 10, 12, 13, 14, 15 e Apêndice B}
+\addcontentsline{toc}{part}{Continuação --- Capítulos 10, 12, 13, 14, 15 e Apêndice B}
+% =============================================================
+
+%% ═════════════════════════════════════════════════════════════════════════════
+\section*{Nota Introdutória}
+\addcontentsline{toc}{section}{Nota Introdutória}
+
+Este documento apresenta as resoluções detalhadas dos exercícios resolvidos dos capítulos
+indicados, com ênfase didática: cada solução é desconstruída, os teoremas e propriedades
+utilizados são identificados, e os cálculos intermédios são explicitados.
+Os exercícios seguem a numeração original do livro.
+
+\newpage
+%% ═════════════════════════════════════════════════════════════════════════════
+\part*{Capítulo 10 — Árvores Binárias}
+\addcontentsline{toc}{part}{Capítulo 10 — Árvores Binárias}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 10.10 — Árvores Binárias Similares e Cópias}
+\addcontentsline{toc}{section}{Exercício 10.10}
+
+\begin{teoriacaixa}
+\textbf{Conceitos essenciais.}
+Duas árvores binárias $T$ e $T'$ dizem-se \keyword{similares} se têm a mesma estrutura
+(a mesma ``forma''). Dizem-se \keyword{cópias} se são similares \emph{e} têm os mesmos
+dados nos nós correspondentes. Numa árvore binária, distingue-se sempre o sucessor
+\emph{esquerdo} do sucessor \emph{direito}, mesmo quando um nó tem apenas um filho.
+\end{teoriacaixa}
+
+\medskip
+\textbf{Enunciado.} Considere as quatro árvores binárias da figura 10-1(b) do livro.
+Indique quais são similares, quais são cópias, e justifique.
+
+\medskip
+\textbf{Resolução detalhada.}
+
+As quatro árvores são rotuladas (1), (2), (3) e (4).
+
+\begin{itemize}
+  \item \textbf{Árvores (1), (3) e (4) são similares.}
+  Para verificar a similaridade, compara-se recursivamente a estrutura: a raiz de cada uma
+  tem dois filhos, que por sua vez têm (ou não) subárvores, de forma idêntica. A disposição
+  topológica (quem é filho esquerdo, quem é filho direito) é a mesma nas três árvores.
+
+  \item \textbf{Árvores (1) e (3) são cópias.}
+  Além de serem similares, os dados armazenados nos nós correspondentes são idênticos.
+  Formalmente, existe uma bijecção que preserva a estrutura \emph{e} os rótulos.
+
+  \item \textbf{A árvore (2) \emph{não} é similar à árvore (4).}
+  Embora (2) tenha o mesmo número de nós, numa das suas posições o único filho é
+  o filho \emph{esquerdo}, enquanto na posição correspondente de (4) o único filho é
+  o filho \emph{direito}. Numa árvore binária, esta distinção é fundamental:
+  ``filho esquerdo'' e ``filho direito'' são entidades distintas, mesmo quando há
+  apenas um filho. Por isso (2) e (4) diferem em estrutura, logo também não são cópias.
+\end{itemize}
+
+\medskip
+\noindent\textit{Síntese:} A condição de similaridade exige igualdade estrutural completa,
+incluindo a posição (esquerda/direita) de cada filho. A condição de cópia acrescenta a
+igualdade de dados. A menor diferença de posição destrói a similaridade.
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 10.11 — Representação Ligada de Árvores Binárias}
+\addcontentsline{toc}{section}{Exercício 10.11}
+
+\begin{teoriacaixa}
+\textbf{Representação ligada (\textit{linked representation}).}
+Uma árvore binária $T$ mantém-se em memória com três vetores paralelos \texttt{INFO},
+\texttt{LEFT}, \texttt{RIGHT} e um ponteiro \texttt{ROOT}. Para cada nó $N$ que ocupa
+a posição $K$:
+\begin{align*}
+  &\texttt{INFO}[K] \text{ --- dados do nó } N,\\
+  &\texttt{LEFT}[K] \text{ --- localização do filho esquerdo de } N,\\
+  &\texttt{RIGHT}[K] \text{ --- localização do filho direito de } N.
+\end{align*}
+Se uma subárvore é vazia, o ponteiro correspondente é \texttt{NULL} (convencionalmente
+$0$ ou um número negativo).
+\end{teoriacaixa}
+
+\medskip
+\textbf{Enunciado.} Dada a árvore $T$ da figura 10-1(a), a sua representação ligada
+aparece na figura 10-5. Interpretá-la e justificar os valores.
+
+\medskip
+\textbf{Resolução detalhada.}
+
+A árvore $T$ tem raiz $A$ e a representação satisfaz \texttt{ROOT} = 5, pois
+$\texttt{INFO}[5] = A$: o nó raiz está armazenado na posição 5 dos vetores.
+
+Para o nó $A$ (posição 5):
+\[
+  \texttt{LEFT}[5] = 10 \implies \texttt{INFO}[10] = B \quad \text{(filho esquerdo de } A \text{)},
+\]
+\[
+  \texttt{RIGHT}[5] = 2 \implies \texttt{INFO}[2] = C \quad \text{(filho direito de } A \text{)}.
+\]
+
+Este esquema propaga-se recursivamente: para encontrar os filhos de qualquer nó $N$
+na posição $K$, basta consultar $\texttt{LEFT}[K]$ e $\texttt{RIGHT}[K]$.
+
+\medskip
+\noindent\textbf{Porquê 18 elementos?}
+A escolha de 18 posições para os vetores é arbitrária; o único requisito é que o número
+de posições seja pelo menos igual ao número de nós da árvore. Posições não utilizadas
+ficam vagas (ou marcadas como ``livres'').
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 10.12 — Representação Sequencial de Árvores Binárias}
+\addcontentsline{toc}{section}{Exercício 10.12}
+
+\begin{teoriacaixa}
+\textbf{Representação sequencial.}
+Para uma árvore binária $T$ \emph{completa} (ou quase completa), é eficiente usar um
+único vetor \texttt{TREE} com a convenção:
+\begin{enumerate}[leftmargin=1.8em]
+  \item A raiz $R$ fica em \texttt{TREE}[1].
+  \item Se o nó $N$ ocupa \texttt{TREE}[$K$], então:\\
+        filho esquerdo $\to$ \texttt{TREE}[$2K$],\\
+        filho direito $\to$ \texttt{TREE}[$2K+1$].
+  \item \texttt{END} guarda a posição do último nó.
+\end{enumerate}
+O pai do nó em \texttt{TREE}[$K$] está em \texttt{TREE}[$\lfloor K/2 \rfloor$].
+\end{teoriacaixa}
+
+\medskip
+\textbf{Enunciado.} Para a árvore completa $T_{26}$ (figura 10-2), determine os filhos
+do nó 9 e o pai do nó 9.
+
+\medskip
+\textbf{Resolução detalhada.}
+
+Aplicando as fórmulas com $K = 9$:
+
+\begin{align*}
+  \text{Filho esquerdo} &= 2 \times 9 = 18,\\
+  \text{Filho direito}  &= 2 \times 9 + 1 = 19,\\
+  \text{Pai}            &= \lfloor 9/2 \rfloor = \lfloor 4{,}5 \rfloor = 4.
+\end{align*}
+
+\noindent\textbf{Verificação com a profundidade.} A profundidade $d_n$ da árvore
+completa $T_n$ é:
+\[
+  d_n = \lfloor \log_2 n \rfloor + 1.
+\]
+Para $n = 26$: $\lfloor \log_2 26 \rfloor = \lfloor 4{,}70 \rfloor = 4$, logo $d_{26} = 5$.
+Confirmamos que os nós 18 e 19 pertencem ao nível 4 (contando desde o nível 0 da raiz),
+o que é consistente com a figura.
+
+\newpage
+%% ═════════════════════════════════════════════════════════════════════════════
+\part*{Capítulo 12 — Linguagens, Autómatos e Gramáticas}
+\addcontentsline{toc}{part}{Capítulo 12 — Linguagens, Autómatos e Gramáticas}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercícios 12.6--12.10 — Linguagens Formais}
+\addcontentsline{toc}{section}{Exercícios 12.6--12.10}
+
+\begin{teoriacaixa}
+\textbf{Conceitos essenciais.}
+Dado um alfabeto $A$, $A^*$ denota o conjunto de todas as palavras (sequências finitas)
+sobre $A$, incluindo a \keyword{palavra vazia} $\lambda$.
+Uma \keyword{linguagem} sobre $A$ é qualquer subconjunto $L \subseteq A^*$.
+A \keyword{concatenação} de linguagens $K$ e $L$ é $KL = \{uv \mid u \in K,\, v \in L\}$.
+A \keyword{potência} $L^n$ é a concatenação de $L$ consigo mesmo $n$ vezes ($L^0 = \{\lambda\}$).
+O \keyword{fecho de Kleene} é $L^* = \bigcup_{n=0}^{\infty} L^n$.
+\end{teoriacaixa}
+
+\subsection*{Exercício 12.6}
+
+\textbf{Enunciado.} Seja $A = \{a,b\}$. Descreva verbalmente:
+$(a)$\; $L_1 = \{(ab)^m \mid m > 0\}$;\quad
+$(b)$\; $L_2 = \{a^r b a^s b a^t \mid r,s,t \ge 0\}$;\quad
+$(c)$\; $L_3 = \{a^2 b^m a^3 \mid m > 0\}$.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item $L_1$ é o conjunto das palavras da forma $ab\,ab\,ab\cdots ab$, isto é, que
+        começam com $a$, alternam entre $b$ e $a$ e terminam em $b$.
+        Exemplos: $ab$, $abab$, $ababab$.
+
+  \item $L_2$ contém exactamente todas as palavras com \emph{exactamente dois} $b$'s.
+        Os expoentes $r,s,t \ge 0$ permitem qualquer número de $a$'s antes do primeiro
+        $b$, entre os dois $b$'s, e depois do segundo $b$.
+        Exemplo: $aaabab$ corresponde a $r=3,\,s=0,\,t=0$.
+
+  \item $L_3$ são todas as palavras que começam com $a^2$, terminam com $a^3$, e têm
+        pelo menos um $b$ no meio.
+        Exemplo: $aabbba^3 = aabbbaaaa$.
+\end{enumerate}
+
+\subsection*{Exercício 12.7}
+
+\textbf{Enunciado.} Sejam $K = \{a, ab, a^2\}$ e $L = \{b^2, aba\}$ linguagens sobre
+$A = \{a,b\}$. Calcule $(a)$ $KL$ e $(b)$ $LL$.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item Para obter $KL$, concatena-se cada elemento de $K$ com cada elemento de $L$:
+  \begin{align*}
+    a \cdot b^2 &= ab^2,\quad & a \cdot aba &= aaba,\\
+    ab \cdot b^2 &= ab^3,\quad & ab \cdot aba &= ababa,\\
+    a^2 \cdot b^2 &= a^2b^2,\quad & a^2 \cdot aba &= a^3ba.
+  \end{align*}
+  Portanto $KL = \{ab^2,\; a^2ba,\; ab^3,\; ababa,\; a^2b^2,\; a^3ba\}$.
+
+  \item Para $LL$, concatenam-se os elementos de $L$ com os de $L$:
+  \begin{align*}
+    b^2 \cdot b^2 &= b^4,\quad & b^2 \cdot aba &= b^2aba,\\
+    aba \cdot b^2 &= abab^2,\quad & aba \cdot aba &= aba^2ba.
+  \end{align*}
+  Portanto $LL = \{b^4,\; b^2aba,\; abab^2,\; aba^2ba\}$.
+\end{enumerate}
+
+\subsection*{Exercício 12.8}
+
+\textbf{Enunciado.} Seja $L = \{ab, c\}$ sobre $A = \{a,b,c\}$. Calcule
+$(a)$ $L^0$;\; $(b)$ $L^3$;\; $(c)$ $L^{-2}$.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item Por definição, $L^0 = \{\lambda\}$, onde $\lambda$ é a palavra vazia.
+        Esta convenção garante que $L^0 \cdot L = L$ para qualquer linguagem $L$.
+
+  \item $L^3$ é o conjunto de todas as concatenações de \emph{três} palavras de $L$.
+        Como $L$ tem dois elementos, existem $2^3 = 8$ combinações (mas verificar
+        duplicados):
+        \[
+          L^3 = \{ababab,\; ababc,\; abcab,\; abc^2,\; cabab,\; cabc,\; c^2ab,\; c^3\}.
+        \]
+        Cada palavra resulta de escolher independentemente, para cada posição, $ab$ ou $c$.
+
+  \item As potências negativas de uma linguagem \textbf{não estão definidas}.
+        O conceito de ``inverso'' de uma concatenação não faz sentido no contexto das
+        linguagens formais.
+\end{enumerate}
+
+\subsection*{Exercício 12.9}
+
+\textbf{Enunciado.} Seja $A = \{a,b,c\}$. Descreva $L^*$ para:
+$(a)$ $L = \{b^2\}$;\; $(b)$ $L = \{a,b\}$;\; $(c)$ $L = \{a,b,c^3\}$.
+
+\medskip
+\textbf{Resolução.}
+
+O fecho de Kleene $L^*$ contém todas as palavras formadas por zero ou mais concatenações
+de elementos de $L$.
+
+\begin{enumerate}[label=(\alph*)]
+  \item Cada elemento de $L^*$ é da forma $(b^2)^n = b^{2n}$ para $n \ge 0$.
+        Logo $L^* = \{b^n \mid n \text{ é par}\} = \{\lambda, b^2, b^4, b^6, \ldots\}$.
+
+  \item $L^*$ consiste em todas as palavras sobre $\{a,b\}$, pois $L = \{a,b\}$
+        já é o alfabeto. Formalmente, $L^* = \{a,b\}^*$.
+
+  \item As palavras em $L^*$ são concatenações de $a$'s, $b$'s e blocos $c^3$.
+        A propriedade-chave é: qualquer subpalavra maximal composta exclusivamente de
+        $c$'s tem comprimento divisível por 3. Isso porque cada ``contribuição'' de $c$'s
+        vem do elemento $c^3 \in L$.
+\end{enumerate}
+
+\subsection*{Exercício 12.10}
+
+\textbf{Enunciado.} Seja $A = \{a_1, a_2, \ldots\}$ um alfabeto contável. Seja $L_k$
+a linguagem das palavras cuja soma dos índices é $k$.
+$(a)$ Determine $L_4$.
+$(b)$ Mostre que $L_k$ é finita.
+$(c)$ Mostre que $A^*$ é contável.
+$(d)$ Mostre que qualquer linguagem sobre $A$ é contável.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item Para $k=4$: uma palavra em $L_4$ usa letras $a_i$ com $i \le 4$
+        (pois um único $a_5$ já excede $k=4$), e tem no máximo 4 letras.
+        Listando todas as formas de escrever 4 como soma ordenada de inteiros positivos:
+        \[
+          a_1a_1a_1a_1,\; a_1a_1a_2,\; a_1a_2a_1,\; a_2a_1a_1,\;
+          a_1a_3,\; a_3a_1,\; a_2a_2,\; a_4.
+        \]
+
+  \item Para $k$ fixado, as letras usáveis são $a_1, \ldots, a_k$ (apenas $k$ letras),
+        e cada palavra tem no máximo $k$ letras. Logo o número de palavras não excede
+        $k^k$, que é finito. Portanto $L_k$ é finita.
+
+  \item $A^* = \bigcup_{k=1}^{\infty} L_k$ é uma união contável de conjuntos finitos,
+        logo contável. (União contável de conjuntos finitos é contável.)
+
+  \item Qualquer linguagem $L \subseteq A^*$ é um subconjunto de um conjunto contável,
+        logo também é contável (subconjuntos de conjuntos contáveis são contáveis).
+\end{enumerate}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercícios 12.11--12.13 — Expressões Regulares}
+\addcontentsline{toc}{section}{Exercícios 12.11--12.13}
+
+\begin{teoriacaixa}
+\textbf{Expressões regulares.} Uma \keyword{expressão regular} $r$ sobre $A$ é construída
+recursivamente a partir de símbolos de $A$ usando os operadores:
+\begin{itemize}[noitemsep]
+  \item concatenação: $rs$ (justaposição),
+  \item união (soma): $r \vee s$ (ou $r + s$),
+  \item fecho de Kleene: $r^*$.
+\end{itemize}
+A linguagem $L(r)$ denotada por $r$ é definida pelas regras habituais.
+\end{teoriacaixa}
+
+\subsection*{Exercício 12.11}
+
+\textbf{Enunciado.} Seja $A = \{a,b\}$. Descreva $L(r)$ para:
+$(a)$ $r = abb^*a$;\;
+$(b)$ $r = b^*ab^*ab^*$;\;
+$(c)$ $r = a^* \vee b^*$;\;
+$(d)$ $r = ab^* \wedge a^*$.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item $r = abb^*a$: começa com $a$, seguido de $b$ (pelo menos um), depois $b^*$
+        (zero ou mais $b$'s adicionais), terminando em $a$. Logo $L(r)$ contém todas as
+        palavras que começam e terminam com $a$ e têm \emph{um ou mais} $b$'s no meio.
+
+  \item $r = b^*ab^*ab^*$: a estrutura $b^*ab^*ab^*$ coloca exactamente dois $a$'s,
+        com zero ou mais $b$'s em cada intervalo. Logo $L(r)$ são todas as palavras com
+        \emph{exactamente dois} $a$'s.
+
+  \item $r = a^* \vee b^*$: a união de $a^*$ e $b^*$ dá todas as palavras formadas
+        exclusivamente por $a$'s \emph{ou} exclusivamente por $b$'s (incluindo $\lambda$).
+        Assim $L(r) = \{\lambda, a, a^2, \ldots\} \cup \{\lambda, b, b^2, \ldots\}$.
+
+  \item A expressão $ab^* \wedge a^*$ \textbf{não} é uma expressão regular, pois o
+        símbolo $\wedge$ (conjunção) não faz parte dos operadores das expressões regulares.
+        A classe das linguagens regulares é fechada para interseção, mas $\wedge$ não é
+        um operador da notação standard de expressões regulares.
+\end{enumerate}
+
+\subsection*{Exercício 12.12}
+
+\textbf{Enunciado.} Seja $A = \{a,b,c\}$ e $w = abc$. Determine se $w \in L(r)$ para:
+$(a)$ $r = a^* \vee (b \vee c)^*$;\; $(b)$ $r = a^*(b \vee c)^*$.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item $L(r) = L(a^*) \cup L((b \vee c)^*)$ contém palavras formadas \emph{só} por $a$'s,
+        ou \emph{só} por $b$'s e $c$'s. A palavra $w = abc$ mistura $a$ com $b,c$,
+        pelo que \textbf{não pertence} a $L(r)$.
+
+  \item $r = a^*(b \vee c)^*$: primeiro um bloco (possivelmente vazio) de $a$'s,
+        depois um bloco (possivelmente vazio) de $b$'s e $c$'s.
+        Para $w = abc$: $a \in L(a^*)$ e $bc \in L((b \vee c)^*)$ (pois $b$ e $c$ são
+        ambos produzidos por $b \vee c$). Logo $w = a \cdot bc \in L(r)$.
+        Resposta: \textbf{sim}.
+\end{enumerate}
+
+\subsection*{Exercício 12.13}
+
+\textbf{Enunciado.} Seja $A = \{a,b\}$. Encontre uma expressão regular $r$ tal que $L(r)$
+consista em:
+$(a)$ todas as palavras que começam com $a^2$ e terminam com $b^2$;
+$(b)$ todas as palavras com um número par de $a$'s.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item A expressão $r = a^2 (a \vee b)^* b^2$ funciona: $a^2$ força o início com dois
+        $a$'s; $(a \vee b)^*$ aceita qualquer coisa (incluindo $\lambda$) no meio;
+        $b^2$ força o fim com dois $b$'s. Logo
+        \[
+          r = a^2(a \vee b)^*b^2.
+        \]
+        Nota: são necessárias pelo menos 4 letras, pois $a^2b^2$ é a palavra mais curta.
+
+  \item Palavras com número par de $a$'s incluem $0, 2, 4, \ldots$ $a$'s.
+        A expressão $s = b^*ab^*ab^*$ captura exactamente as palavras com \emph{dois}
+        $a$'s. O fecho $s^*$ gera concatenações de zero ou mais palavras com dois $a$'s
+        cada, logo qualquer número \emph{par} de $a$'s, com $b$'s arbitrários. Portanto:
+        \[
+          r = s^* = (b^*ab^*ab^*)^*.
+        \]
+\end{enumerate}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercícios 12.14--12.21 — Autómatos Finitos}
+\addcontentsline{toc}{section}{Exercícios 12.14--12.21}
+
+\begin{teoriacaixa}
+\textbf{Autómato finito determinístico (AFD).}
+Um AFD é um quíntuplo $M = (A, S, Y, s_0, F)$ onde:
+\begin{itemize}[noitemsep]
+  \item $A$: alfabeto de entrada,
+  \item $S$: conjunto finito de estados,
+  \item $Y \subseteq S$: estados de aceitação,
+  \item $s_0 \in S$: estado inicial,
+  \item $F: S \times A \to S$: função de transição.
+\end{itemize}
+Uma palavra $w$ é \keyword{aceite} por $M$ se, ao processar $w$ a partir de $s_0$,
+o autómato termina num estado de $Y$.
+\end{teoriacaixa}
+
+\subsection*{Exercício 12.14}
+
+\textbf{Enunciado.} Seja $M$ com $A = \{a,b\}$, $S = \{s_0, s_1, s_2\}$, $Y = \{s_1\}$,
+e a função de transição dada por:
+\[
+  F(s_0, a) = s_0,\quad F(s_0, b) = s_1,\quad
+  F(s_1, a) = s_1,\quad F(s_1, b) = s_2,\quad
+  F(s_2, a) = s_2,\quad F(s_2, b) = s_2.
+\]
+$(a)$ Desenhe o diagrama de estados. $(b)$ Descreva $L(M)$.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{Diagrama de estados:}
+  Os vértices são os estados $s_0, s_1, s_2$ (com $s_1$ a círculo duplo por ser estado
+  de aceitação). As transições são as arestas dirigidas rotuladas por $a$ ou $b$.
+  Uma seta especial indica o estado inicial $s_0$.
+
+  \item \textbf{Linguagem aceite.} Analisando a função de transição:
+  \begin{itemize}
+    \item $s_0$ é o estado ``nenhum $b$ visto ainda'': lendo $a$'s permanece em $s_0$;
+          ao ler o primeiro $b$ vai para $s_1$.
+    \item $s_1$ é o estado ``exactamente um $b$ lido'': $a$'s adicionais mantêm o estado;
+          um segundo $b$ envia para $s_2$.
+    \item $s_2$ é um estado ``sumidouro'' (dois ou mais $b$'s): nunca sai de $s_2$.
+  \end{itemize}
+  Logo $L(M)$ consiste em todas as palavras de $A^*$ com \textbf{exactamente um} $b$.
+\end{enumerate}
+
+\subsection*{Exercício 12.15}
+
+\textbf{Enunciado.} Construa um autómato $M$ sobre $A = \{a,b\}$ que aceite precisamente
+as palavras com um número par de $a$'s.
+
+\medskip
+\textbf{Resolução.}
+
+A ideia é manter na memória (através dos estados) a \emph{paridade} do número de $a$'s
+lidos. São necessários dois estados:
+
+\begin{itemize}
+  \item $s_0$: número par de $a$'s até ao momento (estado inicial e de aceitação).
+  \item $s_1$: número ímpar de $a$'s até ao momento.
+\end{itemize}
+
+As transições são:
+\[
+  F(s_0, a) = s_1,\quad F(s_0, b) = s_0,\quad
+  F(s_1, a) = s_0,\quad F(s_1, b) = s_1.
+\]
+O input $b$ não altera a paridade, logo não muda o estado. O input $a$ troca entre os
+dois estados. O conjunto de aceitação é $Y = \{s_0\}$.
+
+\medskip
+\noindent\textit{Verificação:} a palavra $aababbab$ tem $a$'s nas posições 1, 2, 4, 7 —
+quatro $a$'s (par) — pelo que deve ser aceite. Seguindo as transições:
+$s_0 \xrightarrow{a} s_1 \xrightarrow{a} s_0 \xrightarrow{b} s_0 \xrightarrow{a} s_1
+\xrightarrow{b} s_1 \xrightarrow{b} s_1 \xrightarrow{a} s_0 \xrightarrow{b} s_0 \in Y$. (aplicável)
+
+\subsection*{Exercício 12.16}
+
+\textbf{Enunciado.} Construa um autómato $M$ sobre $A = \{a,b\}$ que aceite palavras que
+começam com $a$ seguido de zero ou mais $b$'s.
+
+\medskip
+\textbf{Resolução.}
+
+São necessários três estados:
+
+\begin{itemize}
+  \item $s_0$: estado inicial (ainda não foi lida nenhuma letra).
+  \item $s_1$: foi lido o $a$ inicial; lendo $b$'s adicionais permanece aqui (estado de aceitação).
+  \item $s_2$: estado de rejeição (entrada inválida).
+\end{itemize}
+
+Transições:
+\[
+  F(s_0, a) = s_1,\quad F(s_0, b) = s_2,\quad
+  F(s_1, a) = s_2,\quad F(s_1, b) = s_1,\quad
+  F(s_2, a) = s_2,\quad F(s_2, b) = s_2.
+\]
+Conjunto de aceitação: $Y = \{s_1\}$.
+
+A linguagem aceite é $L(M) = \{ab^n \mid n \ge 0\} = \{a, ab, abb, abbb, \ldots\}$.
+
+\subsection*{Exercício 12.17}
+
+\textbf{Enunciado.} Descreva as palavras $w$ aceites pelo autómato $M$ na figura 12-9(a).
+
+\medskip
+\textbf{Resolução.}
+
+O autómato tem estados $\{s_0, s_1, s_2\}$ com $s_2$ como estado de aceitação.
+Analisando as transições: o sistema só pode atingir $s_2$ quando lê um $a$ \emph{após}
+ter lido um $b$. Mais precisamente:
+\begin{itemize}
+  \item $s_0$ representa ``nenhum $b$ foi lido ainda''; $a$ mantém em $s_0$; $b$ vai para $s_1$.
+  \item $s_1$ representa ``foi lido pelo menos um $b$''; $a$ vai para $s_2$ (aceitação!);
+        $b$ mantém em $s_1$.
+  \item $s_2$ é estado de aceitação; $a$ e $b$ mantêm em $s_2$.
+\end{itemize}
+
+Logo $L(M)$ consiste em todas as palavras $w$ que contêm pelo menos um $a$ que \emph{sucede}
+algum $b$, ou seja, $w$ contém a subpalavra $ba$ em algum ponto.
+
+\subsection*{Exercício 12.18}
+
+\textbf{Enunciado.} Descreva as palavras $w$ aceites pelo autómato $M$ na figura 12-9(b).
+
+\medskip
+\textbf{Resolução.}
+
+O autómato tem quatro estados $\{s_0, s_1, s_2, s_3\}$ com $s_3$ como estado de aceitação.
+As transições verificam-se:
+\begin{itemize}
+  \item Cada $a$ em $w$ \emph{não altera} o estado (laço em cada estado).
+  \item Cada $b$ avança o estado: $s_0 \to s_1 \to s_2 \to s_3 \to s_0$ (cíclico módulo 4).
+\end{itemize}
+
+O estado atingido após ler $w$ depende apenas do \emph{número de $b$'s} em $w$,
+digamos $n$. O estado final é $s_j$ onde $j \equiv n \pmod{4}$.
+Como $Y = \{s_3\}$, a palavra é aceite se e só se $n \equiv 3 \pmod{4}$,
+isto é, $n \in \{3, 7, 11, 15, \ldots\}$.
+
+\subsection*{Exercício 12.19}
+
+\textbf{Enunciado.} Dado $M = (A, S, Y, s_0, F)$ que aceita $L$, construa um autómato
+$N$ que aceite $L^C$ (o complementar de $L$).
+
+\medskip
+\textbf{Resolução.}
+
+A ideia é simples: uma palavra $w \notin L$ é exactamente uma palavra que $M$ \emph{rejeita},
+ou seja, que termina num estado \emph{fora} de $Y$. Logo basta trocar os estados de
+aceitação e rejeição.
+
+Formalmente:
+\[
+  N = (A,\; S,\; S \setminus Y,\; s_0,\; F).
+\]
+$N$ usa o mesmo alfabeto, os mesmos estados, a mesma função de transição e o mesmo estado
+inicial que $M$; apenas o conjunto de aceitação muda de $Y$ para $S \setminus Y$.
+
+\medskip
+\noindent\textit{Porquê funciona?} Para qualquer $w \in A^*$, a computação de $N$ em
+$w$ é idêntica à de $M$ (mesma sequência de estados). Mas $N$ aceita exactamente quando
+$M$ rejeita, e rejeita exactamente quando $M$ aceita.
+
+\subsection*{Exercício 12.20}
+
+\textbf{Enunciado.} Dados $M = (A, S, Y, s_0, F)$ e $M' = (A, S', Y', s_0', F')$,
+construa $N$ que aceite $L(M) \cap L(M')$.
+
+\medskip
+\textbf{Resolução.}
+
+Usa-se a \keyword{construção produto}: o novo autómato $N$ simula $M$ e $M'$ em
+\emph{paralelo}, mantendo o par de estados como único estado.
+
+\begin{itemize}
+  \item Conjunto de estados de $N$: $S \times S'$.
+  \item Estado inicial: $(s_0, s_0')$.
+  \item Estados de aceitação: $Y \times Y' = \{(s, s') \mid s \in Y,\, s' \in Y'\}$;
+        aceitar quando \emph{ambos} os autómatos aceitariam.
+  \item Função de transição:
+        $G\bigl((s, s'),\, a\bigr) = \bigl(F(s,a),\, F'(s', a)\bigr)$.
+\end{itemize}
+
+\medskip
+\noindent\textit{Correctude:} uma palavra $w$ leva $N$ de $(s_0, s_0')$ para
+$(F^*(s_0, w),\, F'^*(s_0', w))$. Este estado pertence a $Y \times Y'$ se e só se
+$w \in L(M)$ \emph{e} $w \in L(M')$.
+
+\subsection*{Exercício 12.21}
+
+\textbf{Enunciado.} Dados $M$ e $M'$ como acima, construa $N$ que aceite $L(M) \cup L(M')$.
+
+\medskip
+\textbf{Resolução.}
+
+A construção é idêntica à do Exercício 12.20, mas o conjunto de aceitação muda:
+
+\[
+  Y_N = \{(s, s') \in S \times S' \mid s \in Y \text{ ou } s' \in Y'\}.
+\]
+
+Ou seja, $N$ aceita quando \emph{pelo menos um} dos autómatos originais aceitaria.
+Todo o resto (estados, estado inicial, função de transição) é idêntico à construção
+produto do exercício anterior.
+
+\newpage
+%% ═════════════════════════════════════════════════════════════════════════════
+\part*{Capítulo 13 — Máquinas de Estados Finitos e Máquinas de Turing}
+\addcontentsline{toc}{part}{Capítulo 13 — Máquinas de Turing}
+
+\begin{teoriacaixa}
+\textbf{Máquina de Turing (MT).}
+Uma MT é definida por quintuples $q = s_i a_j s_k a_l D$ onde:
+$s_i$ é o estado actual, $a_j$ é o símbolo lido, $s_k$ é o novo estado,
+$a_l$ é o símbolo escrito, e $D \in \{L, R, N\}$ é a direcção de movimento
+(esquerda, direita, imóvel). Um \keyword{quadro} (picture) $\alpha$ descreve
+a configuração instantânea: a fita, com o estado inserido na posição do cabeçote.
+\end{teoriacaixa}
+
+\section*{Exercício 13.1 (= 13.14 do livro) — Quadros de Máquinas de Turing}
+\addcontentsline{toc}{section}{Exercício 13.1 (13.14)}
+
+\textbf{Enunciado.} Determine o quadro $\alpha$ para cada situação:
+$(a)$ A MT está no estado $s_2$ e lê o 3.º símbolo de $w = abbaa$.
+$(b)$ A MT está no estado $s_3$ e lê o último símbolo de $w = aabb$.
+$(c)$ O input é $W = a^3b^3$.
+$(d)$ O input é $W = {)}3{,}2{)}*$.
+
+\medskip
+\textbf{Resolução.}
+
+O quadro obtém-se inserindo o rótulo do estado imediatamente à \emph{esquerda} do símbolo
+que está a ser lido.
+
+\begin{enumerate}[label=(\alph*)]
+  \item $w = abbaa$; 3.º símbolo é o segundo $b$ (posição 3). Inserindo $s_2$ antes desse $b$:
+        \[
+          \alpha = ab\;s_2\;baa.
+        \]
+
+  \item $w = aabb$; último símbolo é $b$ (posição 4). Inserindo $s_3$ antes:
+        \[
+          \alpha = aab\;s_3\;b.
+        \]
+
+  \item O input $W = a^3b^3 = aaabbb$. No início, a MT está no estado $s_0$ a ler o
+        primeiro símbolo:
+        \[
+          \alpha = s_0\;aaabbb.
+        \]
+
+  \item A notação $)(3,2)*$ representa o par $(3,2)$ em código unário: $)3* = 1111$
+        e $)2* = 111$, separados por $B$. Logo $)(3,2)* = 1111B111$.
+        O quadro inicial é:
+        \[
+          \alpha = s_0\;1111B111.
+        \]
+\end{enumerate}
+
+\section*{Exercício 13.2 (= 13.15 do livro) — Transições de Quadros}
+\addcontentsline{toc}{section}{Exercício 13.2 (13.15)}
+
+\textbf{Enunciado.} Seja $\alpha = abs_2aa$. Determine $\beta$ tal que $\alpha \to \beta$
+para cada quintuple $q$:
+$(a)$ $q = s_2 a b s_1 R$;\;
+$(b)$ $q = s_2 a a s_3 L$;\;
+$(c)$ $q = s_2 a b s_2 R$;\;
+$(d)$ $q = s_2 a b s_3 L$;\;
+$(e)$ $q = s_3 a b s_2 R$;\;
+$(f)$ $q = s_2 a a s_2 L$.
+
+\medskip
+\textbf{Resolução.}
+
+No quadro $\alpha = abs_2aa$, a MT está no estado $s_2$ a ler $a$ (o símbolo imediatamente
+à direita de $s_2$). O quintuple $s_i a_j s_k a_l D$ só se aplica se $s_i$ e $a_j$
+coincidirem com o estado e símbolo actuais.
+
+\begin{enumerate}[label=(\alph*)]
+  \item $q = s_2 a b s_1 R$: estado $s_2$, lê $a$ (aplicável). Substitui $a$ por $b$, vai para $s_1$,
+        move à direita. O cabeçote fica sobre o próximo símbolo ($a$):
+        \[
+          \beta = ab\,b\,s_1\,a.
+        \]
+
+  \item $q = s_2 a a s_3 L$: estado $s_2$, lê $a$ (aplicável). Escreve $a$ (sem mudança), vai para $s_3$,
+        move à esquerda. O cabeçote recua sobre $b$:
+        \[
+          \beta = a\,s_3\,b\,aa.
+        \]
+
+  \item $q = s_2 a b s_2 R$: estado $s_2$, lê $a$ (aplicável). Substitui $a$ por $b$, permanece em $s_2$,
+        move à direita:
+        \[
+          \beta = ab\,b\,s_2\,a.
+        \]
+
+  \item $q = s_2 a b s_3 L$: estado $s_2$, lê $a$ (aplicável). Substitui $a$ por $b$, vai para $s_3$,
+        move à esquerda (o cabeçote recua sobre $b$):
+        \[
+          \beta = a\,s_3\,b\,ba.
+        \]
+
+  \item $q = s_3 a b s_2 R$: estado actual é $s_2 \ne s_3$. O quintuple \emph{não se aplica};
+        $\alpha$ não é alterado.
+
+  \item $q = s_2 a a s_2 L$: estado $s_2$, lê $a$ (aplicável). Escreve $a$ (sem mudança), permanece em
+        $s_2$, move à esquerda:
+        \[
+          \beta = a\,s_2\,b\,aa.
+        \]
+\end{enumerate}
+
+\section*{Exercício 13.3 (= 13.17 do livro) — Ciclos Infinitos}
+\addcontentsline{toc}{section}{Exercício 13.3 (13.17)}
+
+\textbf{Enunciado.} Encontre quadros distintos $\alpha_1, \alpha_2, \alpha_3, \alpha_4$
+e uma MT $M$ tais que a sequência não termine:
+$\alpha_1 \to \alpha_2 \to \alpha_3 \to \alpha_4 \to \alpha_1 \to \cdots$
+
+\medskip
+\textbf{Resolução.}
+
+Definem-se quatro quadros num ciclo de comprimento 4:
+
+\begin{align*}
+  \alpha_1 &= s_0 ab,\\
+  \alpha_2 &= b\,s_1\,b,\\
+  \alpha_3 &= s_2\,bb,\\
+  \alpha_4 &= a\,s_3\,b.
+\end{align*}
+
+E os quintuples que produzem as transições:
+\begin{align*}
+  q_1 &= s_0\,a\,b\,s_1\,R &\text{($s_0$ lê $a$, escreve $b$, vai } s_1, R\text{)},\\
+  q_2 &= s_1\,b\,b\,s_2\,L &\text{($s_1$ lê $b$, escreve $b$, vai } s_2, L\text{)},\\
+  q_3 &= s_2\,b\,a\,s_3\,R &\text{($s_2$ lê $b$, escreve $a$, vai } s_3, R\text{)},\\
+  q_4 &= s_3\,b\,b\,s_0\,L &\text{($s_3$ lê $b$, escreve $b$, vai } s_0, L\text{)}.
+\end{align*}
+
+Verificação: $\alpha_1 = s_0 ab \xrightarrow{q_1} bs_1b = \alpha_2 \xrightarrow{q_2}
+s_2 bb = \alpha_3 \xrightarrow{q_3} as_3 b = \alpha_4 \xrightarrow{q_4} s_0 ab = \alpha_1$.
+O ciclo repete indefinidamente.
+
+\section*{Exercício 13.4 (= 13.18/13.19 do livro) — Determinismo e Reconhecimento}
+\addcontentsline{toc}{section}{Exercício 13.4 (13.18--13.19)}
+
+\textbf{Exercício 13.18.} Se $\alpha \to \beta_1$ e $\alpha \to \beta_2$, será que $\beta_1 = \beta_2$?
+
+\medskip
+\textbf{Resolução.} \textbf{Sim.} Uma Máquina de Turing é \keyword{determinística}: dado
+o estado actual e o símbolo lido, existe no máximo um quintuple aplicável. Logo a próxima
+configuração é \emph{única}. Se $\alpha \to \beta_1$ e $\alpha \to \beta_2$, então
+necessariamente $\beta_1 = \beta_2$.
+
+\medskip
+
+\textbf{Exercício 13.19.} Se $\alpha = \alpha(W)$ para algum input $W$, e $\alpha \to \beta \to \alpha$,
+pode $M$ reconhecer $W$?
+
+\medskip
+\textbf{Resolução.} \textbf{Não.} O ciclo $\alpha \to \beta \to \alpha \to \beta \to \cdots$
+é infinito: a computação nunca termina. Uma MT reconhece $W$ apenas se a computação
+\emph{pára} num estado $s_Y$ de aceitação. Como a computação entra num ciclo e nunca pára,
+$W$ não é reconhecido.
+
+\section*{Exercício 13.5 (= 13.20 do livro) — MT que Reconhece $L = \{ab^n \mid n > 0\}$}
+\addcontentsline{toc}{section}{Exercício 13.5 (13.20)}
+
+\textbf{Enunciado.} Encontre uma MT $M$ que reconhece a linguagem $L = \{ab^n \mid n > 0\}$,
+ou seja, o conjunto das palavras que começam por $a$ seguido de um ou mais $b$'s.
+
+\medskip
+\textbf{Resolução.}
+
+A estratégia é ler letra a letra e verificar:
+\begin{enumerate}
+  \item O primeiro símbolo tem de ser $a$.
+  \item Depois deve haver pelo menos um $b$.
+  \item Só devem existir $b$'s após o $a$ inicial.
+  \item A palavra termina num branco $B$.
+\end{enumerate}
+
+Os quintuples (com $s_N$ = ``rejeita'' e $s_Y$ = ``aceita''):
+
+\begin{align*}
+  q_1 &= s_0\,B\,B\,s_N\,R &\text{(vazio: rejeitar)},\\
+  q_2 &= s_0\,b\,b\,s_N\,R &\text{(começa com } b \text{: rejeitar)},\\
+  q_3 &= s_0\,a\,a\,s_1\,R &\text{(leu } a \text{ inicial: avançar)},\\
+  q_4 &= s_1\,B\,B\,s_N\,R &\text{(nenhum } b \text{ após } a \text{: rejeitar)},\\
+  q_5 &= s_1\,a\,a\,s_N\,R &\text{(segundo } a \text{: rejeitar)},\\
+  q_6 &= s_1\,b\,b\,s_2\,R &\text{(primeiro } b \text{: avançar para } s_2\text{)},\\
+  q_7 &= s_2\,b\,b\,s_2\,R &\text{(continua a ler } b \text{'s)},\\
+  q_8 &= s_2\,a\,a\,s_N\,R &\text{(encontrou } a \text{ depois dos } b\text{'s: rejeitar)},\\
+  q_9 &= s_2\,B\,B\,s_Y\,R &\text{(chegou ao fim com pelo menos um } b\text{: aceitar)}.
+\end{align*}
+
+\medskip
+\noindent\textbf{Exemplo de execução} com $W = abb$:
+\[
+  s_0\,abb \xrightarrow{q_3} a\,s_1\,bb \xrightarrow{q_6} ab\,s_2\,b
+  \xrightarrow{q_7} abb\,s_2\,B \xrightarrow{q_9} \text{ACEITAR.}
+\]
+
+\newpage
+%% ═════════════════════════════════════════════════════════════════════════════
+\part*{Capítulo 14 — Conjuntos Ordenados e Reticulados}
+\addcontentsline{toc}{part}{Capítulo 14 — Conjuntos Ordenados e Reticulados}
+
+\begin{teoriacaixa}
+\textbf{Ordem parcial.} Uma relação $R$ em $S$ é uma \keyword{ordem parcial} se é
+reflexiva [$aRa$], antissimétrica [$aRb \wedge bRa \Rightarrow a = b$] e transitiva
+[$aRb \wedge bRc \Rightarrow aRc$]. O par $(S,R)$ chama-se \keyword{conjunto parcialmente
+ordenado} (poset).
+\end{teoriacaixa}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 14.1 (= Exemplo 14.1 do livro) — Exemplos de Ordens Parciais}
+\addcontentsline{toc}{section}{Exercício 14.1}
+
+\subsection*{(a) Inclusão de conjuntos}
+
+Seja $S$ uma colecção de conjuntos. A relação $\subseteq$ é uma ordem parcial:
+\begin{itemize}
+  \item \textbf{Reflexiva:} $A \subseteq A$ para todo $A$.
+  \item \textbf{Antissimétrica:} se $A \subseteq B$ e $B \subseteq A$, então $A = B$.
+  \item \textbf{Transitiva:} se $A \subseteq B$ e $B \subseteq C$, então $A \subseteq C$.
+\end{itemize}
+
+\subsection*{(b) Divisibilidade em $\mathbb{N}$}
+
+Em $\mathbb{N}$, escrevemos $a \mid b$ se $\exists c \in \mathbb{Z}: b = ac$.
+A divisibilidade é uma ordem parcial em $\mathbb{N}$:
+\begin{itemize}
+  \item \textbf{Reflexiva:} $a \mid a$ (tome $c = 1$).
+  \item \textbf{Antissimétrica:} se $a \mid b$ e $b \mid a$ com $a,b > 0$, então $a = b$.
+  \item \textbf{Transitiva:} se $a \mid b$ e $b \mid c$, então $a \mid c$.
+\end{itemize}
+
+\subsection*{(c) Divisibilidade em $\mathbb{Z}$ — não é ordem parcial}
+
+Em $\mathbb{Z}$, a divisibilidade \emph{não} é antissimétrica: $2 \mid -2$ e $-2 \mid 2$
+mas $2 \ne -2$. Logo não define uma ordem parcial em $\mathbb{Z}$.
+
+\subsection*{(d) Relação de potência em $\mathbb{Z}$}
+
+Definindo $aRb$ se $\exists r \in \mathbb{N}: b = a^r$. Esta relação é uma ordem parcial:
+\begin{itemize}
+  \item \textbf{Reflexiva:} $aRa$ pois $a = a^1$.
+  \item \textbf{Antissimétrica:} se $b = a^r$ e $a = b^s$, então $b = (b^s)^r = b^{sr}$,
+        logo $sr = 1$, logo $s = r = 1$ e $a = b$.
+  \item \textbf{Transitiva:} se $b = a^r$ e $c = b^s$, então $c = (a^r)^s = a^{rs}$,
+        logo $aRc$.
+\end{itemize}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 14.2 (= Exemplo 14.2) — Comparabilidade e Ordem Linear}
+\addcontentsline{toc}{section}{Exercício 14.2}
+
+\subsection*{(a) Divisibilidade em $\mathbb{N}$}
+
+Dois elementos $a, b$ são \keyword{comparáveis} se $a \mid b$ ou $b \mid a$.
+Por exemplo, $7 \mid 21$ logo $7$ e $21$ são comparáveis. Mas $3 \nmid 5$ e $5 \nmid 3$,
+logo 3 e 5 são \keyword{não-comparáveis}.
+
+$\mathbb{N}$ com divisibilidade \emph{não} é linearmente ordenado. Porém o subconjunto
+$A = \{2, 6, 12, 36\}$ é linearmente ordenado: $2 \mid 6 \mid 12 \mid 36$.
+
+\subsection*{(b) Ordem usual em $\mathbb{N}$}
+
+Com $\le$, quaisquer dois inteiros positivos são comparáveis, logo $\mathbb{N}$ é
+linearmente ordenado, e todo o subconjunto é também linearmente ordenado.
+
+\subsection*{(c) Inclusão em $\mathcal{P}(A)$}
+
+Se $|A| \ge 2$, existem $\{a\}$ e $\{b\}$ com $a \ne b$ que são não-comparáveis por $\subseteq$.
+Logo $\mathcal{P}(A)$ não é linearmente ordenado.
+Contudo, $\{\emptyset, \{a\}, A\}$ é um subconjunto linearmente ordenado.
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercícios 14.3--14.5 (= Exemplos 14.3, 14.4, 14.5) — Diagramas de Hasse}
+\addcontentsline{toc}{section}{Exercícios 14.3--14.5}
+
+\begin{teoriacaixa}
+\textbf{Diagrama de Hasse.} Para um poset finito $S$, o \keyword{diagrama de Hasse}
+representa os pares $a \lll b$ (``$a$ é predecessor imediato de $b$''): $a < b$ e
+não existe $c$ com $a < c < b$. No diagrama, $b$ fica acima de $a$ e liga-se por
+uma linha. Não se representam as relações transitivas nem reflexivas (redundantes).
+\end{teoriacaixa}
+
+\subsection*{Exercício 14.3 — Três exemplos de diagramas de Hasse}
+
+\begin{enumerate}[label=(\alph*)]
+  \item $A = \{1,2,3,4,6,8,9,12,18,24\}$ ordenado por divisibilidade.
+        Os pares de cobertura incluem, por exemplo, $1 \lll 2$, $1 \lll 3$,
+        $2 \lll 4$, $2 \lll 6$, $3 \lll 6$, $3 \lll 9$, $4 \lll 8$, $4 \lll 12$,
+        $6 \lll 12$, $6 \lll 18$, $8 \lll 24$, $12 \lll 24$, $18 \lll \text{---}$
+        (18 não divide 24). O diagrama tem 1 na base e 18, 24 no topo.
+
+  \item $B = \{a,b,c,d,e\}$ com o diagrama dado: $d \le b$, $d \le a$, $e \le c$,
+        $b \le a$, $c \le a$ (estes são os pares de cobertura: $d \lll b$, $e \lll c$,
+        $b \lll a$, $c \lll a$).
+
+  \item Uma \keyword{cadeia} finita (conjunto totalmente ordenado) tem diagrama linear
+        — apenas um caminho. Por exemplo, uma cadeia de 5 elementos:
+        $x \lll y \lll z \lll u \lll v$.
+\end{enumerate}
+
+\subsection*{Exercício 14.4 — Partições de $m = 5$}
+
+As partições do inteiro 5 ordenam-se da seguinte forma: $P_1 \preceq P_2$ se os inteiros
+de $P_1$ podem ser \emph{agrupados} para obter os de $P_2$ (ou, equivalentemente,
+os de $P_2$ podem ser subdivididos para dar os de $P_1$).
+
+Exemplo: $2{-}2{-}1 \preceq 3{-}2$ porque $2 + 1 = 3$. Os sete níveis do diagrama
+(de baixo para cima) são:
+\[
+  1{-}1{-}1{-}1{-}1 \;\lll\; 2{-}1{-}1{-}1 \;\lll\; 2{-}2{-}1 \;\lll\;
+  \begin{cases} 3{-}1{-}1 \\ 2{-}2{-}1 \end{cases} \;\lll\;
+  \begin{cases} 4{-}1 \\ 3{-}2 \end{cases} \;\lll\; 5.
+\]
+A partição 5 é o elemento máximo (e último), e $1{-}1{-}1{-}1{-}1$ é o elemento mínimo
+(e primeiro).
+
+\subsection*{Exercício 14.5 — Elementos Mínimos, Máximos, Primeiros e Últimos}
+
+Recorrendo aos diagramas do Exercício 14.3:
+
+\begin{itemize}
+  \item[(a.i)] $A$ (divisibilidade): elemento mínimo (e \emph{primeiro}) $= 1$;
+        dois elementos máximos $= 18$ e $24$ (nenhum é \emph{último}).
+  \item[(a.ii)] $B$: dois elementos mínimos $d$ e $e$ (nenhum é \emph{primeiro});
+        único elemento máximo (e \emph{último}) $= a$.
+  \item[(a.iii)] A cadeia: único mínimo e \emph{primeiro} $= x$;
+        único máximo e \emph{último} $= v$.
+\end{itemize}
+
+\begin{enumerate}[label=(\alph*),start=2]
+  \item $\mathcal{P}(A)$ com inclusão: $\emptyset$ é o \emph{primeiro} elemento
+        ($\emptyset \subseteq X$ para todo $X$); $A$ é o \emph{último} elemento
+        ($Y \subseteq A$ para todo $Y \in \mathcal{P}(A)$).
+\end{enumerate}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercícios 14.6--14.30 — Supremo, Ínfimo e Reticulados}
+\addcontentsline{toc}{section}{Exercícios 14.6--14.30}
+
+\begin{teoriacaixa}
+\textbf{Supremo e ínfimo.} Dado $A \subseteq S$ (poset), um \keyword{majorante} de $A$
+é um $M \in S$ com $x \preceq M$ para todo $x \in A$. O \keyword{supremo} $\sup(A)$
+é o menor majorante (se existir). Analogamente, um \keyword{minorante} de $A$ é $m \in S$
+com $m \preceq y$ para todo $y \in A$; o \keyword{ínfimo} $\inf(A)$ é o maior minorante.
+
+\textbf{Reticulado.} Um poset $L$ é um \keyword{reticulado} se para todo par $a,b \in L$
+existem $\sup(a,b)$ e $\inf(a,b)$. Usam-se as notações $a \vee b = \sup(a,b)$ e
+$a \wedge b = \inf(a,b)$.
+\end{teoriacaixa}
+
+\subsection*{Exercício 14.6 (= Exemplo 14.6)}
+
+\begin{enumerate}[label=(\alph*)]
+  \item $S = \{a,b,c,d,e,f\}$, $A = \{b,c,d\}$.
+        Majorantes de $A$: apenas $e$ e $f$ (ambos sucedem $b$, $c$ e $d$).
+        Como $e$ e $f$ são não-comparáveis, $\sup(A)$ \emph{não existe}.
+        Minorantes de $A$: $a$ e $b$ (precedem $b$, $c$ e $d$). Mas $b \succ a$,
+        logo $b$ é o maior minorante: $\inf(A) = b$.
+
+  \item $S = \{1,\ldots,8\}$, $A = \{4,5,7\}$.
+        Majorantes: 1, 2, 3 (no diagrama, todos sucedem 4, 5 e 7). Como $3 \preceq 1$
+        e $3 \preceq 2$, o menor majorante é $\sup(A) = 3$.
+        Minorantes: apenas $8$ (o único que precede 4, 5 e 7). Logo $\inf(A) = 8$.
+\end{enumerate}
+
+\subsection*{Exercício 14.7 (= Exemplo 14.7) — $\gcd$ e $\text{lcm}$ como $\inf$ e $\sup$}
+
+\begin{enumerate}[label=(\alph*)]
+  \item Em $\mathbb{N}$ ordenado por divisibilidade, para quaisquer $a, b$:
+        \begin{itemize}
+          \item Todo o divisor comum de $a$ e $b$ divide $\gcd(a,b)$, portanto
+                $\gcd(a,b)$ é o maior minorante: $\inf(a,b) = \gcd(a,b)$.
+          \item $\text{lcm}(a,b)$ divide todo o múltiplo comum de $a$ e $b$, portanto
+                $\text{lcm}(a,b)$ é o menor majorante: $\sup(a,b) = \text{lcm}(a,b)$.
+        \end{itemize}
+
+  \item O conjunto $D_{36} = \{1,2,3,4,6,9,12,18,36\}$ (divisores de 36) é um reticulado
+        com as mesmas operações. Por exemplo: $\gcd(4,6) = 2 = \inf(4,6)$ e
+        $\text{lcm}(4,6) = 12 = \sup(4,6)$.
+\end{enumerate}
+
+\medskip
+\noindent\textbf{Exercícios 14.8--14.30.} Os exercícios adicionais do capítulo aprofundam
+os temas de enumerações consistentes, reticulados booleanos, reticulados distributivos,
+propriedades algébricas de $\vee$ e $\wedge$, e isomorfismos de reticulados. A estrutura
+de resolução segue os mesmos princípios: identificar a ordem, determinar coberturas,
+calcular sup e inf, e verificar as propriedades de reticulado.
+
+\newpage
+%% ═════════════════════════════════════════════════════════════════════════════
+\part*{Capítulo 15 — Álgebra de Boole}
+\addcontentsline{toc}{part}{Capítulo 15 — Álgebra de Boole}
+
+\begin{teoriacaixa}
+\textbf{Álgebra de Boole.} Uma \keyword{álgebra de Boole} é um reticulado $(B, \vee, \wedge)$
+complementado e distributivo. Os operadores são ``soma'' ($+$ ou $\vee$), ``produto''
+($\cdot$ ou $\wedge$) e complemento ($'$). As leis de De Morgan afirmam:
+$(a + b)' = a'b'$ e $(ab)' = a' + b'$.
+\end{teoriacaixa}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 15.1 (= Exemplo 15.4) — Forma Soma-de-Produtos}
+\addcontentsline{toc}{section}{Exercício 15.1 (15.4)}
+
+\begin{teoriacaixa}
+\textbf{Definições.}
+Um \keyword{produto fundamental} é um produto de literais sem repetição. Uma
+\keyword{expressão soma-de-produtos} é um produto fundamental ou uma soma de produtos
+fundamentais nenhum dos quais está contido noutro (lei da absorção: $P + PQ = P$).
+\end{teoriacaixa}
+
+\textbf{Enunciado.}
+\[
+  E_1 = xz' + y'z + xyz' \qquad E_2 = xz' + x'yz' + xy'z.
+\]
+Mostre que $E_1$ não é uma expressão soma-de-produtos e simplifique-a. Verifique que
+$E_2$ já é uma expressão soma-de-produtos.
+
+\medskip
+\textbf{Resolução.}
+
+Para $E_1$: o produto $xz'$ está \emph{contido} em $xyz'$ (pois $xyz' = xz' \cdot y$
+é mais restritivo). Pela lei da absorção ($P + PQ = P$):
+\begin{align*}
+  E_1 &= xz' + y'z + xyz'\\
+      &= xz' + xyz' + y'z \quad \text{(reordenação)}\\
+      &= xz'(1 + y) + y'z \quad \text{(factorização)}\\
+      &= xz' + y'z. \quad \text{(lei da identidade: } 1 + y = 1 \text{)}
+\end{align*}
+Agora $xz'$ e $y'z$ não se contêm mutuamente ($xz'$ tem $x$ mas não $y$; $y'z$ tem $z$
+mas não $x$). Logo $xz' + y'z$ é uma expressão soma-de-produtos.
+
+Para $E_2$: verificar que nenhum dos três produtos fundamentais contém outro:
+$xz'$, $x'yz'$, $xy'z$ têm variáveis e complementos distintos tal que nenhum é
+submúltiplo de outro. Logo $E_2$ já é uma expressão soma-de-produtos.
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 15.2 (= Exemplo 15.5) — Algoritmo para Forma Soma-de-Produtos}
+\addcontentsline{toc}{section}{Exercício 15.2 (15.5)}
+
+\textbf{Enunciado.} Reduza $E = ((xy)'z)'((x'+z)(y'+z'))'$ à forma soma-de-produtos.
+
+\medskip
+\textbf{Resolução.}
+
+\passo{1} Aplicar De Morgan e involução para mover os complementos para dentro, até
+que se apliquem apenas a variáveis:
+\begin{align*}
+  E &= ((xy)'z)' \cdot ((x'+z)(y'+z'))'\\
+    &= \bigl((xy)'' + z'\bigr) \cdot \bigl((x'+z)' + (y'+z')'\bigr)\\
+    &= (xy + z') \cdot (xz' + yz).
+\end{align*}
+
+\passo{2} Distribuir para obter soma de produtos:
+\begin{align*}
+  E &= xy \cdot xz' + xy \cdot yz + xz' \cdot z' + yz \cdot z'\\
+    &= xyxz' + xyyz + xz'z' + yzz'.
+\end{align*}
+
+\passo{3} Simplificar usando idempotência ($xx = x$), complemento ($zz' = 0$) e
+identidade ($z'z' = z'$):
+\begin{align*}
+  xyxz' &= xyz', &  xyyz &= xyz, &  xz'z' &= xz', & yzz' &= 0.
+\end{align*}
+Logo $E = xyz' + xyz + xz' + 0 = xyz' + xyz + xz'$.
+
+\passo{4} Absorção: $xz'$ está contido em $xyz'$ (pois $xyz' = xz' \cdot y$), logo
+$xz' + xyz' = xz'$. Eliminando $xyz'$ e o $0$:
+\[
+  E = xyz + xz'.
+\]
+Esta é a expressão soma-de-produtos final.
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 15.3 (= Exemplo 15.6) — Forma Soma-de-Produtos Completa}
+\addcontentsline{toc}{section}{Exercício 15.3 (15.6)}
+
+\begin{teoriacaixa}
+\textbf{Forma soma-de-produtos completa (canónica).} Uma expressão é \keyword{completa}
+se cada produto fundamental (minterm) envolve \emph{todas} as $n$ variáveis.
+Para completar um produto $P$ que não contenha a variável $x_i$, multiplica-se pelo
+factor $(x_i + x_i') = 1$:
+\[
+  P = P(x_i + x_i') = Px_i + Px_i'.
+\]
+\end{teoriacaixa}
+
+\textbf{Enunciado.} Exprima $E(x,y,z) = x(y'z)'$ na forma soma-de-produtos completa.
+
+\medskip
+\textbf{Resolução.}
+
+\passo{1} Reduzir a uma forma soma-de-produtos (Algoritmo 15.1):
+\begin{align*}
+  E &= x(y'z)' = x(y'' + z') = x(y + z') = xy + xz'.
+\end{align*}
+
+\passo{2} Completar cada produto fundamental (Algoritmo 15.2). Cada produto deve conter
+$x$, $y$ e $z$.
+
+\begin{itemize}
+  \item $xy$ não contém $z$: multiplicar por $(z + z')$:
+        \[
+          xy = xy(z + z') = xyz + xyz'.
+        \]
+  \item $xz'$ não contém $y$: multiplicar por $(y + y')$:
+        \[
+          xz' = xz'(y + y') = xyz' + xy'z'.
+        \]
+\end{itemize}
+
+Reunindo (eliminando duplicados, pois $xyz'$ aparece duas vezes):
+\[
+  E = xyz + xyz' + xy'z'.
+\]
+Esta é a forma soma-de-produtos completa de $E$.
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 15.4 (= Exemplo 15.7) — Consenso de Produtos Fundamentais}
+\addcontentsline{toc}{section}{Exercício 15.4 (15.7)}
+
+\begin{teoriacaixa}
+\textbf{Consenso.} O \keyword{consenso} de $P_1$ e $P_2$ (quando exactamente uma
+variável $x_k$ aparece não-complementada num e complementada no outro) obtém-se:
+eliminando $x_k$ e $x_k'$ e multiplicando os literais restantes (sem repetição).
+Lema: $P_1 + P_2 + Q = P_1 + P_2$ onde $Q$ é o consenso.
+\end{teoriacaixa}
+
+\textbf{Determine o consenso $Q$ para:}
+
+\begin{enumerate}[label=(\alph*)]
+  \item $P_1 = xyz's$ e $P_2 = xy't$: a variável $y$ aparece sem complemento em $P_1$
+        e complementada em $P_2$. Elimina-se $y$ e $y'$ e multiplica-se o resto:
+        \[
+          Q = x \cdot z' \cdot x \cdot t = xz'st \quad \text{(sem repetição de } x\text{).}
+        \]
+
+  \item $P_1 = xy'$ e $P_2 = y$: eliminar $y$ e $y'$, restam $x$ (de $P_1$) e nada
+        (de $P_2$). Logo $Q = x$.
+
+  \item $P_1 = x'yz$ e $P_2 = x'yt$: \emph{nenhuma} variável aparece em complementos
+        opostos. Não existe consenso.
+
+  \item $P_1 = x'yz$ e $P_2 = xyz'$: \emph{duas} variáveis ($x$ e $z$) aparecem em
+        complementos opostos. O consenso não é definido quando há mais de uma tal variável.
+\end{enumerate}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 15.5 (= Exemplo 15.8) — Método do Consenso para Implicantes Primos}
+\addcontentsline{toc}{section}{Exercício 15.5 (15.8)}
+
+\textbf{Enunciado.} Seja $E = xyz + x'z' + xyz' + x'y'z + x'yz'$. Encontre os
+implicantes primos de $E$ pelo método do consenso.
+
+\medskip
+\textbf{Resolução.}
+
+\passo{1} Eliminar produtos redundantes (lei da absorção: se $P_i \supseteq P_j$,
+eliminar $P_i$):
+\[
+  E = xyz + x'z' + xyz' + x'y'z \quad\text{($x'yz'$ inclui $x'z'$ pois $x'z' \subseteq x'yz'$? Não — é ao contrário: $x'z'$ está em $x'yz'$, logo elimina-se $x'yz'$).}
+\]
+Verificando: $x'z' = x' \cdot z'$ sem restrição em $y$, enquanto $x'yz' = x' \cdot y \cdot z'$.
+Como $x'z'$ é mais geral (``inclui'' $x'yz'$ no sentido de $P+PQ=P$), elimina-se $x'yz'$:
+\[
+  E = xyz + x'z' + xyz' + x'y'z.
+\]
+
+\passo{2} Adicionar consensos novos. Consenso de $xyz$ e $xyz'$: variável $z$ oposta.
+$Q = xy$. Adicionamos $xy$:
+\[
+  E = xyz + x'z' + xyz' + x'y'z + xy.
+\]
+
+\passo{3} $xyz$ e $xyz'$ estão ambos contidos em $xy$ (absorção): eliminam-se.
+\[
+  E = x'z' + x'y'z + xy.
+\]
+
+\passo{4} Consenso de $x'z'$ e $x'y'z$: variável $z$ oposta. $Q = x'y'$.
+\[
+  E = x'z' + x'y'z + xy + x'y'.
+\]
+
+\passo{5} $x'y'z$ inclui $x'y'$: eliminar $x'y'z$.
+\[
+  E = x'z' + xy + x'y'.
+\]
+
+\passo{6} Consenso de $x'z'$ e $xy$: variável $x$ oposta. $Q = yz'$.
+\[
+  E = x'z' + xy + x'y' + yz'.
+\]
+
+Nenhuma nova absorção ou consenso é possível. Os \keyword{implicantes primos} de $E$
+são $x'z'$, $xy$, $x'y'$ e $yz'$.
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício 15.6 (= Exemplo 15.9) — Forma Mínima Soma-de-Produtos}
+\addcontentsline{toc}{section}{Exercício 15.6 (15.9)}
+
+\textbf{Enunciado.} Use os implicantes primos do Exercício 15.5 para encontrar a forma
+mínima soma-de-produtos de $E = x'z' + xy + x'y' + yz'$.
+
+\medskip
+\textbf{Resolução.}
+
+\passo{1} Expandir cada implicante primo à forma soma-de-produtos completa:
+\begin{align*}
+  x'z' &= x'z'(y+y') = x'yz' + x'y'z',\\
+  xy   &= xy(z+z') = xyz + xyz',\\
+  x'y' &= x'y'(z+z') = x'y'z + x'y'z',\\
+  yz'  &= yz'(x+x') = xyz' + x'yz'.
+\end{align*}
+
+\passo{2} Os minterms de $x'z'$ são $\{x'yz',\, x'y'z'\}$. Verificar se estes aparecem
+nos minterms de outros implicantes: $x'yz' \in yz'$ e $x'y'z' \in x'y'$. Ambos estão
+cobertos. Logo $x'z'$ é \emph{supérfluo} e pode ser eliminado:
+\[
+  E = xy + x'y' + yz'.
+\]
+
+\passo{3} Verificar se $xy$, $x'y'$ ou $yz'$ são supérfluos: nenhum dos seus minterms
+está coberto apenas pelos outros dois. Logo a forma mínima soma-de-produtos é:
+\[
+  \boxed{E = xy + x'y' + yz'.}
+\]
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercícios 15.7--15.13 — Portas Lógicas e Circuitos}
+\addcontentsline{toc}{section}{Exercícios 15.7--15.13}
+
+\begin{teoriacaixa}
+\textbf{Portas lógicas básicas.}
+\begin{itemize}[noitemsep]
+  \item \textbf{Porta OR}: $Y = A + B$ ($Y = 0$ s.s.e. $A = B = 0$).
+  \item \textbf{Porta AND}: $Y = A \cdot B$ ($Y = 1$ s.s.e. $A = B = 1$).
+  \item \textbf{Porta NOT} (inversor): $Y = A'$ ($Y = 1$ s.s.e. $A = 0$).
+\end{itemize}
+Qualquer expressão Booleana pode ser implementada com combinações destas três portas.
+Um \keyword{circuito lógico} é uma rede dessas portas.
+\end{teoriacaixa}
+
+\subsection*{Exercício 15.7 — Porta OR}
+
+A porta OR com entradas $A$ e $B$ tem saída $Y = A + B$. A tabela de verdade:
+
+\begin{center}
+\begin{tabular}{cc|c}
+  \toprule
+  $A$ & $B$ & $Y = A+B$\\
+  \midrule
+  0 & 0 & 0\\
+  0 & 1 & 1\\
+  1 & 0 & 1\\
+  1 & 1 & 1\\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+A saída é 0 apenas quando \emph{ambas} as entradas são 0. Com $n$ entradas,
+$Y = 0$ s.s.e. todas as entradas são 0.
+
+\subsection*{Exercício 15.8 — Porta AND}
+
+A porta AND com entradas $A$ e $B$ tem saída $Y = A \cdot B$. A tabela de verdade:
+
+\begin{center}
+\begin{tabular}{cc|c}
+  \toprule
+  $A$ & $B$ & $Y = AB$\\
+  \midrule
+  0 & 0 & 0\\
+  0 & 1 & 0\\
+  1 & 0 & 0\\
+  1 & 1 & 1\\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+A saída é 1 apenas quando \emph{ambas} as entradas são 1.
+
+\subsection*{Exercício 15.9 — Porta NOT e Implementação de Circuitos}
+
+A porta NOT tem $Y = A'$: inverte o bit de entrada.
+Um circuito lógico que implementa $E = xy + x'y' + yz'$ (forma mínima do Exercício 15.6)
+precisaria de:
+\begin{enumerate}
+  \item Inversores para obter $x'$, $y'$, $z'$.
+  \item Três portas AND de dois inputs: $x \cdot y$, $x' \cdot y'$, $y \cdot z'$.
+  \item Uma porta OR de três inputs: $xy + x'y' + yz'$.
+\end{enumerate}
+No total: 3 inversores + 3 AND + 1 OR = 7 portas.
+
+\subsection*{Exercícios 15.10--15.13}
+
+Estes exercícios aprofundam a análise e síntese de circuitos lógicos. A metodologia geral é:
+\begin{enumerate}
+  \item Partir da expressão Booleana (ou tabela de verdade).
+  \item Minimizar usando soma-de-produtos e implicantes primos.
+  \item Implementar com portas OR, AND e NOT.
+  \item Verificar equivalência através da tabela de verdade.
+\end{enumerate}
+
+\newpage
+%% ═════════════════════════════════════════════════════════════════════════════
+\part*{Apêndice B — Sistemas Algébricos}
+\addcontentsline{toc}{part}{Apêndice B — Sistemas Algébricos}
+
+\begin{teoriacaixa}
+\textbf{Conceitos fundamentais.}
+Dado um conjunto $S$ com uma operação binária $*$:
+\begin{itemize}[noitemsep]
+  \item $*$ é \keyword{associativa} se $(a * b) * c = a * (b * c)$.
+  \item $*$ é \keyword{comutativa} se $a * b = b * a$.
+  \item $e$ é \keyword{elemento neutro} se $a * e = e * a = a$.
+  \item $b$ é o \keyword{inverso} de $a$ se $a * b = b * a = e$.
+  \item $(S, *)$ é um \keyword{semigrupo} se $*$ é associativa.
+  \item $(S, *)$ é um \keyword{monóide} se é semigrupo com elemento neutro.
+  \item $(S, *)$ é um \keyword{grupo} se é monóide e todo elemento tem inverso.
+\end{itemize}
+\end{teoriacaixa}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício B.1 (= Exemplo B.4) — Inversos em $\mathbb{Q}$}
+\addcontentsline{toc}{section}{Exercício B.1 (B.4)}
+
+\textbf{Enunciado.} Nos racionais $\mathbb{Q}$, identifique os elementos neutros e os
+inversos para a adição e a multiplicação.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{Adição:} elemento neutro $= 0$ (pois $a + 0 = 0 + a = a$).
+        O inverso de $a$ é $-a$ (pois $a + (-a) = 0$).
+        Exemplo: os inversos aditivos de $-3$ e $3$ são $3$ e $-3$, respectivamente,
+        pois $(-3) + 3 = 3 + (-3) = 0$.
+
+  \item \textbf{Multiplicação:} elemento neutro $= 1$ (pois $a \cdot 1 = 1 \cdot a = a$).
+        O inverso de $a \ne 0$ é $1/a$ (pois $a \cdot (1/a) = 1$).
+        Exemplo: os inversos multiplicativos de $-3$ são $-1/3$:
+        $(-3)(-1/3) = (-1/3)(-3) = 1$.
+        \textbf{Atenção:} $0$ não tem inverso multiplicativo (divisão por zero indefinida).
+\end{enumerate}
+
+\medskip
+\noindent\textit{Nota estrutural:} $(\mathbb{Q}, +)$ é um grupo (abeliano). $(\mathbb{Q}\setminus\{0\}, \cdot)$
+é também um grupo (abeliano). Em conjunto, $\mathbb{Q}$ é um \keyword{corpo}.
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício B.2 (= Exemplo B.5) — Semigrupos e Monóides}
+\addcontentsline{toc}{section}{Exercício B.2 (B.5)}
+
+\textbf{Enunciado.} Classifique como semigrupo ou monóide:
+$(a)$ $(\mathbb{N}, +)$ e $(\mathbb{N}, \times)$;\;
+$(b)$ $F(S)$ (funções $S \to S$ com composição);\;
+$(c)$ $(S, *)$ e $(S, \cdot)$ com as tabelas dadas.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item $(\mathbb{N}, +)$: adição é associativa, logo é semigrupo. Mas $\mathbb{N}$ não
+        contém $0$ (inteiros positivos), pelo que \emph{não} há elemento neutro.
+        \textbf{Semigrupo, não monóide.}
+
+        $(\mathbb{N}, \times)$: multiplicação é associativa e $1 \in \mathbb{N}$ é
+        elemento neutro. \textbf{Monóide.}
+
+  \item $F(S)$ (composição $\circ$): composição de funções é sempre associativa ($(f \circ g) \circ h = f \circ (g \circ h)$). A função identidade $\text{id}_S$ serve como elemento neutro. \textbf{Monóide.}
+
+  \item Para a operação $*$ definida por $x * y = x$ (toma sempre o valor do primeiro operando):
+        \[
+          (x * y) * z = x * z = x \quad\text{e}\quad x * (y * z) = x * y = x.
+        \]
+        Logo $*$ é associativa. \textbf{Semigrupo} (mas verificar se há neutro: $e * y = e$
+        para todo $y$ pede $e = e$, e $y * e = y$ pede $y = y$; portanto qualquer elemento
+        é neutro à direita, mas nenhum é neutro à esquerda se o conjunto tiver mais de um
+        elemento, logo não é monóide).
+
+        Para a operação $\cdot$ com a tabela dada: verificou-se que
+        $(b \cdot c) \cdot c = a \cdot c = c$ mas $b \cdot (c \cdot c) = b \cdot a = b$.
+        Como $c \ne b$, $\cdot$ \textbf{não é associativa}, logo $(S, \cdot)$ \textbf{não é semigrupo}.
+\end{enumerate}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício B.3 (= Exemplo B.6) — Subsemigrupos}
+\addcontentsline{toc}{section}{Exercício B.3 (B.6)}
+
+\textbf{Enunciado.} Determine quais dos subconjuntos são subsemigrupos.
+
+\begin{enumerate}[label=(\alph*)]
+  \item $A$ (pares) e $B$ (ímpares) em $(\mathbb{N}, \times)$ e $(\mathbb{N}, +)$.
+
+  \medskip
+  \textbf{Resolução.}
+  \begin{itemize}
+    \item $(A, \times)$: par $\times$ par $=$ par. $A$ é fechado. \textbf{Subsemigrupo.}
+    \item $(B, \times)$: ímpar $\times$ ímpar $=$ ímpar. $B$ é fechado. \textbf{Subsemigrupo.}
+    \item $(A, +)$: par $+$ par $=$ par. $A$ é fechado. \textbf{Subsemigrupo.}
+    \item $(B, +)$: ímpar $+$ ímpar $=$ par $\notin B$. $B$ \textbf{não} é fechado.
+          \textbf{Não é subsemigrupo.}
+  \end{itemize}
+
+  \item $H$ (palavras de comprimento par) no semigrupo livre $F = F(\{a,b\})$.
+
+  \medskip
+  \textbf{Resolução.} Se $u, v \in H$ têm comprimento par, então $|uv| = |u| + |v|$
+  é par $+$ par $=$ par. Logo $uv \in H$. $H$ é fechado. \textbf{Subsemigrupo.}
+\end{enumerate}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício B.4 (= Exemplo B.7) — Relações de Congruência}
+\addcontentsline{toc}{section}{Exercício B.4 (B.7)}
+
+\begin{teoriacaixa}
+\textbf{Relação de congruência.} Uma relação de equivalência $\sim$ em $S$ é uma
+\keyword{relação de congruência} se for compatível com a operação:
+$a \sim a'$ e $b \sim b'$ implica $ab \sim a'b'$.
+O \keyword{quociente} $S/{\sim}$ é então um semigrupo com $[a][b] = [ab]$.
+\end{teoriacaixa}
+
+\textbf{Enunciado.} Verifique que:
+$(a)$ em $F(\{a,b,\ldots\})$, a relação $u \sim u'$ se $|u| = |u'|$ é congruência;
+$(b)$ a congruência módulo $m$ em $\mathbb{Z}$ é uma relação de congruência.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{enumerate}[label=(\alph*)]
+  \item Se $|u| = |u'| = p$ e $|v| = |v'| = q$, então:
+        \[
+          |uv| = |u| + |v| = p + q = |u'| + |v'| = |u'v'|.
+        \]
+        Logo $uv \sim u'v'$. É uma relação de congruência.
+
+        O quociente $F/{\sim}$ identifica-se com $(\mathbb{N}, +)$: cada classe de
+        equivalência é identificada pelo comprimento da palavra.
+
+  \item Em $\mathbb{Z}$, se $a \equiv c \pmod{m}$ e $b \equiv d \pmod{m}$, então:
+        \begin{align*}
+          a + b &\equiv c + d \pmod{m},\\
+          ab    &\equiv cd \pmod{m}.
+        \end{align*}
+        Estas propriedades (Teorema 11.22 do livro) mostram que $\equiv \pmod{m}$ é
+        compatível com adição e multiplicação, sendo portanto uma relação de congruência
+        em $(\mathbb{Z}, +)$ e em $(\mathbb{Z}, \cdot)$.
+
+        O quociente $\mathbb{Z}/{\equiv_m}$ é o conjunto $\mathbb{Z}_m = \{0, 1, \ldots, m-1\}$
+        com aritmética módulo $m$.
+\end{enumerate}
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício B.5 — Unicidade do Elemento Neutro e dos Inversos}
+\addcontentsline{toc}{section}{Exercício B.5}
+
+\textbf{Enunciado (Teorema B.2).} Se $e$ é neutro à esquerda e $f$ é neutro à direita
+para uma operação $*$ em $S$, então $e = f$.
+
+\medskip
+\textbf{Resolução.}
+
+\begin{align*}
+  e * f &= f \quad\text{(porque } e \text{ é neutro à esquerda)},\\
+  e * f &= e \quad\text{(porque } f \text{ é neutro à direita)}.
+\end{align*}
+Logo $e = f$. $\square$
+
+\medskip
+\noindent\textbf{Corolário.} O elemento neutro (se existir) é \emph{único}. De facto,
+se $e_1$ e $e_2$ são ambos neutros, então $e_1 = e_1 * e_2 = e_2$.
+
+%% ─────────────────────────────────────────────────────────────────────────────
+\section*{Exercício B.6 — Leis de Cancelamento}
+\addcontentsline{toc}{section}{Exercício B.6}
+
+\textbf{Enunciado.} A operação de multiplicação de matrizes não satisfaz as leis de
+cancelamento. Verifique com o exemplo dado.
+
+\medskip
+\textbf{Resolução.}
+
+No livro, os seguintes dados são fornecidos:
+\[
+  A = \begin{pmatrix} 1 & 1 \\ 0 & 0 \end{pmatrix}, \quad
+  B = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}, \quad
+  C = \begin{pmatrix} 0 & -3 \\ 1 & 5 \end{pmatrix}, \quad
+  D = \begin{pmatrix} 1 & 2 \\ 0 & 0 \end{pmatrix}.
+\]
+
+Calculemos $AB$ e $AC$:
+\begin{align*}
+  AB &= \begin{pmatrix}1&1\\0&0\end{pmatrix}\begin{pmatrix}1&1\\0&1\end{pmatrix}
+       = \begin{pmatrix}1\cdot1+1\cdot0 & 1\cdot1+1\cdot1\\
+                        0\cdot1+0\cdot0 & 0\cdot1+0\cdot1\end{pmatrix}
+       = \begin{pmatrix}1&2\\0&0\end{pmatrix} = D,\\[6pt]
+  AC &= \begin{pmatrix}1&1\\0&0\end{pmatrix}\begin{pmatrix}0&-3\\1&5\end{pmatrix}
+       = \begin{pmatrix}0+1 & -3+5\\0+0 & 0+0\end{pmatrix}
+       = \begin{pmatrix}1&2\\0&0\end{pmatrix} = D.
+\end{align*}
+
+Portanto $AB = AC = D$, mas $B \ne C$. Isto demonstra que a lei de cancelamento
+à esquerda \emph{falha} para a multiplicação de matrizes: $AB = AC$ \emph{não}
+implica $B = C$.
+
+\medskip
+\noindent\textit{Porquê?} A lei de cancelamento é equivalente a dizer que a
+matriz $A$ é invertível ($\det A \ne 0$). Neste caso,
+$\det A = 1 \cdot 0 - 1 \cdot 0 = 0$, logo $A$ é singular e não cancelável.
+
+%% ═════════════════════════════════════════════════════════════════════════════
+\newpage
+\section*{Conclusão}
+\addcontentsline{toc}{section}{Conclusão}
+
+Este documento cobriu os exercícios resolvidos dos seguintes capítulos:
+
+\begin{itemize}
+  \item \textbf{Capítulo 10} (Exercícios 10.10--10.12): estrutura e representação de
+        árvores binárias (árvores similares, representação ligada e sequencial).
+  \item \textbf{Capítulo 12} (Exercícios 12.1--12.21): linguagens formais, expressões
+        regulares e autómatos finitos, incluindo construções clássicas (complementar,
+        interseção, união).
+  \item \textbf{Capítulo 13} (Exercícios 13.1--13.5): máquinas de Turing — quadros,
+        transições, ciclos e reconhecimento de linguagens.
+  \item \textbf{Capítulo 14} (Exercícios 14.1--14.30): conjuntos parcialmente ordenados,
+        diagramas de Hasse, supremo, ínfimo e reticulados.
+  \item \textbf{Capítulo 15} (Exercícios 15.1--15.13): álgebra de Boole, simplificação
+        de expressões, forma canónica e circuitos lógicos.
+  \item \textbf{Apêndice B} (Exercícios B.1--B.6): sistemas algébricos — semigrupos,
+        monóides, substrutaturas, relações de congruência e leis de cancelamento.
+\end{itemize}
+
+\end{document}
