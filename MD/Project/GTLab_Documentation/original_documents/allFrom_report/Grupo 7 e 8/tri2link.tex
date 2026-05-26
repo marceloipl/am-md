@@ -1,0 +1,68 @@
+
+\chapter{MATLAB Code Analysis: \texttt{tri2link.m}}
+\date{}
+
+\maketitle
+
+\section{Overview}
+
+\textbf{What is the main purpose of this file?} \\
+The main purpose of this script is to convert a 3D triangular mesh (represented by face indices $T$ and vertex coordinates $V$) into an ``anchored link'' data structure. This structure consists of geometric edge information ($g$), an edge-connecting permutation map ($\phi$), and a source vertex map ($s$).
+
+\textbf{What type of analysis or calculation does it perform?} \\
+It performs topological indexing and discrete geometric calculations. Specifically, it maps out the connectivity of directed edges within each triangle and calculates the logarithmic ``amplitwist''---the natural logarithm of the length ratio and the angle difference (twist) between adjacent directed edges along a face.
+
+\textbf{What is the mathematical/theoretical context?} \\
+The code operates within the context of \textbf{discrete differential geometry}, \textbf{algebraic topology} (specifically simplicial complexes), and \textbf{graph theory} (directed graphs embedded on surfaces). Calculating ratios and angles to form a complex variable ($g = \log(r) + i\theta$) strongly relates to discrete conformal geometry and discrete complex analysis.
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{1. Setup and Variable Initialization}
+\textbf{Explanation:} \\
+This section initializes the necessary utility functions and extracts the dimensions of the input matrix. It creates an anonymous function \texttt{id} that generates an identity index map (1 to $N$) for any given vector. It then extracts the dimensions of the triangle matrix $T$, determining the number of faces (\texttt{nT}) and the number of vertices/edges per face (\texttt{nf}, which is inherently 3 for triangles).
+
+\begin{lstlisting}[language=Matlab]
+id=@(x) (1:numel(x))';    
+[nT,nf]=size(T);   
+\end{lstlisting}
+
+\subsection{2. Topological Mapping ($s$ and $\phi$)}
+\textbf{Explanation:} \\
+This block constructs the topological connectivity of the mesh. First, it transposes and flattens the triangle matrix $T$ into a column vector $s$, which effectively creates a list of source vertices for every directed edge in the mesh. Next, it creates $\phi$, a permutation map for the edges. It reshapes a linear index array, shifts the rows by one position (moving the first edge to the second, second to third, and third to first), and flattens it. The result is a mapping where each edge points to the next consecutive edge within the same triangular face.
+
+\begin{lstlisting}[language=Matlab]
+s=T'; 
+s=s(:); 
+phi=reshape(1:nf*nT,nf,nT);
+phi=phi([2:nf 1],:);
+phi=phi(:); 
+\end{lstlisting}
+
+\subsection{3. Geometric Calculations ($g$)}
+\textbf{Explanation:} \\
+This section calculates the discrete geometric properties. It determines the target vertex $t$ for each edge using the $\phi$ map. It then defines anonymous functions to compute 3D direction vectors (\texttt{dir}) and their Euclidean norms (\texttt{norm}). 
+
+Using these, it calculates the \texttt{ampli} (the ratio of the length of the next edge to the current edge) and the \texttt{twist} (the angle between the current edge and the next edge, calculated using the dot product and arccosine). Finally, it constructs the complex vector $g$ using the formula $g = \log(\text{ampli}) + 1i \cdot \text{twist}$.
+
+\begin{lstlisting}[language=Matlab]
+t=s(phi); idA=id(s);
+dir=@(a) V(t(a),:)-V(s(a),:); 
+norm=@(v) sqrt(dot(v',v')');   
+ampli=norm(dir(phi))./norm(dir(idA));
+twist=acos(dot(dir(phi)',dir(idA)')'./(norm(dir(phi)).*norm(dir(idA))));
+g=log(ampli)+1i*twist;
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+
+\textbf{Explanation:} \\
+The \texttt{tri2link} function strictly performs mathematical transformations and data restructuring; it \textbf{does not generate any graphical plots, figures, or console visualizations natively}. 
+
+If executed, the expected outputs are purely numeric arrays residing in the MATLAB workspace:
+\begin{itemize}
+    \item \textbf{$g$}: A complex double column vector representing the geometric relationship (log-length ratio and angle) of consecutive edges.
+    \item \textbf{$\phi$}: An integer column vector acting as a permutation map connecting adjacent edges.
+    \item \textbf{$s$}: An integer column vector containing the source vertex indices for every edge.
+\end{itemize}
+
+To visualize these results, external MATLAB functions would be required. For example, one could use \texttt{trisurf(T, V(:,1), V(:,2), V(:,3))} to plot the original 3D mesh, or use the \texttt{digraph} and \texttt{plot} functions combined with the source $s$ and target $t$ arrays to visually represent the directed graph of the mesh on a 3D axis.

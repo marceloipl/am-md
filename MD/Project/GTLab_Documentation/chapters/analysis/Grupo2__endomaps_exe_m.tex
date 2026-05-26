@@ -1,0 +1,172 @@
+
+\chapter{Análise do Código MATLAB: endomaps\_exe.m}
+
+\subsection*{Visão Geral Inicial}
+\subsection* { \hspace*{0.2cm} What is the main purpose of this file?}
+The primary purpose of this MATLAB function is to generate, compute, and visualize specific binary relations on the set of all endomaps (functions from a set to itself) for a given finite set X. It checks whether these relations form equivalence relations or partial orders, and then visualizes the underlying structural graphs.
+
+
+\subsection*{ \hspace*{0.2cm} What type of analysis or calculation does it perform?}
+This function performs combinatorial matrix computations to build adjacency matrices representing binary relations. Specifically, it maps between linear indices and function representations  (base-$n_X$ expansions) to efficiently compute compositions of functions. It then analyzes the properties of the resulting adjacency matrices (like reflexivity, transitivity, and anti-symmetry) using external helper functions, ultimately constructing quotient spaces (coequalizers) for visualization.
+
+\subsection*{ \hspace*{0.2cm} What is the mathematical/theoretical context?}
+The code is rooted in Discrete Mathematics and Abstract Algebra, specifically focusing on: 
+\begin{itemize}
+    \item Transformation Monoids: The set of all endomaps End(X) on a finite set.
+\end{itemize}
+\begin{itemize}
+    \item Binary Relations: Constructing relations based on left/right functional composition with invertible (bijective) or monotone maps.
+    \item Equivalence Classes and Partial Orders: Determining if a relation partitions the set or establishes a hierarchy (Hasse diagrams).
+\end{itemize}
+\begin{itemize}
+    \item Grafo Theory and Homology: Visualizing relations as directed graphs and analyzing their connected components.
+\end{itemize}
+
+
+\section*{Análise Passo a Passo do Código}
+
+\subsection*{ \hspace*{0.2cm} Block 1: Entrada Validation and Default Initialization}
+Explanation: This section handles the input arguments rel (the specific relation to compute, from 1 to 6) and nX (the cardinality of the set X). If the user does not provide these arguments or provides invalid ones, the try-catch block catches the error and initializes them to default values ($n_X = 3$ and $rel = 1$), issuing a warning to the user.
+
+\begin{lstlisting}
+try
+nX < 9; rel < 7
+catch
+nX=3; rel=1; 
+warning('Input nX was set to 3 and input(rel) was set to
+1')
+end
+\end{lstlisting}
+
+
+\subsection*{ \hspace*{0.2cm} Block 2: Endomap Setup and Bijections}
+Explanation: This block establishes the foundational math for the set $X = \{1, \dots, n_X\}$. The total number of possible endomaps is $n_B = n_X^{n_X}$. Because dealing with arrays of functions is computationally heavy, the author creates anonymous functions (i2f and f2i) to establish a bijection between a single linear index $i \in \{1, \dots, n_B\}$ and its functional representation (a row vector). i2f uses base-$n_X$ conversion to map an integer to a function, and f2i reverses this. composerows is defined to compose two endomaps computationally.
+
+\begin{lstlisting}
+eyeX=(1:nX);  
+nB=nX^nX;
+B=(1:nB)';  
+
+composerows=@(g,f) g(sub2ind(size(f),repmat((1:size(f,1))'
+,1,size(f,2)),f));
+
+i2f=@(i) mod(floor(bsxfun(@rdivide,i(:)-1,nX.^((1:nX)-1)))
+,nX)+1; 
+f2i=@(f) (f-1)*(nX.^((1:nX)'-1))+1;
+\end{lstlisting}
+
+\subsection*{ \hspace*{0.2cm} Block 3: Identifying Monotone and Invertible Maps}
+ Explanation: Here, the code evaluates all $n_X^{n_X}$ endomaps to find specific subsets with algebraic properties. It sorts the functional rows to find monotone maps (where the elements are in non-decreasing order) and invertible maps (permutations, where the sorted row equals the identity map eyeX). It stores the indices of monotone maps in $\phi$, invertible maps in $\alpha$, and the inverses of the invertible maps in alphainv.
+ 
+\begin{lstlisting}
+[fsorted,finvert]=sort(i2f(B),2);
+phi=find(f2i(fsorted)==B); 
+alpha=find(all(fsorted==repmat(eyeX,nB,1),2)); 
+alphainv=f2i(finvert(alpha,:));
+\end{lstlisting}
+
+
+
+\subsection*{ \hspace*{0.2cm} Block 4: Relational Computation and Property Analysis}
+ Explanation:The script calls the subfunction binaryrel to compute the adjacency matrix $R$ for the user-selected relation. It then passes this matrix to an external function binrelsanalyser, which checks the mathematical properties of $R$ (e.g., if it is an equivalence relation or a partial order) and returns a property flag (prop), a transitive closure (Rtran), and an antisymmetric reduction (Ranti).
+
+ \begin{lstlisting}
+R=binaryrel(rel,nX,phi,alpha,alphainv);
+[prop,Rtran,Ranti]=binrelsanalyser(R);
+\end{lstlisting}
+
+
+
+\subsection*{ \hspace*{0.2cm} Block 5: Equivalence Relation Handling and Visualization (prop == 3)}
+ Explanation:If prop equals 3, the relation $R$ is confirmed as an equivalence relation. The script finds the interacting edges, computes the quotient relation (coequalizer) to group the maps into equivalence classes, and prints the total number of classes. It then calculates the graph homology and plots the directed graph using linkdraw24.
+
+ \begin{lstlisting}
+if prop==3
+fprintf('The relation R%d is an equivalence relation\n',
+rel)    
+[s,t]=find(R);
+qR=(coequalizer(s,t));
+disp('Number of equivalence classes')
+numel(unique(qR))   
+g=homology(qR);
+linkdraw24(g,qR,(1:numel(qR))',0,0);
+\end{lstlisting}
+
+
+\subsection*{\hspace*{0.2cm} Block 6: Partial Order Handling and Visualization (prop == 5)}
+Explanation:
+If prop equals 5, the relation lacks anti-symmetry but can be reduced to a partial order. The code corrects this failure by creating a partition (equivalence classes of mutually related elements). It creates a two-panel subplot: the top plot shows the equivalence classes formed to fix the anti-symmetry, and the bottom plot computes and displays the Hasse diagram of the resulting pure partial order using linkdigraph24a to establish layout hierarchy.
+
+\begin{lstlisting}
+elseif prop==5
+fprintf('In correcting the failure of anti-symmetry for 
+the relation R%d the following partition is created\n', rel)
+[s,t]=find(R & R');
+qR=(coequalizer(s,t));
+disp('Number of equivalence classes')
+numel(unique(qR))   
+g=homology(qR);
+subplot(2,1,1)
+linkdraw24(g,qR,(1:numel(qR))',0,0);
+title('correction for the failure of anti-symmetry')
+fi=logical(sum(Ranti-eye(size(Ranti)),2));
+[s t]=find(Ranti-diag(fi));
+[phi,theta,in,out]=linkdigraph24a(s,t);
+g=homology(phi);
+subplot(2,1,2)
+linkdraw24(g,phi,s,0);
+end
+\end{lstlisting}
+
+\subsection*{\hspace*{0.2cm} Block 7: binaryrel Subfunction}
+Explanation:This local function calculates the specific $n_B \times n_B$ sparse adjacency matrix for the requested relation. It utilizes ndgrid to generate all combinations of elements from the base set $B$ and subsets $\alpha$ or $\phi$. Using the bijections defined earlier, it composes the functions (e.g., in Case 1, calculating $F_i(F_b(F_j))$ where $F_i$ and $F_j$ are invertible) and checks if the composition matches another map. It returns the resulting logical sparse matrix $R$.
+
+\begin{lstlisting}
+function R=binaryrel(rel,nX,phi,alpha,alphainv)
+% ... [setup omitted for brevity] ...
+switch rel
+case 1 
+I=alpha; J=alphainv; 
+I_=(1:numel(I))'; 
+[i,b]=ndgrid(I_,B); 
+j=J(i);   
+i=I(i);   
+Fi=i2f(i); 
+Fb=i2f(b);
+Fj=i2f(j);  
+m=f2i(composerows(Fi,composerows(Fb,Fj))); 
+R=logical(sparse(b(:),m(:),1));
+% ... [cases 2-6 follow similar logic] ...
+end 
+end
+\end{lstlisting}
+
+
+\subsection*{\hspace*{0.2cm} Saídas e Elementos Visuais Esperados}
+Based on the execution path, this code produces both console text and MATLAB figure windows.
+
+\subsubsection*{Console Saídas:}
+         \begin{itemize}
+            \item It will print either "The relation R[x] is an equivalence relation" or "In correcting the failure of anti-symmetry for the relation R[x] the following partition is created".
+        \end{itemize}
+        \begin{itemize}
+         \item It will output the integer representing the "Number of equivalence classes".
+        \end{itemize}
+
+    \subsubsection*{Visual Saídas (Gráficos)}
+        \begin{itemize}
+            \item If $R$ is an Equivalence Relation: A single standard 2D plot window will appear showing a directed graph. The nodes represent the $n_X^{n_X}$ endomaps, grouped visually into distinct, disconnected subgraphs. Each subgraph represents a single equivalence class.
+        \end{itemize}
+
+     \begin{itemize}
+             \item If $R$ requires Partial Order Correction: A figure window split into two subplots (using subplot(2,1,1) and subplot(2,1,2)) will appear.
+             
+             \begin{itemize}
+\item Top Plot: Titled "correction for the failure of anti-symmetry". This visualizes the cyclic, mutually-related nodes being grouped into unified equivalence classes.
+             \end{itemize}
+             
+             \begin{itemize}
+\item Bottom Plot: This represents the formal Hasse diagram of the resulting antisymmetric partial order $R_{anti}$. The axes generally don't have standard numerical meanings here; instead, the $Y$-axis visually represents the hierarchical "level" or rank of the partial order, with directed edges flowing downwards or upwards to denote the $\leq$ relation between the clustered endomap classes.
+             \end{itemize}
+    \end{itemize}
+

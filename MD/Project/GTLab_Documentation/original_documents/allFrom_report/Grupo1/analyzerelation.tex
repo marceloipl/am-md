@@ -1,0 +1,147 @@
+\chapter{MATLAB Code Analysis: \texttt{analyzerelation.m}}
+\author{}
+\date{}
+
+
+\maketitle
+
+\section{Initial Overview}
+
+\subsection*{What is the main purpose of this file?}
+The primary purpose of this file is to thoroughly analyze a binary relation provided as an adjacency matrix. It evaluates the relation's fundamental properties, computes its reflexive and transitive closures, and determines induced equivalence classes and partial orders. Furthermore, it includes tools to study the topological and algebraic structure (homology) of endomaps and visualize partial orders using Hasse diagrams.
+
+\subsection*{What type of analysis or calculation does it perform?}
+The script performs a mix of logical matrix operations and graph-theoretic calculations. It evaluates boolean properties like symmetry and transitivity. It calculates algebraic closures using iterative matrix multiplication. It also performs combinatorial evaluations to find orbits, connected components, and cyclic properties of mappings, effectively calculating the categorical coequalizers and homology characteristics.
+
+\subsection*{What is the mathematical/theoretical context?}
+The code operates deeply within the fields of \textbf{Graph Theory}, \textbf{Order Theory}, and \textbf{Category Theory/Algebraic Topology}. 
+\begin{itemize}
+    \item \textbf{Order Theory:} It evaluates partial orders and generates Hasse diagrams. 
+    \item \textbf{Category Theory:} It computes the categorical coequalizer of two maps.
+    \item \textbf{Topology/Dynamical Systems:} It calculates the ``homology'' of an endomap ($\phi: X \to X$), finding its geometric realization through orbits, cyclic components (attractors), and non-cyclic components (basins of attraction).
+\end{itemize}
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{Main Function: \texttt{analyzerelation}}
+\textbf{Explanation:} This is the entry-point function. It takes a binary adjacency matrix $R$ defined on a set $A$. It prints out whether the relation is reflexive, transitive, symmetric, or anti-symmetric. It then computes the transitive closure, the reflexive-transitive closure ($R^*$), and two specific partitions: $q$ (induced by the smallest equivalence relation containing $R$) and $p$ (induced by $R^* \cap (R^*)^T$, ensuring $R^*$ over $p$ is a partial order).
+
+\begin{lstlisting}[caption={Main Function Snippet}]
+function [Rstar,p,q]=analyzerelation(R)
+sprintf('is reflexive? %d \n',full(all(diag(R))))
+sprintf('is transitive? %d \n',full(all(all(logical(R*R)<=R))))
+sprintf('is symmetric? %d \n',isequal(R,R'))
+sprintf('is anti-symmetric? %d \n',full(all(all((R&R')<=eye(size(R))))))
+
+Rtran=transitiveclosure(R);
+Rstar=Rtran | eye(size(R)); % reflexive and transitive closure
+[d,c]=find(Rstar);
+q=coeq(d,c);
+[d,c]=find(Rstar&Rstar');
+p=coeq(d,c);
+end
+\end{lstlisting}
+
+\subsection{Transitive Closure: \texttt{transitiveclosure}}
+\textbf{Explanation:} This helper function takes a binary relation matrix $R_1$ and computes its transitive closure iteratively. It uses the logic that a relation is transitive if $R \cup R^2 = R$. It continuously updates the relation with $R + R \times R_1$ (using logical indexing to keep it binary) until the matrix stops changing, meaning it has converged.
+
+\begin{lstlisting}[caption={Transitive Closure Snippet}]
+function Rtran=transitiveclosure(R1)
+R=R1; % Get the transitive closure of R1
+Rtran=logical(R+R*R1);
+while ~isequal(R,Rtran)
+    R=Rtran;
+    Rtran=logical(R+R*R1);
+end
+end
+\end{lstlisting}
+
+\subsection{Hasse Diagram Generator: \texttt{hasse}}
+\textbf{Explanation:} This function takes the adjacency matrix of a partial order $R$ and a set of elements $D$, and computes the 2D coordinates ($x, y$) needed to draw a Hasse diagram. It first validates that $R$ is indeed a partial order. It determines the vertical ($y$) hierarchy by comparing out-degrees and in-degrees, and sets the horizontal ($x$) spacing to avoid overlaps. Finally, it normalizes the coordinates and uses the \texttt{quiver} function to draw lines between elements strictly where $R^2 = 2$ (representing the transitive reduction or immediate predecessors).
+
+\begin{lstlisting}[caption={Hasse Diagram Generator Snippet}]
+function [x,y]=hasse(R,D)
+s=sum(R)'-sum(R,2);
+[~,~,q]=unique(s);
+[qs,sq]=sort(q);
+y(sq)=s(sq);
+v=hist(qs,1:max(qs))';
+x(sq)=(mod((1:nD)'-1,v(qs))+1) - v(qs)/2  + 0.5*sq/nD;
+% ... normalization and quiver plotting logic follows
+\end{lstlisting}
+
+\subsection{Categorical Coequalizer: \texttt{coeq}}
+\textbf{Explanation:} Given a graph defined by maps $d, c: A \to B$, this function computes the categorical coequalizer $q$. In set theory, this acts as the smallest equivalence relation connecting elements mapped by $d$ and $c$. It builds an adjacency matrix $R_0$ from the maps, makes it symmetric, computes the transitive closure, and then outputs the partition array $q$.
+
+\begin{lstlisting}[caption={Categorical Coequalizer Snippet}]
+function [q,p1,p2]=coeq(d,c)
+nB=max(d); B=(1:nB)';
+R0=sparse(d,c,1,nB,nB);
+R1=triu(R0+R0');
+% ... calculates transitive closure Rtran here ...
+[s,t]=find(R+eye(nB));
+E=[s,t]; Erows=sortrows(E);
+p1=Erows(:,1); p2=Erows(:,2);
+q(p1)=p2; q=q(:);
+end
+\end{lstlisting}
+
+\subsection{Homology of Endomaps: \texttt{homology}}
+\textbf{Explanation:} This mathematically dense function takes an endomap $\phi$ (a mapping of a set to itself) and computes its topological characteristics. It relies on the \texttt{orbits} function to split the map into cyclic (loops) and non-cyclic components (trees leading into loops). It returns a complex vector $g$ representing spatial coordinates for visualization, distributing cycles in circles using $e^{i\theta}$ formulations. It also returns $Hc$ containing data on cyclic components, and $Hnc$ containing data on non-cyclic structures.
+
+\begin{lstlisting}[caption={Homology of Endomaps Snippet}]
+function [g,Hc,Hnc]=homology(phi)
+[orb,ord,psi,deg,init,term,prin,conn]=orbits(phi);
+% ... cyclic handling ...
+iscyc=(deg==-1);
+SM=sortrows([orb(iscyc), ord(iscyc), idA(iscyc)]);
+g(SM(:,3))=(1i*2*pi*linspace(1/nnz(iscyc),1,nnz(iscyc)));
+% ... non-cyclic handling and angle calculations follow
+\end{lstlisting}
+
+\subsection{Orbit Calculation: \texttt{orbits}}
+\textbf{Explanation:} This function acts as the underlying engine for the \texttt{homology} function. It traces the path of every element in the endomap $\phi$ to find initial points, terminal points, and junction points. It iteratively traverses the graph to tag elements with their specific orbit number, order within the orbit, degree (differentiating initial points vs. junctions), and flags cyclic points with a specific degree of $-1$.
+
+\begin{lstlisting}[caption={Orbit Calculation Snippet}]
+function [orb, ord, psi, deg, init, term, prin, conn] = orbits(phi)
+% ... variable initialization ...
+for j=1:numel(init)
+    a=init(j); k=1;
+    % ... traversal loop ...
+    while ~orb(phi(a))   % phi(a) is not yet a junction point
+        psi(phi(a))=a; 
+        a=phi(a); k=k+1;  
+        orb(a)=j; ord(a)=k; deg(a)=1;
+    end
+    % ... logic to separate principal vs secondary components ...
+end
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+
+When running the full script and associated sub-functions, you can expect two main types of output: text to the console and generated graphical plots.
+
+\subsection*{Console Outputs}
+\begin{itemize}
+    \item \textbf{Boolean Flags:} When \texttt{analyzerelation(R)} is called, the MATLAB command window will display strings indicating whether the relation is reflexive, transitive, symmetric, and anti-symmetric, followed by a 1 (true) or 0 (false).
+    \item \textbf{Returned Variables:} The workspace will populate with $R^*$ (the closure matrix), $p$, and $q$ (vectors representing equivalence classes or partitions).
+\end{itemize}
+
+\subsection*{Visual Plots}
+
+
+If the example code inside \texttt{analyzerelation} (or the \texttt{hasse} and \texttt{showmethemaps} functions) is executed, the following visuals will be generated:
+
+\begin{itemize}
+    \item \textbf{Hasse Diagram (\texttt{hasse}):}
+    \begin{itemize}
+        \item \textbf{Axes:} The axes are turned off (\texttt{axis off}), but the mathematical bounding box is normalized between 0 and 1 for both X and Y.
+        \item \textbf{Representation:} Elements of the partial order are drawn as text numbers. The vertical height (Y-axis) visually represents the element's level in the hierarchy (e.g., minimal elements at the bottom).
+        \item \textbf{Connections:} Arrowless lines (via \texttt{quiver} with \texttt{showarrowhead} set to \texttt{'off'}) connect elements to their immediate successors.
+    \end{itemize}
+    \item \textbf{Homology Networks (\texttt{showmethemaps} / \texttt{homology}):}
+    \begin{itemize}
+        \item \textbf{Representation:} Plotted on a 2D complex plane. Cyclic components (loops) are geometrically arranged in a circle based on the roots of unity.
+        \item \textbf{Non-cyclic components:} Elements that eventually fall into a cycle are plotted branching outward or inward from the cycle, using logarithmic scaling (\texttt{log(sqrt(J(i)+1))}) to determine their radial distance.
+    \end{itemize}
+\end{itemize}

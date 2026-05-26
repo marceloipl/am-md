@@ -1,0 +1,51 @@
+
+\chapter{Análise Técnica of MATLAB Função: \texttt{mobious.m}}
+\section{Visão Geral}
+
+The \texttt{mobious.m} file is a MATLAB function designed to compute and apply a unique M\"{o}bius transformation to complex numbers.
+
+\begin{itemize}
+    \item \textbf{Objetivo Principal}: To calculate the specific linear fractional transformation $f(z) = \frac{az+b}{cz+d}$ that maps three distinct complex points $z_i$ to three target complex points $w_i$.
+    \item \textbf{Tipo de Análise}: It performs numerical calculations in the complex plane, specifically solving for transformation coefficients and mapping input data points into a new coordinate space.
+    \item \textbf{Contexto Matemático}: The context is \textbf{Complex Analysis} and \textbf{Conformal Mapping}. M\"{o}bius transformations are projective transformations of the complex projective line that preserve generalized circles and angles.
+\end{itemize}
+
+\section{Análise Passo a Passo do Código}
+
+\subsection{Função Signature and Entrada Pre-processing}
+\textbf{Explanation}: The function accepts three inputs: \texttt{z} (the points to transform), \texttt{zi} (three reference points), and \texttt{wi} (three target points). The script ensures that \texttt{zi} and \texttt{wi} are treated as column vectors for consistent matrix operations.
+
+\begin{lstlisting}
+function w = mobious(z,zi,wi)
+un=[1 1 1]';
+zi=zi(:); wi=wi(:); % force column vectors
+\end{lstlisting}
+
+\subsection{Coefficient Calculation via Determinants}
+\textbf{Explanation}: The transformation coefficients $a, b, c,$ and $d$ are determined using determinants of matrices composed of the reference points and target points. This algebraic approach solves the system of equations defined by $w_i = \frac{az_i+b}{cz_i+d}$ for $i=1, 2, 3$.
+
+\begin{lstlisting}
+a=det([zi.*wi, wi, un]);
+b=det([zi.*wi, zi, wi]);
+c=det([zi, wi, un]);
+d=det([zi.*wi, zi, un]);
+\end{lstlisting}
+
+\subsection{Transformation Application}
+\textbf{Explanation}: Once the coefficients are obtained, the linear fractional transformation formula is applied to the input array \texttt{z}. The result \texttt{w} represents the transformed set of complex points.
+
+\begin{lstlisting}
+w=(a*z+b)./(c*z+d);
+\end{lstlisting}
+
+\section{Saídas e Elementos Visuais Esperados}
+
+The \texttt{mobious.m} file contains examples that visualize the transformation's effect on geometric shapes and grids. 
+
+
+
+\begin{itemize}
+    \item \textbf{Axis Details}: The plots use the complex plane where the horizontal axis represents the real part and the vertical axis represents the imaginary part of the coordinates.
+    \item \textbf{Shape Transformations}: Examples demonstrate how a set of complex points forming letter-like shapes (e.g., a "d") can be reflected, rotated, or inverted into other letters like "p", "b", or "q" based on the target points \texttt{wi}.
+    \item \textbf{Grid Mappings}: The second set of examples uses a grid of numbers to show how the M\"{o}bius transformation warps the surrounding space while preserving local relationships and conformal properties.
+\end{itemize}

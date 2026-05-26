@@ -1,0 +1,120 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage[colorlinks=false, pdfborder={0 0 0}]{hyperref}
+\usepackage{amsmath,amssymb,amsthm,listings,xcolor,booktabs,longtable,array,enumitem,fancyhdr,multirow,graphicx,float,textcomp}
+\usepackage[most]{tcolorbox}
+
+\addto\captionsportuguese{%
+  \renewcommand{\contentsname}{Índice}%
+  \renewcommand{\chaptername}{Capítulo}%
+  \renewcommand{\partname}{Parte}%
+  \renewcommand{\appendixname}{Apêndice}%
+}
+\pgfkeys{/tcb/.unknown/.code={}}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}\rhead{\small GTLab Toolbox -- Documentação Final}\lhead{\small Relatório Consolidado}\cfoot{\thepage}
+\definecolor{codebg}{rgb}{0.97,0.97,0.97}
+\lstdefinestyle{ml}{language=Octave,basicstyle=\ttfamily\footnotesize,keywordstyle=\color{blue!75!black}\bfseries,commentstyle=\color{gray}\itshape,stringstyle=\color{teal},numbers=left,numberstyle=\tiny\color{gray},breaklines=true,frame=single,backgroundcolor=\color{codebg},tabsize=2,showstringspaces=false,captionpos=b,morekeywords={function,end,true,false,NaN,Inf,assert,disp,fprintf}}
+\lstdefinestyle{matlab}{style=ml}
+\lstdefinestyle{matlabstyle}{style=ml}
+\lstset{style=ml}
+\tcbset{Abox/.style={colback=blue!4,colframe=blue!55!black,fonttitle=\bfseries,breakable,sharp corners,before upper=\small},Pbox/.style={colback=green!5,colframe=green!50!black,fonttitle=\bfseries\small,breakable,sharp corners},Fbox/.style={colback=orange!6,colframe=orange!70!black,fonttitle=\bfseries\small,breakable,sharp corners},Bbox/.style={colback=red!5,colframe=red!60!black,fonttitle=\bfseries,breakable,sharp corners,before upper=\small},Cbox/.style={colback=gray!5,colframe=gray!50,fonttitle=\bfseries,breakable,sharp corners,before upper=\small}}
+\newcommand{\mf}[1]{\texttt{#1}}\newcommand{\APROVADO}{\textcolor{green!60!black}{\textbf{APROVADO}}}\newcommand{\FALHOU}{\textcolor{red!70!black}{\textbf{FALHOU}}}\newcommand{\NOTA}{\textcolor{orange!80!black}{\textbf{NOTA}}}
+\newtheorem{concl}{Conclusão}[chapter]
+\title{GTLab Toolbox\\Documentação Final Consolidada}
+\author{
+    \textbf{Grupo Nº: 2} \\    
+    David Domingues (2022125309) \\
+    Diana Gomes (2019101181) \\
+    Guilherme Baltazar (2025209893) \\
+    Joana Venâncio (2016123347) \\
+    Leonardo Costa (2023137263) \\
+    Marcelo Marques (2022102560) \\
+    Miguel Reis (2024164633) \\ \\
+    Escola Superior de Tecnologia e Gestão \\
+    Instituto Politécnico de Leiria
+}\date{Ano Letivo 2025/2026}
+\begin{document}
+\maketitle
+\tableofcontents
+\clearpage
+\chapter*{Resumo Executivo}\addcontentsline{toc}{chapter}{Resumo Executivo}
+Este documento consolida a análise e a documentação preparadas em \texttt{allFrom report} com o trabalho de testes controlados preparado em \texttt{TL2Miguel.tex}. Fornece um entregável único e reprodutível que descreve cada ficheiro \texttt{.m} analisado, o seu objetivo, pressupostos, comportamento de entrada/saída, melhorias propostas, testes controlados, resultados, limitações e conclusões globais.
+
+\section*{Âmbito}
+O relatório abrange as funções da toolbox agrupadas de acordo com a estrutura original de pastas, bem como uma campanha de testes controlados para avaliar correção, aplicabilidade e desempenho. Os ficheiros-fonte são disponibilizados em \texttt{src/GTLabtools}; os documentos intermédios originais são preservados em \texttt{original\_documents}; e o material LaTeX consolidado encontra-se em \texttt{chapters}.
+
+\section*{Principais conclusões}
+A toolbox é matematicamente coerente e, em geral, fiável para o seu uso educacional e computacional previsto. O relatório de testes identifica uma taxa global elevada de sucesso, mas também isola problemas acionáveis, como chamadas auxiliares indefinidas, artefactos de conflitos de merge, código morto, exemplos executados em tempo de análise, funções descontinuadas e casos geométricos degenerados.
+
+\part{Análise e Documentação dos Ficheiros MATLAB/Octave}
+\input{chapters/analysis/Grupo1__analyzerelation}
+\input{chapters/analysis/Grupo1__anonymous}
+\input{chapters/analysis/Grupo1__argminmax}
+\input{chapters/analysis/Grupo1__binrelsanalyser}
+\input{chapters/analysis/Grupo1__coeq}
+\input{chapters/analysis/Grupo1__complex2sphere}
+\input{chapters/analysis/Grupo2__conjclasses}
+\input{chapters/analysis/Grupo2__digraph}
+\input{chapters/analysis/Grupo2__dimagmaenergy}
+\input{chapters/analysis/Grupo2__dlink}
+\input{chapters/analysis/Grupo2__dlinktopology}
+\input{chapters/analysis/Grupo2__endomaps_exe_m}
+\input{chapters/analysis/Grupo3__endomapsanalyzer30Abr}
+\input{chapters/analysis/Grupo3__fillzeros}
+\input{chapters/analysis/Grupo3__graph}
+\input{chapters/analysis/Grupo3__guide4classes2ndweek}
+\input{chapters/analysis/Grupo3__guide4classes6}
+\input{chapters/analysis/Grupo3__hasse}
+\input{chapters/analysis/grupo4}
+\input{chapters/analysis/Grupo5__isoslide}
+\input{chapters/analysis/Grupo5__link2latex}
+\input{chapters/analysis/Grupo5__linkcanonical}
+\input{chapters/analysis/Grupo5__linkdigraph}
+\input{chapters/analysis/Grupo5__linkdraw}
+\input{chapters/analysis/Grupo5__linkfigs}
+\input{chapters/analysis/Grupo6__linkplatonic}
+\input{chapters/analysis/Grupo6__linkprod2surf}
+\input{chapters/analysis/Grupo6__links2surf}
+\input{chapters/analysis/Grupo6__linksection}
+\input{chapters/analysis/Grupo6__mobius}
+\input{chapters/analysis/Grupo6__orbits}
+\input{chapters/analysis/Grupo_7_e_8__partition}
+\input{chapters/analysis/Grupo_7_e_8__plane2sphere}
+\input{chapters/analysis/Grupo_7_e_8__platonics}
+\input{chapters/analysis/Grupo_7_e_8__shearform}
+\input{chapters/analysis/Grupo_7_e_8__showmethemaps}
+\input{chapters/analysis/Grupo_7_e_8__slerp}
+\input{chapters/analysis/Grupo_7_e_8__sphere2complex}
+\input{chapters/analysis/Grupo_7_e_8__sphere2plane}
+\input{chapters/analysis/Grupo_7_e_8__stlread}
+\input{chapters/analysis/Grupo_7_e_8__thecomplexplane}
+\input{chapters/analysis/Grupo_7_e_8__torusknot}
+\input{chapters/analysis/Grupo_7_e_8__tri2link}
+\input{chapters/analysis/Grupo_7_e_8__turing}
+\part{Testes Controlados, Resultados e Conclusões}
+\input{chapters/testing/controlled_testing}
+\appendix
+\chapter{Estrutura do Pacote}
+\begin{itemize}
+\item \texttt{final\_report.tex}: documento LaTeX mestre consolidado.
+\item \texttt{chapters/analysis}: capítulos de análise/documentação revistos.
+\item \texttt{chapters/testing/controlled\_testing.tex}: testes controlados, resultados e conclusões.
+\item \texttt{src/GTLabtools}: ficheiros-fonte MATLAB/Octave.
+\item \texttt{original\_documents}: ficheiros intermédios originais para rastreabilidade.
+\end{itemize}
+\chapter{Fluxo Recomendado de Compilação e Teste}
+\begin{enumerate}
+\item Compilar com \texttt{pdflatex final\_report.tex}. Executar duas vezes para atualizar o índice.
+\item No MATLAB ou GNU Octave, adicionar a pasta-fonte da toolbox com \texttt{addpath('src/GTLabtools')}.
+\item Executar cada bloco de teste documentado na secção de testes controlados.
+\item Comparar os resultados com as classificações esperadas \APROVADO, \FALHOU, or \NOTA .
+\item Aplicar as correções prioritárias documentadas no resumo dos testes antes de distribuir a toolbox.
+\end{enumerate}
+\end{document}

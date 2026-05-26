@@ -1,0 +1,74 @@
+
+\chapter{Análise do Código MATLAB: \texttt{showmethemaps.m}}
+\section{Visão Geral}
+
+\subsection*{What is the main purpose of this file?}
+The script visualizes a collection of finite endomaps (mappings from a set to itself) by drawing them as directed graphs arranged in a neat grid of subplots.
+
+\subsection*{What type of analysis or calculation does it perform?}
+It performs a topological/graphical layout calculation. It converts a 1D sequence of mappings into a 2D spatial representation by calculating coordinates on a unit circle using complex numbers. It then computes vector differences to represent the directional edges (arrows) between these nodes.
+
+\subsection*{What is the mathematical/theoretical context?}
+This code relies on discrete mathematics, graph theory, and abstract algebra. Specifically, it visualizes \textbf{endomorphisms} on finite sets. In graph theory terms, these are known as "functional graphs"—directed graphs where every vertex has exactly one outgoing edge (out-degree of 1).
+
+\section{Análise Passo a Passo do Código}
+
+\subsection{Variable Initialization and Matriz Sizing}
+\textbf{Explanation:} This section takes the input matrix \texttt{SM}. It extracts \texttt{nn}, which represents the total number of endomaps (rows) to be plotted. It then calculates \texttt{n}, the size of the finite set (the domain/codomain size). It subtracts 2 from the total number of columns because the first two columns of \texttt{SM} are metadata (the color code and the index).
+
+\begin{lstlisting}
+function showmethemaps(SM)
+  [nn,n]=size(SM); n=n-2;
+\end{lstlisting}
+
+\subsection{Circular Node Layout Generation}
+\textbf{Explanation:} This line calculates the spatial coordinates for the nodes of the graph. It generates \texttt{n} evenly spaced points along the perimeter of the unit circle in the complex plane. It leverages Euler's formula to map linearly spaced angles from $0$ to $2\pi \frac{n-1}{n}$ into complex numbers. The mathematical logic applied here is $g_k = e^{i \frac{2\pi (k-1)}{n}}$. These complex numbers serve as the $(x, y)$ coordinates for the vertices.
+
+\begin{lstlisting}
+g=exp(linspace(0,2*pi*(n-1)/n,n)*1i);
+\end{lstlisting}
+
+\subsection{Subplot Grid Sizing and Safety Check}
+\textbf{Explanation:} To display all \texttt{nn} maps on a single figure, this logic calculates the optimal dimensions for a grid of subplots (\texttt{na} rows and \texttt{nb} columns) to keep the layout as square as possible. It includes a safeguard to throw an error if the user attempts to plot more than 64 graphs at once, which prevents MATLAB from crashing or rendering an unreadable, cluttered figure window.
+
+\begin{lstlisting}
+na=round(sqrt(nn)); nb=ceil(nn/na);
+if nn>64, error('too big to plot; SM must have less than 64 rows'), end
+\end{lstlisting}
+
+\subsection{Grafo Plotting Loop}
+\textbf{Explanation:} This loop iterates through each endomap. For a given map \texttt{i}, it sets the active subplot. It isolates the mapping sequence \texttt{SM(i, 3:n+2)} and uses these values as indices to look up the destination coordinates in the node array \texttt{g}. 
+
+The vector difference \texttt{dg} represents the displacement from the source node to the destination node. The script plots the nodes as points (\texttt{plot(g, '.')}) and then overlays directional arrows using \texttt{quiver}. The \texttt{quiver} function separates the complex numbers into their real ($x$-axis) and imaginary ($y$-axis) components. Finally, it hides the axes for a clean look and adds a title using the metadata from the first two columns.
+
+\begin{lstlisting}
+for i=1:nn,
+  subplot(na,nb,i),
+  dg=g(SM(i,3:n+2))-g;
+  plot(g,'.'), hold on,
+  quiver(real(g),imag(g),real(dg),imag(dg));
+  axis off, hold off
+  title(num2str(SM(i,1:2)))
+end
+\end{lstlisting}
+
+\subsection{Completion Saída}
+\textbf{Explanation:} A simple console output to indicate the function has successfully finished its plotting loop.
+
+\begin{lstlisting}
+disp('yes yes')
+end
+\end{lstlisting}
+
+\section{Saídas e Elementos Visuais Esperados}
+
+When you run this script with a valid matrix \texttt{SM}, here is what you will see:
+
+\begin{itemize}
+    \item \textbf{The Figure Window:} A single MATLAB figure window will pop up containing a grid of smaller plots. For example, if you input 12 endomaps, it will generate a $3 \times 4$ or $4 \times 3$ grid of subplots.
+    \item \textbf{The Grafos:} Inside each subplot, you will see a directed graph. The nodes (vertices) are plotted as blue dots arranged perfectly in a circle.
+    \item \textbf{The Arrows (Visualizing the Math):} Originating from every single dot will be exactly one arrow, pointing either to another dot or looping back to itself. This visualizes the core mathematical property of an endomorphism on a finite set: every element maps to exactly one element. While every node has one \textit{outgoing} arrow, some nodes may have multiple arrows pointing \textit{to} them, and some may have none.
+    \item \textbf{The Axes:} There will be no visible $x$ or $y$ axes, no tick marks, and no gridlines, allowing the circular graphs to float cleanly in the subplot space.
+    \item \textbf{Titles:} Above each circular graph, there will be a numeric title (e.g., "1 4") corresponding to the specific color code and map index passed in the first two columns of \texttt{SM}.
+    \item \textbf{Console Saída:} Upon completion, the phrase \texttt{yes yes} will be printed to the MATLAB command window.
+\end{itemize}

@@ -1,0 +1,87 @@
+\documentclass{report}
+
+% --- PACOTES NECESSÁRIOS ---
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+% --- CONFIGURAÇÕES DE PÁGINA ---
+\geometry{a4paper, margin=1in}
+
+% --- CONFIGURAÇÕES DE CÓDIGO (MATLAB) ---
+\lstset{
+    language=Matlab,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!60!black},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{gray!5},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    tabsize=4,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=false,
+    title=\lstname
+}
+
+\begin{document}
+
+% Podes adicionar uma capa ou índice aqui se quiseres
+% \tableofcontents
+
+% Importação dos ficheiros secundários
+\input{Grupo1/analyzerelation}
+\input{Grupo1/anonymous}
+\input{Grupo1/argminmax}
+\input{Grupo1/binrelsanalyser}
+\input{Grupo1/coeq}
+\input{Grupo1/complex2sphere}
+\input{Grupo2/conjclasses}
+\input{Grupo2/digraph}
+\input{Grupo2/dimagmaenergy}
+\input{Grupo2/dlink}
+\input{Grupo2/dlinktopology}
+\input{Grupo2/endomaps_exe_m}
+\input{Grupo3/endomapsanalyzer30Abr}
+\input{Grupo3/fillzeros}
+\input{Grupo3/graph}
+\input{Grupo3/guide4classes2ndweek}
+\input{Grupo3/guide4classes6}
+\input{Grupo3/hasse}
+\input{grupo4}
+\input{Grupo5/isoslide}
+\input{Grupo5/link2latex}
+\input{Grupo5/linkcanonical}
+\input{Grupo5/linkdigraph}
+\input{Grupo5/linkdraw}
+\input{Grupo5/linkfigs}
+\input{Grupo6/linkplatonic}
+\input{Grupo6/linkprod2surf}
+\input{Grupo6/links2surf}
+\input{Grupo6/linksection}
+\input{Grupo6/mobius}
+\input{Grupo6/orbits}
+\input{Grupo 7 e 8/partition}
+\input{Grupo 7 e 8/plane2sphere}
+\input{Grupo 7 e 8/platonics}
+\input{Grupo 7 e 8/shearform}
+\input{Grupo 7 e 8/showmethemaps}
+\input{Grupo 7 e 8/slerp}
+\input{Grupo 7 e 8/sphere2complex}
+\input{Grupo 7 e 8/sphere2plane}
+\input{Grupo 7 e 8/stlread}
+\input{Grupo 7 e 8/thecomplexplane}
+\input{Grupo 7 e 8/torusknot}
+\input{Grupo 7 e 8/tri2link}
+\input{Grupo 7 e 8/turing}
+\end{document}

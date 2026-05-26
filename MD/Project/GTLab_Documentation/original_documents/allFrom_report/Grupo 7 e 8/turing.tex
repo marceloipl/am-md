@@ -1,0 +1,144 @@
+
+\chapter{MATLAB Turing Machine Simulator Analysis}
+\date{}
+
+
+\maketitle
+
+\section*{Initial Overview}
+
+\textbf{What is the main purpose of this file?}\\
+The main purpose of this file is to simulate the execution of a deterministic Turing Machine. It takes an initial tape, a starting head position, and a set of rules (Write, Move, and Transit matrices), and simulates the machine's behavior until a halting state is reached.
+
+\textbf{What type of analysis or calculation does it perform?}\\
+It performs an iterative state-machine evaluation. At each iteration, it reads the value at the current tape head position, looks up the corresponding rule for the current state, writes a new value to the tape, moves the head (left or right), and updates the machine's internal state. Two of the versions perform a complex arithmetic calculation to decode packed writing and movement instructions.
+
+\textbf{What is the mathematical/theoretical context?}\\
+The code is grounded in Automata Theory and the Theory of Computation. It models a Turing Machine, a fundamental theoretical construct in computer science used to define limits of computability. The logic utilizes matrices to map finite discrete states and alphabet symbols to deterministic transitions, representing concepts from discrete mathematics.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Code Breakdown and Step-by-Step Analysis}
+
+\subsection*{1. Section/Function Title: Function Definition and Version Selection}
+\textbf{Explanation:} This section defines the function signature, taking inputs for the tape, head position, rule matrices (\texttt{Write}, \texttt{Move}, \texttt{Transit}), and an optional argument (\texttt{varargin}). It then sets a \texttt{version} variable and uses a \texttt{switch} statement to determine which implementation of the Turing machine logic to execute.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+function Out=turing(tape,head,Write,Move,Transit,varargin)
+% ... [comments omitted for brevity] ...
+version='27May2025'
+%version='20May2025'
+%version 'Matematica Discreta 23 - PL (Teams)'
+
+switch version
+\end{lstlisting}
+
+\subsection*{2. Section/Function Title: Version '27May2025' (Complex Number Implementation)}
+\textbf{Explanation:} This block implements the Turing machine using a mathematically compact approach. If the input \texttt{tape} is a scalar, it initializes a sparse array. It then combines the \texttt{Write}, \texttt{Move}, and \texttt{Transit} matrices into a single complex matrix called \texttt{Phi}. The real part encodes both the symbol to write and the direction to move, while the imaginary part holds the next state. The loop executes until the imaginary part (state) is $0$ or the head moves out of bounds. The values are decoded using absolute values and signums: \texttt{abs(real(z))-1} retrieves the write value, and \texttt{sign(real(z))} retrieves the movement direction.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+case '27May2025'
+if numel(tape)==1
+    tape=sparse(1,ceil(abs(tape)));
+end
+Phi=(Write+1).*Move + 1i*Transit;
+z=0+1i % initial state is 1
+stop=0;
+while ~stop
+    z=Phi(tape(head)+1,imag(z));
+    tape(head)=abs(real(z))-1;
+    head=head+sign(real(z));
+    if imag(z)==0||(tape(head)<0)
+        stop=1;
+    end    
+end
+Out=tape;
+\end{lstlisting}
+
+\subsection*{3. Section/Function Title: Version '20May2025'}
+\textbf{Explanation:} This section functions very similarly to the '27May2025' version, utilizing the same complex matrix \texttt{Phi} for state transition packing. The primary difference lies in the initialization: it forces the tape to be a sparse array of exactly 100 elements, hardcodes the initial state to $1$, and places the starting head position at $50$, regardless of the user's input arguments.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+case '20May2025'
+Phi=(Write+1).*Move + 1i*Transit;
+tape=sparse(1,100);
+state=1;
+head=50;
+stop=0;
+while ~stop
+    z=Phi(tape(head)+1,state);
+    tape(head)=abs(real(z))-1;
+    state=imag(z);
+    stop=isequal(state,0)||(tape(head)<0);
+    head=head+sign(real(z));
+end
+Out=tape;
+\end{lstlisting}
+
+\subsection*{4. Section/Function Title: Standard Execution 'Matematica Discreta' Version}
+\textbf{Explanation:} This block represents the classic, straightforward implementation of the Turing machine. It executes if exactly 5 input arguments are provided. A \texttt{while} loop runs as long as the current state is not \texttt{NaN} (the defined halting state). In each iteration, it reads the current tape value, updates the tape using the \texttt{Write} matrix, moves the head using the \texttt{Move} matrix, and transitions to a new state using the \texttt{Transit} matrix.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+case 'Matematica Discreta 23 - PL (Teams)'
+if nargin==5
+Out=tape;
+state=1;
+while ~isnan(state)
+    read=Out(head);
+    Out(head)=Write(read+1,state);
+    head=head+Move(read+1,state);
+    state=Transit(read+1,state);
+end
+\end{lstlisting}
+
+\subsection*{5. Section/Function Title: Display Mode Execution 'Matematica Discreta'}
+\textbf{Explanation:} Triggered when a 6th argument is passed (intended as \texttt{'disp'}), this block visually simulates the machine step-by-step in the console. It first validates matrix sizes. It uses MATLAB's \texttt{digraph} to map character conversions (likely shifting numerical outputs to ASCII characters for visualization). During the \texttt{while} loop, it creates an array \texttt{N} with \texttt{NaN} values, placing a hexadecimal representation of the current state exactly at the index of the \texttt{head}. It then uses \texttt{disp} to print the tape as characters with the head position indicated simultaneously, creating a dynamic command-line visualization.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+else % in the case that the sixth input argument is varargin=='disp'
+nlc=size(Write);
+if ~isequal(size(Move),nlc) || ~isequal(size(Transit),nlc)
+    error('The input matrices Write, Move and Transit must have the same size')
+end
+[s,t,u]=digraph(Write(:),tape(:)); %19May2025
+W=reshape(s,size(Write));
+T=t';
+state=1;
+
+while ~isnan(state)
+    N=nan(size(T)); N(head)=dec2hex(state); %limited to 16 states
+    disp(char([T+64;N]))
+    read=T(head);
+    T(head)=W(read,state);
+    head=head+Move(read,state);
+    state=Transit(read,state);
+end
+disp(char(T+64))
+Out=u(T)';
+end
+\end{lstlisting}
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section*{Expected Outputs and Visuals}
+
+This script does not generate traditional 2D/3D plots, line graphs, or GUI-based visual figures (e.g., no $x$-$y$ coordinate axes). Instead, the output manifests in two distinct ways depending on the arguments provided:
+
+\begin{enumerate}
+    \item \textbf{Standard Output (Data Array):} By default, the function silently computes the final state of the Turing machine and returns a 1D array (either a standard array or a sparse matrix) representing the final symbols written on the \texttt{tape} after the machine reaches its halting state. 
+    \item \textbf{Console Visualization (Display Mode):} If the 6th argument (\texttt{'disp'}) is provided under the 'Matematica Discreta' version, the code outputs an animated, frame-by-frame text visualization directly into the MATLAB command window. 
+    \begin{itemize}
+        \item \textbf{The Tape:} It visually translates the numerical tape into an ASCII character string (offset by $+64$, mapping $1 \rightarrow \text{'A'}$, $2 \rightarrow \text{'B'}$, etc.). 
+        \item \textbf{The Head/State:} The script overlays a secondary text array immediately below (or above) the tape character string. It prints blank spaces (\texttt{NaN}s converted to space) except at the exact current position of the reading head, where it prints the current machine state represented as a hexadecimal character (\texttt{1-9}, \texttt{A-F}).
+    \end{itemize}
+    This creates a scrolling, step-by-step visual tracker of the Turing Machine reading, modifying the string, and moving left or right over time.
+\end{enumerate}

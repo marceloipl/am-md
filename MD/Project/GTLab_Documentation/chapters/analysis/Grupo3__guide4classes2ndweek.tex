@@ -1,0 +1,121 @@
+\chapter{Análise do Script MATLAB: Guide4classes2ndweek}
+
+\section{Visão Geral}
+The provided MATLAB file is a pedagogical script divided into two distinct classes (Case 1 and Case 2) focusing on \textbf{Computational Abstract Algebra} and \textbf{Neural Network Optimization of Algebraic Structures}.
+
+\subsection{Objetivo Principal}
+The script aims to model and analyze finite algebraic structures (endomaps, conjugacy classes, and dimagmas) using both traditional combinatorial methods and modern machine learning approaches.
+
+\subsection{Tipo de Análise}
+\begin{itemize}
+    \item \textbf{Case 1:} Performs group-theoretic analysis, specifically calculating the multiplication table (Cayley table) of endomorphisms and determining conjugacy classes via coequalizers.
+    \item \textbf{Case 2:} Implements a neural network to learn and approximate complex-valued operations within a "dimagma" structure, utilizing gradient descent to minimize energy/loss.
+\end{itemize}
+
+\subsection{Contexto Matemático}
+The theoretical context includes:
+\begin{itemize}
+    \item \textbf{Category Theory \& Algebra:} Endomorphisms of finite sets, conjugation relations, and quotient sets (coequalizers).
+    \item \textbf{Numerical Analysis:} Complex plane embeddings of discrete structures.
+    \item \textbf{Machine Learning:} Backpropagation, sigmoid activation functions, and Mean Squared Erro (MSE) optimization.
+\end{itemize}
+
+---
+
+\section{Step-by-Step Analysis: Case 1 (Endomaps \& Conjugacy)}
+
+\subsection{Combinatorial Endomap Generation}
+\textbf{Explanation:} This section uses the previously defined \texttt{fillzeros} logic to generate all 27 possible endomaps ($3^3$) of a 3-element set. It then constructs a $27 \times 27$ matrix \texttt{Circ} representing the composition of these maps.
+
+\begin{lstlisting}
+% A is the collection of all endomaps of X=1:3
+A=fillzeros([0 0 0]',1:3)
+Circ=zeros(27,27);
+for i=1:27
+    for j=1:27
+        ui=A(:,i);
+        uj=A(:,j);
+        uij=ui(uj); % Composition of maps
+        Circ(i,j)=find(ismember(A',uij(:)','rows'));
+    end
+end
+\end{lstlisting}
+
+\subsection{Conjugation Relation and Coequalizer}
+\textbf{Explanation:} This block defines the equivalence relation $u \sim v$ if there exists a permutation $p$ such that $p \circ u = v \circ p$. It builds a relation matrix $R$, extracts the graph edges, and uses a coequalizer (\texttt{coeq}) to find the number of unique conjugacy classes.
+
+\begin{lstlisting}
+R=zeros(27,27);
+for i=1:27
+    for j=1:27
+        for k=1:6
+            u=A(:,i); v=A(:,j); p=Perm(:,k);
+            if p(u)==v(p), R(i,j)=1; end
+        end
+    end
+end
+[d,c]=find(R);
+q=coeq(d,c); % Compute quotient
+numel(unique(q)) % Number of equivalence classes
+\end{lstlisting}
+
+---
+
+\section{Step-by-Step Analysis: Case 2 (Neural Network Optimization)}
+
+\subsection{Complex Embedding (Dimagma Energy)}
+\textbf{Explanation:} This section maps the discrete set of endomaps to coordinates in the complex plane using mapping functions $f$ and $g$. This embeds the algebraic structure into a continuous space for neural network processing.
+
+\begin{lstlisting}
+i2s=@(i) mod(floor(bsxfun(@rdivide,i(:)-1,nB.^((1:nX)-1))),nB)+1;
+g=[exp(2*pi*1i*(nB-B(1:end-1))/(nB-1)), 0];
+zaux=@(a) g(a).*(3.^repmat(f,size(a,1),1));
+z=@(a) sum(zaux(a),2);
+F=[z(i2s(A)); w(i2s(A))];
+plot(F,'.')
+\end{lstlisting}
+
+\subsection{Neural Network Implementação (Manual)}
+\textbf{Explanation:} A single-layer network is initialized. The forward pass computes a predicted value $\hat{y}$ using a custom activation function $\tau$. The backward pass manually computes gradients to update weights $W$ and bias $b$ to minimize the distance between the algebraic operation and the network's output.
+
+\begin{lstlisting}
+% forward
+yhat=round(tau(real(W*x+b)))'; 
+
+% backward
+eta=0.1;  
+partialder=[(2*pi*1i*(nB-B(1:end-1))/(nB-1)) 0]'.*tauprime(real(W*x+b));
+b=b-eta*2*(z(yhat)-y)*zaux(yhat)'.*partialder;
+W=W-eta*2*(z(yhat)-y)*(x*zaux(yhat))'.*repmat(partialder,1,9);
+\end{lstlisting}
+
+\subsection{Two-Layer Sigmoid Network (ChatGPT Variant)}
+\textbf{Explanation:} This section implements a more standard two-layer neural network using sigmoid activations. It includes helper functions for the forward pass (matrix multiplications) and the backward pass (chain rule application).
+
+\begin{lstlisting}
+function [z1, y1, z2, y2] = forward_pass(x, W, b, W_prime, b_prime, sigmoid)
+    z1 = W * x + b;
+    y1 = sigmoid(z1);
+    z2 = W_prime * y1 + b_prime;
+    y2 = sigmoid(z2);
+end
+
+function [W, b, W_prime, b_prime] = backward_pass(x, y_true, z1, y1, z2, y2, W, b, W_prime, b_prime, eta, sigmoid_derivative)
+    dL_dy2 = y2 - y_true;
+    dL_dz2 = dL_dy2 .* sigmoid_derivative(z2);
+    % ... weight updates ...
+end
+\end{lstlisting}
+
+---
+
+\section{Saídas e Elementos Visuais Esperados}
+\begin{itemize}
+    \item \textbf{Complex Plot:} The \texttt{plot(F,'.')} command generates a scatter plot in the complex plane. The axes represent the real and imaginary parts of the embedded endomaps, likely showing a symmetrical or spiral-like distribution characteristic of roots of unity scaled by powers of 3.
+    \item \textbf{Activation Função:} \texttt{plot(linspace(-10,10),tau(...))} shows a modified periodic function that acts as the network's decision boundary.
+    \item \textbf{Console Saída:} During Case 2 iterations, the console displays the convergence of the values: \texttt{[real(y) real(z(yhat))]}. Ideally, \texttt{real(z(yhat))} should approach \texttt{real(y)} as training progresses, indicating the network is learning the algebraic operation.
+    \item \textbf{Class Count:} The final output of Case 1 is an integer (the number of conjugacy classes of endomaps on 3 elements).
+\end{itemize}
+
+\vspace{2em}
+Would you like me to explain the specific "coequalizer" logic used in the \texttt{coeq} function, or perhaps help you visualize the neural network's loss surface?

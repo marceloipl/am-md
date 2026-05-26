@@ -1,0 +1,26 @@
+
+\chapter{Technical Analysis of \texttt{linkcanonical.m}}
+\date{March 10, 2026}
+
+\maketitle
+
+\section{Overview}
+The purpose of \texttt{linkcanonical.m} is to transform an endomap into a canonical form based on its orbit structure[cite: 2]. It ensures that nodes in the same orbits are grouped and ordered consistently[cite: 2].
+
+\section{Step-by-Step Analysis}
+
+\subsection{Section 1: Orbit Decomposition}
+This section performs a complete orbit decomposition of the input endomap using an external \texttt{orbits} function[cite: 2].
+\begin{lstlisting}
+[orb, ord, psi, deg, init, term, prin, conn] = orbits(phi);
+\end{lstlisting}
+
+\subsection{Section 2: Permutation Derivation}
+The code uses \texttt{sortrows} to organize orbit membership and determine the permutation vector \texttt{sphi}[cite: 2].
+\begin{lstlisting}
+SM=sortrows([orb ord idom(phi)])
+sphi=SM(:,end); 
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+The function returns \texttt{phican} (canonical endomap) and \texttt{sphi}[cite: 2]. Visually, this simplifies the graph by ensuring elements of the same cycle are indexed sequentially[cite: 2].

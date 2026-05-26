@@ -1,0 +1,405 @@
+
+\chapter{MATLAB Code Analysis}
+\author{Expert Software Engineer}
+\date{}
+
+
+\maketitle
+
+\section{Overview}
+
+\subsection{Main Purpose}
+
+The primary purpose of this MATLAB file is to experiment with \textbf{neural networks applied to algebraic/combinatorial structures represented in the complex plane}. The program explores mappings between discrete symbolic structures and complex numbers, and attempts to \textbf{learn the inverse mapping} using a neural network trained via backpropagation.
+
+The currently active configuration corresponds to:
+
+\[
+\texttt{edited = '25Apr2025'}
+\]
+
+which executes the most recent experiment in the code.
+
+\subsection{Type of Analysis Performed}
+
+The file performs the following computational tasks:
+
+\begin{itemize}
+\item Construction of a discrete combinatorial space \(A\) consisting of sequences of symbols.
+\item Mapping these sequences into the complex plane using a structured embedding.
+\item Training a neural network to recover the original symbolic sequence from its complex representation.
+\item Evaluating prediction accuracy and geometric reconstruction error.
+\end{itemize}
+
+The model is trained using:
+
+\begin{itemize}
+\item GELU activation functions
+\item Softmax output layer
+\item Cross-entropy style gradients
+\item Gradient descent weight updates
+\end{itemize}
+
+\subsection{Mathematical / Theoretical Context}
+
+The mathematical framework combines several areas:
+
+\begin{itemize}
+\item \textbf{Discrete combinatorics}: sequences \(A = B^X\)
+\item \textbf{Complex embeddings}: mapping symbolic sequences into complex numbers
+\item \textbf{Representation theory / algebraic encodings}: using exponentials and powers to encode symbolic information
+\item \textbf{Machine learning}: neural networks attempting to invert the embedding
+\item \textbf{Geometric representation}: analyzing the structure of embeddings in the complex plane
+\end{itemize}
+
+Conceptually, the program studies whether a neural network can \textbf{decode algebraic information embedded in complex-valued geometric representations}.
+
+\newpage
+
+\section{Activation Functions}
+
+\subsection{Explanation}
+
+This section defines the activation functions used in the neural network.
+
+\textbf{GELU (Gaussian Error Linear Unit)} is used as the hidden-layer activation function, which is common in modern neural architectures.
+
+The derivative is explicitly implemented to support backpropagation.
+
+A numerically stable \textbf{softmax} function is defined for the output layer.
+
+\textbf{Inputs:}
+\begin{itemize}
+\item Vector \(x\) or \(z\)
+\end{itemize}
+
+\textbf{Outputs:}
+\begin{itemize}
+\item Activated values
+\end{itemize}
+
+\subsection{Code Snippet}
+
+\begin{lstlisting}[language=Matlab]
+gelu = @(x) 0.5 .* x .* (1 + tanh(sqrt(2/pi) .* (x + 0.044715 .* x.^3)));
+
+gelu_derivative = @(x) ...
+    0.5 .* (1 + tanh(sqrt(2/pi)*(x + 0.044715.*x.^3))) + ...
+    0.5 .* x .* (1 - tanh(sqrt(2/pi)*(x + 0.044715.*x.^3)).^2) .* ...
+    sqrt(2/pi) .* (1 + 3*0.044715*x.^2);
+
+softmax = @(z) exp(z - max(z)) ./ sum(exp(z - max(z)));
+\end{lstlisting}
+
+\newpage
+
+\section{Forward Pass Function}
+
+\subsection{Explanation}
+
+The \textbf{forward} function performs inference through the neural network.
+
+The network structure is:
+
+\[
+\text{Input} \rightarrow W_1 \rightarrow \text{Hidden Layer} \rightarrow W_2^{(1..n)} \rightarrow \text{Hidden Stack} \rightarrow W_3 \rightarrow \text{Softmax}
+\]
+
+Key details:
+
+\begin{itemize}
+\item First hidden layer uses GELU activation.
+\item A sequence of \(n_{lay}\) hidden layers follow.
+\item Final output layer produces probabilities via softmax.
+\end{itemize}
+
+\textbf{Inputs}
+
+\begin{itemize}
+\item \(x\): embedded input vector
+\item \(W_1,W_2,W_3\): weight matrices
+\item \(b_1,b_2,b_3\): biases
+\end{itemize}
+
+\textbf{Outputs}
+
+\begin{itemize}
+\item \(y_3\): predicted class probabilities
+\item intermediate activations for backpropagation
+\end{itemize}
+
+\subsection{Code Snippet}
+
+\begin{lstlisting}[language=Matlab]
+function [y3,y2,y1,z3,z2,z1]=forward(x,W1,W2,W3,b1,b2,b3)
+
+nlay=size(W2,3);
+nlin=size(W2,1);
+
+y2=zeros(nlin,nlay);
+z2=y2;
+
+z1 = W1 * x + b1;
+y1 = gelu(z1);
+
+z2(:,1) = W2(:,:,1) * y1 + b2(:,1);
+y2(:,1) = gelu(z2(:,1));
+
+for i=2:nlay
+    z2(:,i) = W2(:,:,i) * y2(:,i-1) + b2(:,i);
+    y2(:,i) = gelu(z2(:,i));
+end
+
+z3 = W3 * y2(:,end) + b3;
+y3 = softmax(z3);
+
+end
+\end{lstlisting}
+
+\newpage
+
+\section{Backpropagation Function}
+
+\subsection{Explanation}
+
+The \textbf{backprop} function computes gradients and updates network parameters using gradient descent.
+
+The algorithm:
+
+\begin{enumerate}
+\item Compute output error using softmax-crossentropy derivative
+\item Propagate gradients through hidden layers
+\item Compute weight gradients
+\item Update weights using learning rate \(\eta\)
+\end{enumerate}
+
+\textbf{Outputs}
+
+Updated weight matrices and biases.
+
+\subsection{Code Snippet}
+
+\begin{lstlisting}[language=Matlab]
+dz3 = y3 - y_true;
+
+dW3 = dz3 * y2(:, end)';
+db3 = dz3;
+
+dy2 = W3' * dz3;
+
+for i = nlay:-1:2
+    dz2(:, i) = dy2 .* gelu_derivative(z2(:, i));
+    input_to_this_layer = y2(:, i - 1);
+
+    dW2(:, :, i) = dz2(:, i) * input_to_this_layer';
+    db2(:, i) = dz2(:, i);
+
+    dy2 = W2(:, :, i)' * dz2(:, i);
+end
+\end{lstlisting}
+
+\newpage
+
+\section{Performance Evaluation}
+
+\subsection{Explanation}
+
+This function evaluates prediction quality after each training epoch.
+
+Metrics computed:
+
+\begin{itemize}
+\item Number of correctly predicted symbols
+\item Mean geometric reconstruction error
+\item Maximum geometric reconstruction error
+\end{itemize}
+
+The geometric error compares the predicted embedding against the true complex embedding.
+
+\subsection{Code Snippet}
+
+\begin{lstlisting}[language=Matlab]
+correct_symbols = sum(a_list == a0_list, 2);
+total_correct = sum(correct_symbols);
+
+x0_pred = sum(geom(a0_list), 2);
+
+geom_error = abs(x0_list - x0_pred);
+
+fprintf('Epoch %d Results:\n', epoch);
+fprintf('Total correct symbols: %d\n', total_correct);
+\end{lstlisting}
+
+\newpage
+
+\section{Combinatorial Space Construction}
+
+\subsection{Explanation}
+
+This section constructs the symbolic space \(A\).
+
+\[
+A = (B+B+B)^X
+\]
+
+where
+
+\begin{itemize}
+\item \(nX = 3\) sequence length
+\item \(nB = 4\) base alphabet
+\end{itemize}
+
+Two bijections are defined:
+
+\begin{itemize}
+\item index $\rightarrow$ sequence
+\item sequence $\rightarrow$ index
+\end{itemize}
+
+\subsection{Code Snippet}
+
+\begin{lstlisting}[language=Matlab]
+nX = 3; 
+nB = 4; 
+nA = (3*nB)^nX;
+
+i2s = @(i) mod(floor(bsxfun(@rdivide, i(:)-1, nB.^((1:nX)-1))), nB) + 1;
+s2i = @(s) (s-1)*(nB.^((1:nX)'-1)) + 1;
+\end{lstlisting}
+
+\newpage
+
+\section{Complex Embedding}
+
+\subsection{Explanation}
+
+Each symbolic sequence \(a\) is mapped to a complex value.
+
+The embedding uses:
+
+\[
+\rho(a) = 3^{\text{position weight}}
+\]
+
+and
+
+\[
+\exp\left(\frac{2\pi i a}{n_B}\right)
+\]
+
+Thus the geometric representation becomes:
+
+\[
+\sum \rho(a) e^{2\pi i a/n_B}
+\]
+
+This generates a unique geometric encoding of each sequence.
+
+\subsection{Code Snippet}
+
+\begin{lstlisting}[language=Matlab]
+rho=@(a) 3.^(repmat(1:nX,size(a,1),1)-1-floor(nX/2)-floor((a-1)/nB)*nX);
+
+geom=@(a) rho(a).*exp(2i*pi*a/nB);
+\end{lstlisting}
+
+\newpage
+
+\section{Training Loop}
+
+\subsection{Explanation}
+
+The neural network is trained over multiple epochs.
+
+For each symbolic sequence:
+
+\begin{enumerate}
+\item Compute complex embedding
+\item Generate feature vector
+\item Run forward pass
+\item Predict symbol probabilities
+\item Apply backpropagation
+\end{enumerate}
+
+The training uses a \textbf{three-stage decoding process}:
+
+\begin{itemize}
+\item nano stage
+\item micro stage
+\item macro stage
+\end{itemize}
+
+Each stage refines the predicted symbol.
+
+\subsection{Code Snippet}
+
+\begin{lstlisting}[language=Matlab]
+for epoch=1:Nepoch
+
+for ix=1:nA
+
+a=i2s(ix);
+
+x0=sum(geom(a));
+
+for j=1:nX
+
+x=split(embed(x0,a0));
+
+[y3,y2,y1,z3,z2,z1]=forward(x,W1,W2,W3,b1,b2,b3);
+
+[W1, W2, W3, b1, b2, b3] =
+backprop(x, y_true, y3, y2, y1, z3, z2, z1,
+         W1, W2, W3, b1, b2, b3, eta);
+
+end
+end
+end
+\end{lstlisting}
+
+\newpage
+
+\section{Expected Outputs and Visuals}
+
+The program generates several graphical outputs.
+
+\subsection{Complex Embedding Visualization}
+
+A scatter plot in the complex plane:
+
+\[
+z = \sum \rho(a)e^{2\pi ia/n_B}
+\]
+
+\textbf{Axes}
+
+\begin{itemize}
+\item X-axis: real part
+\item Y-axis: imaginary part
+\end{itemize}
+
+Each point represents one symbolic sequence.
+
+\subsection{Training Performance Plots}
+
+Two plots summarize training performance.
+
+\textbf{Plot 1}
+
+Prediction accuracy over epochs.
+
+\[
+\text{Accuracy} =
+\frac{\text{correct symbols}}{\text{total symbols}}
+\]
+
+\textbf{Plot 2}
+
+Geometric reconstruction errors:
+
+\begin{itemize}
+\item Mean error
+\item Maximum error
+\end{itemize}
+
+These show how well the predicted sequence reconstructs the original complex embedding.

@@ -1,0 +1,69 @@
+
+\chapter{Análise do Código MATLAB: \texttt{sphere2complex.m}}
+\section{Visão Geral}
+
+\textbf{What is the main purpose of this file?}\\
+The primary purpose of this MATLAB function is to map 3D spatial coordinates located on the surface of a unit sphere to 2D points on the complex plane.
+
+\textbf{What type of analysis or calculation does it perform?}\\
+The function performs a geometric transformation calculation known as a stereographic projection. It mathematically projects points from a 3D spherical geometry onto a 2D Euclidean plane, utilizing element-wise array operations to handle multiple data points simultaneously.
+
+\textbf{What is the mathematical/theoretical context?}\\
+The code is grounded in \textit{complex analysis} and \textit{projective geometry}, specifically dealing with the \textbf{Riemann sphere}. In this context, the extended complex plane (the complex plane plus the point at infinity) is mapped to a sphere. The projection occurs from the "North Pole" $(0, 0, 1)$ of the unit sphere down to the equatorial plane (or a parallel plane), creating a bijective mapping between the sphere (excluding the pole) and the complex plane. 
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section{Step-by-Step Analysis}
+
+\subsection*{1. Título da Secção/Função: Função Definition and Variable Initialization}
+\textbf{2. Explanation:} \\
+This section defines the MATLAB function and extracts the 3D coordinate components from the input. The function accepts a single argument, $v$, which is expected to be an $N \times 3$ matrix where each row represents a point $(x, y, z)$ on the unit sphere. The code slices this matrix into three separate $N \times 1$ column vectors ($x$, $y$, and $z$) to facilitate vectorized mathematical operations in the subsequent steps.
+
+\textbf{3. Code Snippet:}
+\begin{lstlisting}
+function w=sphere2complex(v)
+x=v(:,1); y=v(:,2); z=v(:,3);
+\end{lstlisting}
+
+\vspace{1em}
+
+\subsection*{1. Título da Secção/Função: Stereographic Projection Mapping}
+\textbf{2. Explanation:} \\
+This logical block applies the core mathematical formula for stereographic projection from the North Pole $(0,0,1)$. It calculates the 2D Cartesian coordinates $(X, Y)$ on the projected plane. The inputs are the $x$, $y$, and $z$ vectors. The algorithm divides the $x$ and $y$ coordinates by $(1 - z)$. Because MATLAB's \texttt{./} operator is used, this division is applied element-wise. 
+Nota: If a point is exactly at the North Pole $v = (0, 0, 1)$, the denominator $(1 - z)$ evaluates to $0$. The numerators $x$ and $y$ are also $0$, resulting in $0/0$, which MATLAB evaluates to \texttt{NaN} (Not-a-Number), precisely as documented in the original file's comments.
+
+\textbf{3. Code Snippet:}
+\begin{lstlisting}
+X=x./(1-z);
+Y=y./(1-z);
+\end{lstlisting}
+
+\vspace{1em}
+
+\subsection*{1. Título da Secção/Função: Complex Variable Formation}
+\textbf{2. Explanation:} \\
+In this final step, the function converts the 2D Cartesian coordinates $(X, Y)$ into a single complex variable $w$. The input arguments are the newly calculated $X$ (real part) and $Y$ (imaginary part) vectors. The output $w$ is an $N \times 1$ vector of complex numbers, returned by the function. The script explicitly uses \texttt{1i} (which is the recommended, most efficient way to denote the imaginary unit $\sqrt{-1}$ in MATLAB) multiplied by $Y$ and added to $X$ to formulate $w = X + iY$.
+
+\textbf{3. Code Snippet:}
+\begin{lstlisting}
+w=X+1i*Y;
+\end{lstlisting}
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section{Saídas e Elementos Visuais Esperados}
+
+The script provided is a purely mathematical utility function; it suppresses all internal console outputs using semicolons (\texttt{;}) and does not contain any explicit plotting commands (like \texttt{plot3}, \texttt{scatter}, or \texttt{plot}). Therefore, \textbf{running this file alone generates no visual graphs or console text}. 
+
+However, if one were to capture the output $w$ and visualize it, here is what the result represents and how it would look:
+
+\begin{itemize}
+    \item \textbf{Dados Saída:} The function returns a single MATLAB variable \texttt{w}, which is an $N \times 1$ column vector containing double-precision complex numbers (e.g., $2.5 + 3.1i$).
+    \item \textbf{Visual Representation:} If you were to pass the output to a plotting function via \texttt{plot(w, 'o')}, you would generate a 2D scatter plot on the complex plane. 
+    \item \textbf{Axes:} The horizontal axis (X-axis) would represent the real part of $w$ (\texttt{real(w)}), and the vertical axis (Y-axis) would represent the imaginary part of $w$ (\texttt{imag(w)}).
+    \item \textbf{Geometric Translation:} Points that were originally located in the Southern Hemisphere of the unit 3D sphere ($z < 0$) would map visually to the inside of the unit circle on this 2D complex plot. Points on the equator ($z = 0$) would map exactly onto the perimeter of the unit circle ($|w| = 1$). Points in the Northern Hemisphere ($z > 0$) would map outside the unit circle, expanding towards infinity as they approach the North Pole.
+\end{itemize}

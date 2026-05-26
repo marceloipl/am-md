@@ -1,0 +1,377 @@
+
+\chapter{Analysis of \texttt{homology.m}}
+
+\section{What is the main purpose of this file?}
+The primary purpose of \texttt{homology.m} is to compute the orbits of a given endomap $\phi : X \to X$ and generate a complex vector representing the geometric realization of this mapping in a 2D plane. Additionally, it calculates characteristic homology vectors and matrices (\texttt{Hc} and \texttt{Hnc}) that describe the cyclic and non-cyclic components of the graph. 
+
+\section{What type of analysis or calculation does it perform?}
+The script performs a discrete dynamical system analysis on finite sets. It separates the nodes into cyclic (periodic) components and non-cyclic (transient) components, organizing them hierarchically by degree. It maps these structures geometrically: cyclic nodes in circular formations and non-cyclic nodes branching out radially.
+
+\section{What is the mathematical/theoretical context?}
+The mathematical context relies on discrete dynamical systems and functional graphs. An endomap $\phi: X \to X$ defines a directed graph where every node has out-degree 1. Such graphs resolve into connected components made up of exactly one directed cycle, with directed trees of transient nodes flowing into the cycle. 
+
+\subsection{Function Initialization and Cyclic Processing}
+\textbf{Explanation:} 
+This block calls the \texttt{orbits} function to retrieve the fundamental properties of the endomap $\phi$, such as the domain vector, connected components, and node degrees. It isolates the periodic points (identified by \texttt{deg == -1}) and generates complex coordinates spread evenly across a unit circle using Euler's formula representation. The vector \texttt{Hc} stores the cyclic dimensions.
+
+\begin{lstlisting}[language=Matlab]
+function [g,Hc,Hnc, sc, snc]=homology(phi,n)
+[orb,ord,psi,deg,init,term,prin,conn]=orbits(phi);
+idA=(1:numel(phi))';
+g=zeros(size(phi));
+try n, catch n=0, end
+
+iscyc=(deg==-1);
+cyc1=find(iscyc & ord==1); 
+Hc=sortrows([ord(psi(cyc1)), orb(cyc1)]); 
+SM=sortrows([orb(iscyc), ord(iscyc), idA(iscyc)]);
+g(SM(:,3))=(1i*2*pi*linspace(1/nnz(iscyc),1,nnz(iscyc)));
+sc=SM(:,3);
+\end{lstlisting}
+
+\subsection{Non-Cyclic Homology Matrix (Hnc)}
+\textbf{Explanation:} 
+This section handles the transient nodes that flow into the cycles. It constructs the \texttt{Hnc} matrix, where each row acts as a signature for a unique connected component. It loops from $0$ to $n$ to count the occurrence of specific degrees across the trees.
+
+\begin{lstlisting}[language=Matlab]
+connop=conn'; prinop=prin'; 
+SM=sortrows([connop(orb(~iscyc)), prinop(orb(~iscyc)), ord(phi(term(orb(~iscyc)))), orb(~iscyc), ord(~iscyc), idA(~iscyc)]);
+[~,r,q]=unique(conn); 
+Prin=sparse(q,prin,ord(term));
+
+Hnc=zeros(numel(r),3+n); Hnc(:,end)=r;
+Hnc(:,1)=full(sum(Prin,2));
+Hnc(:,2)=ord(term(r))-ord(phi(term(r)))+1;
+
+for i=1:numel(r)
+    isconni=(conn(orb(~iscyc))==r(i))';
+    for j=0:n 
+        Hnc(i,3+j)=nnz(isconni(:) & deg(~iscyc)==j); 
+    end
+end
+\end{lstlisting}
+
+\subsection{Geometric Realization of Trees}
+\textbf{Explanation:} 
+The script calculates spatial coordinates for the non-cyclic (tree) structures. It assigns angular segments based on the relative size of each connected component, plotting nodes outward logarithmically corresponding to their hierarchical depth. The complex exponent function is then applied to transform these spatial coordinates from a pseudo-log-polar space into a Euclidean 2D plane.
+
+\begin{lstlisting}[language=Matlab]
+th=2*pi*(cumsum([0; Hnc(:,1)]))/sum(Hnc(:,1)); 
+
+[I,J]=find(Prin); 
+for i=1:numel(I)
+    iscompi=(SM(:,1)==r(I(i)) & SM(:,2)==J(i));
+        ni=nnz(iscompi);
+        thi=th(I(i));
+        rangi= 0.5 *(1 + linspace(-1+1/ni,1-1/ni,ni));
+        rangethi=min(pi/2,th(I(i)+1)-thi);
+        g(SM(iscompi,6))=log(sqrt(J(i)+1)) + 1i*(thi+ rangi*rangethi);
+end
+
+g=exp(g);
+Hnc=sortrows(Hnc(:,1:end-1)); 
+Hc=Hc(:,1); 
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+\textbf{Visual Representation:} Plotting \texttt{g} yields a functional graph visualized as "sunbursts" or disconnected clusters. Cyclic nodes form a perfect regular polygon at the center. Non-cyclic nodes branch radially outward like trees, avoiding overlap by scaling outwards logarithmically. The $X$ and $Y$ coordinates correspond to the real and imaginary parts of the returned complex vector \texttt{g}.
+
+
+\newpage
+\chapter{Analysis of \texttt{isoslice.m}}
+
+\section{What is the main purpose of this file?}
+Given a graph in the complex plane and a specific slicing value \texttt{xval}, the function computes sequences of intersecting lines (slices). These slices anchor across graph edges to connect points inside designated "faces" sharing identical \texttt{color} values.
+
+\section{What type of analysis or calculation does it perform?}
+It computes line segment intersections computationally. It filters graph edges across defined vertical thresholds, sorts and groups intersecting segments, and applies parametric vector math to find the exact complex coordinates bounding the slice.
+
+\section{What is the mathematical/theoretical context?}
+The context is computational geometry. Points are modeled in the complex plane, and edges are continuous paths modeled parametrically as $z = \text{dom}(a) + t(\text{cod}(a) - \text{dom}(a))$, with parameter $t \in [0, 1]$. 
+
+\subsection{Domain and Slicing Boundary Evaluation}
+\textbf{Explanation:} 
+This section ensures inputs are column vectors and evaluates all graph edges across multiple threshold levels defined in \texttt{xval}. It determines which edges cross an imaginary vertical line at $x$ by verifying if the \texttt{xval} strictly sits between the real coordinates of the edge's domain and codomain endpoints.
+
+\begin{lstlisting}[language=Matlab]
+dom=dom(:);cod=cod(:);color=color(:);xval=xval(:);
+n=numel(xval);
+a0=[]; a1=[]; ilevel=[];
+for i=1:n
+    Ax=xval(i);
+    up=(real(dom)<=Ax & Ax<real(cod));
+    down=(real(cod)<=Ax & Ax<real(dom));
+    Iup=find(up); Idown=find(down);
+    domcod=[dom(Iup) cod(Iup) color(Iup) Iup ones(numel(Iup),1); dom(Idown) cod(Idown) color(Idown) Idown zeros(numel(Idown),1)];
+\end{lstlisting}
+
+\subsection{Matching Faces and Edges}
+\textbf{Explanation:} 
+Here, the algorithm sorts the intersecting edges based on their color (face index) and determines bounding pairings. The matching ensures that a left-to-right directed edge is correctly paired with a right-to-left directed edge that share the same color, thereby representing a cross-section over an interior enclosed face.
+
+\begin{lstlisting}[language=Matlab]
+    upsort=sortrows(domcod(domcod(:,5)==1, :),3);
+    downsort=sortrows(domcod(domcod(:,5)==0, :),3);
+
+    m=min(size(upsort,1),size(downsort,1));
+    if m>0
+        a0=[a0; downsort(1:m,4)];
+        a1=[a1; upsort(1:m,4)];
+        ilevel=[ilevel; repmat(i,m,1)];
+    end
+end
+\end{lstlisting}
+
+\subsection{Parametric Intersection Calculation}
+\textbf{Explanation:} 
+Using the matched boundaries (\texttt{a0} and \texttt{a1}), the script calculates the exact geometric coordinates (\texttt{z0} and \texttt{z1}) of the intersection along the segment. It also derives parameters \texttt{t0} and \texttt{t1} using real and imaginary ratios along the bounded edges.
+
+\begin{lstlisting}[language=Matlab]
+domcod=[real(dom(a0)) real(cod(a0)) imag(dom(a0)) imag(cod(a0))];
+domcod(:,5)=domcod(:,3)+ (xval(ilevel)-domcod(:,1))./(domcod(:,2)-domcod(:,1)).*(domcod(:,4)-domcod(:,3));
+z0=xval(ilevel)+1i*domcod(:,5);
+
+domcod=[real(dom(a1)) real(cod(a1)) imag(dom(a1)) imag(cod(a1))];
+domcod(:,5)=domcod(:,3)+ (xval(ilevel)-domcod(:,1))./(domcod(:,2)-domcod(:,1)).*(domcod(:,4)-domcod(:,3));
+z1=xval(ilevel)+1i*domcod(:,5);
+
+t0=(z0-dom(a0))./(cod(a0)-dom(a0));
+t1=(z1-dom(a1))./(cod(a1)-dom(a1)); 
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+\textbf{Visual Representation:} The script returns variables denoting the anchors (\texttt{a0, a1}), slicing indices (\texttt{ilevel}), and absolute slice vectors (\texttt{z0, z1}). If plotted on top of the original complex graph, the user will see sets of horizontal or horizontal-like arrow vectors bounded internally within the graph faces, successfully representing a spatial cross-section at given \texttt{xval} markers.
+
+
+\newpage
+\chapter{Analysis of \texttt{link2latex.m}}
+
+\section{What is the main purpose of this file?}
+The script automates the conversion of a directed graph (provided by endomap structures and complex coordinates) into a LaTeX \texttt{tikzpicture} rendering code. 
+
+\section{What type of analysis or calculation does it perform?}
+It is purely an export and formatting script. It parses spatial point vectors (splitting the complex plane into cartesian $X$ and $Y$) and graph relation mapping, formatting the outputs into a continuous block of TikZ macro strings.
+
+\section{What is the mathematical/theoretical context?}
+The mathematical foundation is basic graph theory, representing topological structure through domains (\texttt{d}), endomaps (\texttt{phi}), and corresponding codomains (\texttt{c}) alongside a spatial set of 2D coordinates (\texttt{g}).
+
+\subsection{Coordinate Extraction and Formatting setup}
+\textbf{Explanation:} 
+The function first calculates the codomain map \texttt{c} from the domain \texttt{d} using the \texttt{phi} transformation. It breaks the complex coordinates \texttt{g} into real (\texttt{x}) and imaginary (\texttt{y}) parts and prepares the standard \texttt{tikzpicture} preamble.
+
+\begin{lstlisting}[language=Matlab]
+function s = link2latex(g, phi, d, D)
+c = d(phi);
+if nargin < 4
+    D = 1:numel(g);
+end
+x = real(g);
+y = imag(g);
+n = numel(g);
+
+header = {
+    '\begin{center}'
+    '\begin{tikzpicture}[scale=1.5, every node/.style={circle,draw}, every path/.style={->, thick}]'
+};
+\end{lstlisting}
+
+\subsection{Node and Path Generation}
+\textbf{Explanation:} 
+The script maps the previously defined coordinates to exact nodes in LaTeX syntax, giving them visual numeric labels. Then, utilizing the computed domain-to-codomain pairs (\texttt{d(i)} to \texttt{c(i)}), it generates directed edge definitions. Everything is concatenated using \texttt{sprintf} into a structured array.
+
+\begin{lstlisting}[language=Matlab]
+nodes = cell(n,1);
+for i = 1:n
+    nodes{i} = sprintf('\\node (n%d) at (%.2f, %.2f) {%d};', i, x(i), y(i), D(i));
+end
+
+m = numel(d);
+edges = cell(m,1);
+for i = 1:m
+    edges{i} = sprintf('\\path (n%d) edge (n%d);', d(i), c(i));
+end
+
+footer = {
+    '\end{tikzpicture}'
+    '\end{center}'
+};
+s = strjoin([header; nodes; edges; footer], '\n');
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+\textbf{Visual Representation:} The immediate MATLAB output is a long multi-line string text. When copied into a \texttt{.tex} editor and compiled, it produces a clear graph visualization: numbered nodes enclosed in circular borders, situated exactly corresponding to \texttt{g}, connected by thick directional arrows depicting the endomap paths.
+
+
+\newpage
+\chapter{Analysis of \texttt{hasse.m}}
+
+\section{What is the main purpose of this file?}
+The script creates horizontal ($x$) and vertical ($y$) coordinates required to draw a Hasse diagram based on the adjacency matrix \texttt{R} of a given partial order.
+
+\section{What type of analysis or calculation does it perform?}
+It determines depth mappings inside a DAG (Directed Acyclic Graph). By reducing the adjacency matrix to isolate immediate "covering" relations (using square matrices), the script iteratively positions nodes into leveled hierarchical vertical layers and spacing them horizontally.
+
+\section{What is the mathematical/theoretical context?}
+This lies deeply in Order Theory. A partial order represents a binary relation that is reflexive, antisymmetric, and transitive. Hasse diagrams simplify this visually by mapping relationships upward and omitting transitive edges (the covering relation).
+
+\subsection{Adjacency Validation and Transitive Reduction}
+\textbf{Explanation:} 
+The script validates the fundamental rules of partial orders (transitivity and antisymmetry) using logic evaluation across the multiplied relation matrix $R*R$. It subsequently finds the core relations \texttt{R1} representing immediate upward moves (paths of length 2 that mask transitive overlays) and populates the vertical node hierarchy based on their sums.
+
+\begin{lstlisting}[language=Matlab]
+if ~all(all(logical(R*R)<=R)) 
+    error('R is not the adjacency matrix of a partial order: transitivity fails')
+end
+if ~all(all(~(R-diag(diag(R)) & R'-diag(diag(R)))))
+    error('R is not the adjacency matrix of a partial order: anti-symmetry fails')
+end
+
+R=R-diag(diag(R)); % remove reflexivity
+R1=R*R==2;         % paths of length 2
+R(R1)=0;           % extracting Hasse diagram edges (covering relation)
+[d,c]=find(R);
+
+y=zeros(nD,1); % initialization
+for i=1:nD
+    R1=R*R1;
+    y=y+sum(R1,2);
+end
+\end{lstlisting}
+
+\subsection{Horizontal Distribution}
+\textbf{Explanation:} 
+Nodes sharing the same hierarchical level $y$ must be assigned different $x$ placements to avoid visual overlap. By extracting the amount of nodes residing on any single $y$-layer (using histogram binning `histc`), it centers the nodes uniformly using modulo calculations.
+
+\begin{lstlisting}[language=Matlab]
+[uy,r,q]=unique(y);
+v=histc(q,1:max(q));
+w=v(:); 
+
+S= sortrows([w(y) y  D(:)  (1:nD)']);
+w_=S(:,1); id_=S(:,end);
+x(id_)=mod((1:nD)'-1,w_)+1-(w_-1)/2;
+x=x(:);
+v=x+1i*y;
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+\textbf{Visual Representation:} The script directly commands a plot using \texttt{quiver}. The output figure sets the axes off, displaying text identifiers (the sets \texttt{D}) suspended at distinct hierarchical altitudes. Line segments lacking arrowheads (\texttt{'showarrowhead','off'}) link the nodes strictly vertically and diagonally to map direct hierarchy without redundant transitive overlaps.
+
+
+\newpage
+\chapter{Analysis of \texttt{hassediv.m}}
+
+\section{What is the main purpose of this file?}
+\texttt{hassediv.m} is specifically tailored to compute the partial order defined by the relation "$i$ divides $j$" for an integer \texttt{n} and generate its Hasse diagram coordinates.
+
+\section{What type of analysis or calculation does it perform?}
+It is a wrapper application for Hasse algorithms, isolating the factors of $n$, constructing their boolean relation matrix manually by applying modulo operations, and plotting the topological hierarchy.
+
+\section{What is the mathematical/theoretical context?}
+It visualizes a divisibility lattice, an essential construct in number theory. In this partially ordered set, the elements are divisors, and the relation $a \le b$ holds iff $a \mid b$ (a divides b). 
+
+\subsection{Divisibility Matrix Construction}
+\textbf{Explanation:} 
+The function calculates all perfect divisors of the given number $n$. Using a matrix grid comparison (\texttt{ndgrid}), it generates a square adjacency matrix $R$ where the element $(i, j)$ is true ($1$) if the divisor mapped to $i$ evenly divides the divisor mapped to $j$.
+
+\begin{lstlisting}[language=Matlab]
+function [R,x,y]=hassediv(n,varargin)
+if nargin==1
+    D=find(mod(n,1:n)==0); nD=numel(D);
+    [i,j]=ndgrid(1:numel(D));
+    R=(mod(D(j),D(i))==0); 
+else
+    R=varargin{1};
+    nD=size(R,1);
+    D=1:nD;
+end
+\end{lstlisting}
+
+\subsection{Redundant Edge Pruning}
+\textbf{Explanation:} 
+Similar to the broader \texttt{hasse.m} script, it strips away self-referential reflexive elements by zeroing out the matrix diagonal. It isolates the direct covering relations ($R^2 == 2$) and generates arrays mapping the immediate paths. 
+
+\begin{lstlisting}[language=Matlab]
+R0=R-diag(diag(R)); % irreflexive
+R2=(R0^2==2);       % only the edges
+[i,j]=find(R2);
+
+if nargout>1
+    s=sum(R)'-sum(R,2);
+    [u,r,q]=unique(s);
+    v=hist(q,1:max(q))';
+    x_=mod((1:nD)',v(q));
+    x=x_-(v(q)-1)/2;
+    y=q-1;
+end
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+\textbf{Visual Representation:} The visual output portrays the standard divisibility tree of an integer (e.g., passing $1000$ yields nodes spanning from $1$ at the lowest base level to $1000$ at the global peak). Connected edges display factor multiplications, structured evenly along defined horizontal bands.
+
+
+\newpage
+\chapter{Analysis of \texttt{hassep7.m}}
+
+\section{What is the main purpose of this file?}
+The script computes the prime factors of an integer \texttt{num} and generates a 3-Dimensional visual Hasse diagram illustrating the composite factorization lattice. 
+
+\section{What type of analysis or calculation does it perform?}
+It determines the unique prime factors and their multiplicities/powers. Using these exponents as dimensional bounding limits, it uses permutations over nested spatial grids (up to 5 dimensions, plotting up to 3) to compute all possible divisors and structure them in a 3D coordinate frame.
+
+\section{What is the mathematical/theoretical context?}
+It maps integer factorization theorems. Specifically, it portrays the divisor lattice of an integer $N = p_1^{e_1} p_2^{e_2} \dots p_k^{e_k}$, projecting the exponents $e_k$ directly onto orthogonal spatial axes in a 3D grid graph representation.
+
+\subsection{Prime Component Mapping}
+\textbf{Explanation:} 
+The code parses \texttt{num} into a sequence of its fundamental prime building blocks using MATLAB's \texttt{factor} command. It accumulates duplicates to deduce exponents, storing the distinct primes in \texttt{W(:,1)} and their corresponding maximum powers in \texttt{W(:,2)}.
+
+\begin{lstlisting}[language=Matlab]
+function [Sum] = hassep7(num)
+W           = zeros(5,2); 
+K2          = factor(num);
+I           = 0;
+
+for k = 1:size(K2,2)
+   if k == 1
+       I = I + 1;
+       W(I,1) = K2(1);
+       W(I,2) = 1;
+   else
+       if W(I,1) == K2(k)
+           W(I,2) = W(I,2) + 1;
+       else
+           I = I + 1;
+           W(I,1) = K2(k);
+           W(I,2) = 1;
+       end
+   end
+end
+\end{lstlisting}
+
+\subsection{Dimensional Grid Parsing and Node Rendering}
+\textbf{Explanation:} 
+Utilizing up to 5 iterative loops bounded by the prime exponents (from $h=0$ to $W(5,2)$ through $n=0$ to $W(1,2)$), the algorithm calculates every single divisor by varying the powers. For visual rendering, the primary three prime factors' exponents are mapped to spatial $X$, $Y$, and $Z$ axes. It anchors the calculated values using MATLAB's \texttt{text} function at these 3D integer coordinates.
+
+\begin{lstlisting}[language=Matlab]
+r=0;
+for h=0:W(5,2)                              
+    for k=0:W(4,2)                          
+        for l=0:W(3,2)                      % dim z
+            for m=0:W(2,2)                  % dim y
+                for n=0:W(1,2)              % dim x
+                    r = r+1;
+                    a = ((W(5,1)^h)*(W(4,1)^k)*W(3,1)^l)*(W(2,1)^m)*(W(1,1)^n);
+                    TR(r)=a;
+                    if  length(find(W(:,1))) <= 3
+                        text(n+1,m+.85,l+1,num2str(a),'FontWeight','bold','Color','k');
+                    end
+                end
+            end
+        end
+    end
+end
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+\textbf{Visual Representation:} The script commands standard MATLAB console output printing the factor components and sum. Visually, it opens a 3-Dimensional \texttt{plot3} box graph. The 3 axes map the prime elements (e.g., $X=2^n, Y=3^m, Z=5^l$). Nodes containing divisor integers hover as text labels within the 3D volume, connected by a network of orthogonal red grid lines visually binding the factorization structure.

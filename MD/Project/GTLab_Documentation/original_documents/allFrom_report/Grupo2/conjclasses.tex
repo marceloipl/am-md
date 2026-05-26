@@ -1,0 +1,128 @@
+
+\chapter{MATLAB Script Analysis: Conjugation Classes of Endomaps}
+\author{Expert Software Engineer}
+\date{}
+
+\maketitle
+
+\section{Overview}
+
+\textbf{What is the main purpose of this file?}
+The main purpose of this script is to compute and visualize the conjugation classes of endomaps (mappings from a set to itself) for small finite sets with less than 5 elements (specifically $n=2, 3, 4$). It identifies which maps are structurally equivalent under permutation.
+
+\textbf{What type of analysis or calculation does it perform?}
+It performs a combinatorial calculation by generating all possible mappings ($n^n$ maps) and all permutations ($n!$) of the set elements. It then calculates the composition of these permutations with the mappings to group the endomaps into equivalence classes (conjugation classes) based on their connectivity patterns. 
+
+\textbf{What is the mathematical/theoretical context?}
+The mathematical context lies in discrete mathematics, specifically involving finite sets, endomorphisms (functions from a set to itself), symmetric groups (permutations), and group actions. By determining conjugation classes, the script effectively groups endomaps into isomorphism classes, viewing each endomap as a directed graph where nodes have exactly one outgoing edge.
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{1. Initialization and Set Definition}
+\textbf{Explanation:} This section defines the core parameters of the problem. It sets the size of the set ($n=3$), calculates the total number of possible endomaps ($nn = n^n$), and defines the fundamental sets $U$ (the set elements) and $T$ (indices of the endomaps). 
+
+\begin{lstlisting}[language=Matlab]
+n=3, nn=n^n, U=1:n; T=1:nn;
+\end{lstlisting}
+
+\subsection{2. Mapping and Permutation Matrix Generation}
+\textbf{Explanation:} This block generates all permutations ($P$) of the set $1:n$ and calculates their inverses ($Pbar$). It also establishes the matrix $M$, which is expected to hold all $n^n$ possible mappings (though it relies on an external/custom function \texttt{fillzeros} to do so). Finally, it finds the row indices of the permutations and their inverses within the full mapping matrix $M$.
+
+\begin{lstlisting}[language=Matlab]
+M=fillzeros(zeros(1,n),1:n)';
+P=perms(1:n);
+[x,y]=ndgrid(1:prod(1:n),1:n);
+Pbar(sub2ind(size(P),x,P))=y;
+Pbar=reshape(Pbar, size(P)); % the inverses of each P(i,:)
+ 
+[~,S]=ismember(P,M,'rows');
+[~,Sbar]=ismember(Pbar,M,'rows');
+\end{lstlisting}
+
+\subsection{3. Composition Computations ($ST$ and $TSbar$)}
+\textbf{Explanation:} This section computes the compositions of permutations with the mappings. The variable \texttt{np} calculates the number of permutations using a continuous mathematical equivalent expression via the gamma function. The matrices \texttt{ST} and \texttt{TSbar} store the indices resulting from the composition $S \circ T$ and $T \circ S^{-1}$, linearized for fast vector operations.
+
+\begin{lstlisting}[language=Matlab]
+% computing ST as ST(s,t)=M(s,M(t,u)) linearized with s in S, t in T, and u in U
+[s t u]=ndgrid(S,T,U); np=log(sqrt(exp(2*gamma(n+2))))/(n+1);
+[~,ST]=ismember(reshape(M(sub2ind([nn,n],s,M(sub2ind([nn,n],t,u)))),[np*nn,n]),M,'rows');
+ST=reshape(ST,[np,nn]);
+ 
+% computing TSbar as TSbar(t,sbar)=M(t,M(sbar,u)) linearized with sbar in Sbar, t in T, and u in U
+[tbar sbar ubar]=ndgrid(T,Sbar,U);
+[~,TSbar]=ismember(reshape(M(sub2ind([nn,n],tbar,M(sub2ind([nn,n],sbar,ubar)))),[np*nn,n]),M,'rows');
+TSbar=reshape(TSbar,[nn,np]);
+\end{lstlisting}
+
+\subsection{4. Class Identification Loop}
+\textbf{Explanation:} This \texttt{while} loop is responsible for tracing the equivalence classes. It propagates class IDs through the array \texttt{Q}. If map $A$ is conjugate to map $B$, they receive the same identifier $i$. The loop finds the first unassigned mapping and iteratively fills the class labels until all $nn$ maps are categorized.
+
+\begin{lstlisting}[language=Matlab]
+Q=zeros(n,1);
+flagcontinue=true; i=1;
+while flagcontinue
+[x,t]=ndgrid(1:np,i);
+ST_i=ST(sub2ind(size(ST),x,t));
+STSbar_i=TSbar(sub2ind(size(TSbar),ST_i,x));
+        Q(STSbar_i)=i;
+    fi=find(~Q,1); %  finds the first non-zero element in Q
+    if isempty(fi)
+        flagcontinue=false;
+      elseif  fi==i
+        error(['Entering in a cyclic loop at i = ' num2str(i)])
+      else
+        i=fi;
+    end
+end
+\end{lstlisting}
+
+\subsection{5. Validation (Optional)}
+\textbf{Explanation:} This code snippet, active only for $n<4$, constructs the full composition table by iterating over all pairs of mappings. It then verifies the optimized vectorized results (\texttt{ST} and \texttt{TSbar}) against this brute-force generated table to ensure correctness. 
+
+\begin{lstlisting}[language=Matlab]
+if n<4
+Tab=zeros(n);
+for i=1:nn
+  for j=1:nn
+    [~,pos]=ismember(M(i,M(j,:)),M,'rows');
+    Tab(i,j)=pos;
+  end
+end
+%Tab
+isequal(ST,Tab(S,:))
+isequal(TSbar,Tab(:,Sbar))
+end
+\end{lstlisting}
+
+\subsection{6. Visualizing Results (\texttt{showmethemaps} Local Function)}
+\textbf{Explanation:} This custom function generates the graphical representation of the endomaps. It calculates the positions of nodes as roots of unity around a complex circle. It plots the nodes and uses the \texttt{quiver} function to draw directed edges between them based on the mappings contained in the \texttt{SM} matrix.
+
+\begin{lstlisting}[language=Matlab]
+function showmethemaps(SM)
+  [nn,n]=size(SM); n=n-2;
+g=exp(linspace(0,2*pi*(n-1)/n,n)*1i);
+na=round(sqrt(nn)); nb=ceil(nn/na);
+if nn>64, error('too big to plot; SM must have less than 64 rows'), end
+for i=1:nn,
+  subplot(na,nb,i),
+  dg=g(SM(i,3:n+2))-g;
+  plot(g,'.'), hold on,
+  quiver(real(g),imag(g),real(dg),imag(dg));
+  axis off, hold off
+  title(num2str(SM(i,1:2)))
+end
+disp('yes yes')
+end
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+
+When this script finishes running, you can expect two main types of output:
+\begin{enumerate}
+    \item \textbf{Console Output:} A sorted numerical matrix output representing the array \texttt{SM}. The columns represent the class ID (Color/Class Code), the original index of the endomap, and the specific functional mapping vector itself.
+    \item \textbf{Graphical Plots:} The script generates multiple figure windows depending on the size of $n$. 
+    \begin{itemize}
+        \item For $n=3$, Figure 1 displays all 27 endomaps, and Figure 2 isolates one representative map per conjugation class. 
+        \item \textbf{Axes and Representation:} The axes are turned off for aesthetic clarity (\texttt{axis off}). The plots represent directed graphs. The nodes (set elements) are arranged in a regular polygon on the complex plane (e.g., a triangle for $n=3$). Arrows (\texttt{quiver}) point from each element to its mapped target, visually representing the endomap's function. Two graphs belonging to the same class will look identical in structure but will have their node positions permuted.
+    \end{itemize}
+\end{enumerate}

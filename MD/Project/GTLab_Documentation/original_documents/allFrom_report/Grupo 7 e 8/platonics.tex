@@ -1,0 +1,158 @@
+
+\chapter{MATLAB Code Analysis: \texttt{platonics.m}}
+\date{}
+
+
+\maketitle
+
+\section{Overview}
+
+\subsection{Main Purpose}
+The main purpose of this MATLAB file is to construct and generate geometric and topological data for generalized Platonic solids (tetrahedron, cube, octahedron, dodecahedron, and a placeholder for the icosahedron) based on a base $N$-sided polygon. It returns complex coordinates, adjacency/permutation vectors for face definition, drawing sequences, and 3D spatial mappings.
+
+\subsection{Type of Analysis or Calculation}
+It performs geometric constructions in the complex plane, graph theory calculations (determining combinatorial maps and vertex permutations), and 3D spatial projections. It explicitly computes scaling, translations, and stereographic projections to map these generalized polyhedral graphs from 2D structures into 3D spherical and planar representations.
+
+\subsection{Mathematical and Theoretical Context}
+The code operates within the context of \textbf{Graph Theory} (specifically polyhedral graphs and combinatorial maps), \textbf{Complex Geometry} (representing 2D points as complex numbers), and \textbf{Topology} (stereographic projections mapping the complex plane to a Riemann sphere). It defines polyhedra not just as rigid 3D shapes, but as topological graphs governed by vertex permutations ($\varphi$) and drawing sequences ($s$).
+
+\section{Step-by-Step Logic Breakdown}
+
+\subsection{1. Function Definition and Input Parsing}
+\textbf{Explanation:} 
+This section defines the function signature and handles variable input arguments (\texttt{nargin}). It determines the number of sides ($N$) for the base polygon based on the input parameters. If \texttt{pos} is a single scalar, it treats it as $N$. Otherwise, it infers $N$ from the length of the \texttt{pos} or \texttt{phi} arrays. If no inputs are given, it initializes empty variables.
+
+\begin{lstlisting}
+function [g,varphi,s,vstereo,vplain]=platonics(plato,pos,phi)
+% controling user inputs
+switch nargin()
+case 1
+ N=0; pos=[]; phi=[];
+case 2
+phi=[];
+    if numel(pos)==1  % use pos(1) to set N
+        N=round(abs(pos)); 
+        pos=[];
+    else
+        N=numel(pos);
+    end
+case 3
+N=numel(phi);
+end
+\end{lstlisting}
+
+\subsection{2. Platonic Solid Identification and Base N Assignment}
+\textbf{Explanation:} 
+This block maps user-friendly string inputs (like 'cube' or 'pyramid') to an integer index (1 to 5) representing the chosen Platonic solid. It then assigns a default number of sides $N$ (from \texttt{Nref}) to the base polygon if the user did not specify one. 
+
+\begin{lstlisting}
+if any(strcmp(plato,{'tetra','tetrahedron','pyramid'})), plato=1; end
+if any(strcmp(plato,{'cube','hexahedron','prism'})), plato=2; end
+if any(strcmp(plato,{'octa','octahedron','double pyramid'})), plato=3; end
+if any(strcmp(plato,{'dode','dodecahedron','pentagon'})), plato=4; end
+if any(strcmp(plato,{'ico','icosahedron','star of triangles'})), plato=5; end
+
+% Adjust N if necessary
+Nref=[3 4 4 5 3];
+if N==0 
+    N=Nref(plato);
+end
+\end{lstlisting}
+
+\subsection{3. Base Polygon Initialization}
+\textbf{Explanation:} 
+If the base polygon's vertex positions (\texttt{pos}) or cyclic permutations (\texttt{phi}) are not provided, this section mathematically constructs them. It creates a regular $N$-sided polygon in the complex plane using Euler's formula ($e^{i \frac{2\pi}{N}}$) and sets up a standard cyclic permutation vector \texttt{phi} and an identity array \texttt{idA}.
+
+\begin{lstlisting}
+% N is updated, construct phi,idA, pos if necessary
+if numel(pos)==0 % need to construct phi, idA, pos
+phi=[2:N 1]'; idA=(1:N)'; pos=exp(idA/N*2*pi*1i); 
+elseif numel(phi)==0 % need to construct phi, idA
+    phi=[2:N 1]'; idA=(1:N)'; 
+else % need to construct idA
+    idA=(1:N)';
+end
+\end{lstlisting}
+
+\subsection{4. Tetrahedron Construction (Case 1)}
+\textbf{Explanation:} 
+Calculates the geometric and combinatorial data for a generalized tetrahedron (a pyramid over an $N$-sided base). It scales the vertices and adds an origin point (representing the apex). It then computes the stereographic projection mapping these 2D complex plane points to 3D spherical coordinates via the external \texttt{complex2sphere} function.
+
+\begin{lstlisting}
+case 1 %{1, 'tetra'}
+% from given N, pos, phi, idA  construct:
+idA_=[idA; idA+N; idA+2*N; idA+3*N ];
+phi_=[phi; idA+2*N; idA+3*N; idA+N ];
+s_=[idA; phi; idA; repmat(N+1,N,1) ];
+pos_=[pos-1/N*sum(pos); 0];
+pos_=pos_/mean(abs(pos_(1:end-1)));
+% output
+g=pos_; varphi=phi_; s=s_;
+vstereo=complex2sphere(g); % stereographic projection
+vplain=[real(g) imag(g) [zeros(N,1); -1]];
+\end{lstlisting}
+
+\subsection{5. Cube Construction (Case 2)}
+\textbf{Explanation:} 
+Builds a generalized cube (a prism over an $N$-sided base). It calculates the inverse permutation \texttt{phinv} to properly wire the bottom and top faces. It calculates upper and lower vertex positions by translating and scaling the base polygon in the complex plane, defining the drawing sequences, and pushing the results to 3D plain and stereographic representations.
+
+\begin{lstlisting}
+case 2 %{2, 'cube', 'hexa'}
+phinv=zeros(numel(phi),1); phinv(phi)=idA;
+idA_=[idA; idA+N; idA+2*N; idA+3*N; idA+4*N; idA+5*N];
+phi_=[phi; phinv+N; idA+3*N; idA+4*N; idA+5*N; idA+2*N];
+s_=[idA; phi+N; phi+N; phi; idA; idA+N];
+centered=pos-sum(pos)/N;
+scaled=centered/mean(abs(centered));
+upper=[1/2*scaled];
+lower=[2*scaled];
+pos_=[upper; lower];
+% output
+g=pos_; varphi=phi_; s=s_;
+vstereo=complex2sphere(g); 
+vplain=[real(g) imag(g) [ones(N,1); -1*ones(N,1)]];
+\end{lstlisting}
+
+\subsection{6. Octahedron Construction (Case 3)}
+\textbf{Explanation:} 
+Generates an octahedron structure (a double pyramid over an $N$-sided base). It designates a scaled base polygon on the complex plane and adds the origin (South Pole) and \texttt{NaN} (representing infinity/North Pole) to act as the two apices. 
+
+\begin{lstlisting}
+case 3 %{3, 'octa'}
+idA_=[idA; idA+N; idA+2*N; idA+3*N; idA+4*N; idA+5*N ];
+phi_=[idA+4*N; idA+2*N; idA+3*N; idA+N; idA+5*N; idA ];
+s_=[idA; phi; idA; repmat(N+1,N,1); phi; repmat(N+2,N,1) ];
+centered=pos-sum(pos)/N; 
+scaled=centered/mean(abs(centered)); 
+pos_=[scaled; 0; NaN];  % 0=South Pole, NaN=North Pole
+% output
+g=pos_; varphi=phi_; s=s_;
+vstereo=complex2sphere(g); 
+vplain=[[real(scaled) imag(scaled) zeros(N,1)]; 0 0 -1; 0 0 1];
+\end{lstlisting}
+
+\subsection{7. Dodecahedron Construction (Case 4)}
+\textbf{Explanation:} 
+Constructs a dodecahedron graph. It divides the vertices into multiple topological "rings" (upper, middleup, middledown, lower) mapped as concentric scaled versions of the base polygon in the complex plane. Complex connectivity vectors \texttt{phi\_} and \texttt{s\_} wire these concentric rings together to form the dodecahedral faces.
+
+\begin{lstlisting}
+case 4 %{4, 'dodecahedron', 'penta'}
+phinv=zeros(numel(phi),1); phinv(phi)=idA;
+% ... [connectivity vector construction hidden for brevity] ...
+centered=pos-sum(pos)/N; 
+scaled=centered/mean(abs(centered)); 
+pos_=[1/2*scaled; 2/3*scaled; 3/2*scaled; 2*scaled]; 
+% output
+g=pos_; varphi=phi_; s=s_;
+vstereo=complex2sphere(g); 
+plain=[scaled; scaled; scaled*exp(1i*2*pi/N); scaled*exp(1i*2*pi/N)]; 
+vplain=[real(plain) imag(plain) [repmat(1,N,1); repmat(2/3,N,1); repmat(1/3,N,1); repmat(0,N,1)]];
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+When a user executes this code in conjunction with the assumed rendering function (e.g., \texttt{linkdraw} shown in the commented-out examples), the script outputs three core visual representations for the requested generalized Platonic solid:
+\begin{itemize}
+    \item \textbf{2D Complex Graph (\texttt{g}):} A planar Schlegel-style diagram plotted on standard X-Y axes representing the real and imaginary parts of the complex plane. Vertices are distributed as concentric polygons connected by lines that define the faces.
+    \item \textbf{Stereographic Projection (\texttt{vstereo}):} A 3D spherical representation where the 2D complex graph is wrapped onto a Riemann sphere. The axes are 3D spatial coordinates (X, Y, Z). This visually translates the flat 2D connections into a perfectly wrapped polyhedral globe.
+    \item \textbf{Planar 3D Structure (\texttt{vplain}):} A standard 3D Cartesian representation (like a prism or pyramid) where vertices are assigned rigid Z-heights (e.g., $1$ and $-1$) over the XY plane. This produces a traditional 3D wireframe mesh of the polyhedron.
+\end{itemize}

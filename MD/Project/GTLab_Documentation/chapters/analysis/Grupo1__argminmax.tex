@@ -1,0 +1,55 @@
+
+\chapter{Análise Técnica of \texttt{argminmax.m}}
+\author{Software Engineering Analysis}
+\date{\today}
+
+\section{Visão Geral}
+
+\subsection{Objetivo Principal}
+The primary purpose of this file is to determine the \textbf{indices} of the minimum or maximum elements within an input array. Unlike standard functions that return values, this utility focuses on positional metadata.
+
+\subsection{Tipo de Análise}
+The function performs a \textbf{sorting-based index extraction}. It leverages MATLAB's internal sorting algorithm to rank elements and then retrieves the index corresponding to the lowest or highest rank based on user input.
+
+\subsection{Contexto Matemático}
+The code implements the mathematical operators $\operatorname{arg\,min}$ and $\operatorname{arg\,max}$. These operators find the points of the domain at which a function's values are maximized or minimized. This is common in optimization tasks and statistical data processing.
+
+\section{Análise Passo a Passo do Código}
+
+\subsection{Cabeçalho da Função}
+\textbf{Explanation:} This section defines the function name \texttt{argminmax}, its output variable $y$, and its two input arguments: $x$ (the data vector/matrix) and $str$ (the selection string).
+
+\begin{lstlisting}
+function y=argminmax(x,str)
+\end{lstlisting}
+
+\subsection{Ordenação dos Índices}
+\textbf{Explanation:} This is the core logic. The \texttt{sort} function is called on $x$. By using the \texttt{[~, i]} syntax, the actual sorted values are ignored, and only the permutation vector $i$ (the indices) is stored.
+
+\begin{lstlisting}
+[~,i]=sort(x);
+\end{lstlisting}
+
+\subsection{Seleção Condicional}
+\textbf{Explanation:} A \texttt{switch} statement processes the string input. 
+\begin{itemize}
+    \item If 'min' is requested, it returns the first index in the sorted list, $i(1,:)$.
+    \item If 'max' is requested, it returns the last index, $i(end,:)$.
+\end{itemize}
+
+\begin{lstlisting}
+switch str
+    case 'min'
+        y=i(1,:);
+    case 'max'
+        y=i(end,:);
+end
+\end{lstlisting}
+
+\section{Saídas e Elementos Visuais Esperados}
+Since this is a functional utility, it does not produce a plot by default. However, if applied to a dataset, the output would be a scalar or vector representing a position.
+
+\textbf{Example Scenario:}
+If $x = [5, 1, 8, 3]$ and $str = 'max'$, the function sorts the values to find that $8$ is the largest. Because $8$ is at the 3rd position, the function returns $y = 3$. 
+
+In a graphical context, if you plotted $x$ on a bar chart, the output of this function would highlight which bar is the tallest ('max') or shortest ('min') along the horizontal axis.

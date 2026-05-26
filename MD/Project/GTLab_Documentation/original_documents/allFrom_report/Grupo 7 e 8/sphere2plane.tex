@@ -1,0 +1,59 @@
+
+\chapter{MATLAB Code Analysis: \texttt{sphere2plane.m}}
+\date{}
+\maketitle
+
+\section{Initial Overview}
+
+\subsection{What is the main purpose of this file?}
+The main purpose of this MATLAB function is to map three-dimensional coordinates located on the surface of a unit sphere to two-dimensional coordinates on a flat plane. 
+
+\subsection{What type of analysis or calculation does it perform?}
+The script performs a coordinate transformation using element-wise algebraic division. By utilizing MATLAB's element-wise division operator (\texttt{./}), the function is vectorized, meaning it can efficiently process single scalar points, vectors, or large matrices of coordinates simultaneously without requiring explicit loops.
+
+\subsection{What is the mathematical/theoretical context?}
+The mathematical context is \textbf{stereographic projection}, which falls under the domains of geometry, topology, and complex analysis. Specifically, it maps points from a unit sphere (often used to represent the extended complex plane, or Riemann sphere) onto an equatorial or tangent plane. The projection is drawn from the "North Pole" at coordinate $(0,0,1)$. This type of mapping is conformal, meaning it preserves angles at which curves intersect.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section{Step-by-Step Code Breakdown}
+
+\subsection{1. Function Definition and Projection Logic}
+
+\textbf{Explanation:}\\
+This section defines the function signature and immediately applies the core mathematical projection logic. 
+\begin{itemize}
+    \item \textbf{General Purpose:} To ingest 3D spatial coordinates and output their corresponding 2D mapped coordinates.
+    \item \textbf{Inputs:} \texttt{x}, \texttt{y}, and \texttt{z} represent the Cartesian coordinates of points located on the surface of a 3D unit sphere.
+    \item \textbf{Outputs:} \texttt{X} and \texttt{Y} represent the transformed Cartesian coordinates on the 2D projection plane.
+    \item \textbf{Mathematical/Programming Logic:} The code executes the standard stereographic projection formulas: $X = \frac{x}{1-z}$ and $Y = \frac{y}{1-z}$. The denominator $(1-z)$ represents the distance from the projection pole $(0,0,1)$ along the z-axis. As a point approaches the North Pole ($z \to 1$), the denominator approaches zero, mathematically pushing the projected \texttt{X} and \texttt{Y} coordinates toward infinity. The code intentionally omits the commented-out \texttt{NaN} checks, keeping the execution strictly to the algebraic transformation.
+\end{itemize}
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+function [X,Y]=sphere2plane(x,y,z)
+
+X=x./(1-z);
+Y=y./(1-z);
+\end{lstlisting}
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section{Expected Outputs and Visuals}
+
+\textbf{Console and Programmatic Output:}\\
+Because the assignment operations end with semicolons, this specific file suppresses its output and does not print anything to the MATLAB console. Furthermore, it contains no graphical plotting functions (such as \texttt{plot}, \texttt{scatter3}, or \texttt{surf}). Its direct output consists strictly of the numeric arrays \texttt{X} and \texttt{Y} returned to the MATLAB workspace.
+
+\vspace{1em}
+\textbf{Theoretical Visual Translation:}\\
+If one were to write a wrapper script to plot the inputs and outputs of this function, the visual representation would be as follows:
+\begin{itemize}
+    \item \textbf{Input Visualization (Axes $x, y, z$):} A 3D plot showing a hollow unit sphere centered at the origin $(0,0,0)$. 
+    \item \textbf{Output Visualization (Axes $X, Y$):} A flat 2D scatter or surface plot. 
+    \item \textbf{Visual Translation:} Points originating from the "Southern Hemisphere" of the 3D sphere ($z < 0$) would cluster visually inside a unit circle on the 2D plane. Points exactly on the 3D equator ($z = 0$) would form a perfect unit circle on the 2D plane. Points from the "Northern Hemisphere" ($0 < z < 1$) would explode outward radially, populating the vast space outside the 2D unit circle.
+\end{itemize}
+

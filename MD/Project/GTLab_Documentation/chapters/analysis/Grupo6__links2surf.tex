@@ -1,0 +1,58 @@
+
+\chapter{Análise Técnica of MATLAB Script: \texttt{links2surf.m}}
+\section{Visão Geral}
+
+The \texttt{links2surf.m} file is a MATLAB function designed to generate a 3D surface mesh by extruding a profile curve along a central path curve.
+
+\begin{itemize}
+    \item \textbf{Objetivo Principal}: To construct a 3D surface by sweeping a "generatrix" curve (profile) along a "mother" curve (path).
+    \item \textbf{Tipo de Análise}: The script performs geometric extrusion and coordinate transformations. It calculates tangent vectors and rotation angles to ensure the generating curve is placed orthogonally relative to the direction of the mother curve.
+    \item \textbf{Mathematical/Theoretical Context}: The file operates within the context of \textbf{Discrete Differential Geometry} and \textbf{Mesh Topology}. It treats curves as complex-valued vectors and uses adjacency mappings ($\phi_1, \phi_2$) to define the connectivity of a quadrangular manifold.
+\end{itemize}
+
+\section{Análise Passo a Passo do Código}
+
+\subsection{Section 1: Variable Initialization and Mesh Grid Setup}
+\textbf{Explanation}: This section determines the dimensions of the input structures and initializes the mesh topology. It uses 
+\texttt{ndgrid} to create a coordinate system for all vertex pairs $(i, j)$ and calculates the linear indices for quadrangular faces. Each quadrangle connects four vertices in a cyclic order across the mother and generatrix curves.
+
+\begin{lstlisting}
+n=numel(phi1); m=numel(phi2);
+dir=g1(phi1)-g1; % direction vectors of the mother curve
+[i,j]=ndgrid(1:n,1:m);
+a=sub2ind([n,m],i,j);
+b=sub2ind([n,m],phi1(i),j);
+c=sub2ind([n,m],phi1(i),phi2(j));
+d=sub2ind([n,m],i,phi2(j));
+Q=[a(:),b(:),c(:),d(:)];
+\end{lstlisting}
+
+\subsection{Section 2: Tangent Angle and Scaling/Translation Calculation}
+\textbf{Explanation}: This block computes the geometric orientation for the extrusion. The variable \texttt{th} represents the angle of the tangent vector at each point of the mother curve, adjusted to find the orthogonal placement. It also applies optional complex vectors $C_0$ (translation) and $C_1$ (rotation and scaling) to the generating curve $g_2$.
+
+\begin{lstlisting}
+th=angle(dir(i).*(dir(phi1(i))./dir(i)).^0.5); % angle of the vector tangent at g(phi1(i))
+g2C01=C1(i).*g2(j)+C0(i);
+\end{lstlisting}
+
+\subsection{Section 3: 3D Vertex Coordinate Mapping}
+\textbf{Explanation}: This is the core transformation logic. The generating curve, initially identified with the $yz$ plane, is rotated to stand orthogonal to the mother curve's path in the $xy$ plane. The final Cartesian coordinates $(x, y, z)$ are calculated by combining the mother curve translation with the rotated profile of the generatrix.
+
+\begin{lstlisting}
+x=real(g1(phi1(i)))+real(g2C01).*cos(th-pi/2);  % orthogonal to the mother curve
+y=imag(g1(phi1(i)))+real(g2C01).*sin(th-pi/2);
+z=imag(g2C01);
+V=[x(:),y(:),z(:)];
+\end{lstlisting}
+
+
+
+\section{Saídas e Elementos Visuais Esperados}
+
+The function returns a vertex matrix \texttt{V} and a quadrangle matrix \texttt{Q}. When visualized using MATLAB's \texttt{tetramesh}, the output will be a 3D surface.
+
+\begin{itemize}
+    \item \textbf{Axes}: Standard x, y, and z Cartesian coordinates.
+    \item \textbf{Visual Representation}: The result represents a "swept" surface. For example, if the mother curve is a circle and the generatrix is a small line, the output will resemble a tubular structure or torus.
+    \item \textbf{Geometric Translation}: The mother curve defines the path on the $xy$ plane, while the generatrix curve provides the cross-sectional shape rotated to follow that path's curvature.
+\end{itemize}

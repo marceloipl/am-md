@@ -1,0 +1,77 @@
+\chapter{Análise do Script MATLAB: Fillzeros}
+\section{Visão Geral}
+
+\textbf{What is the main purpose of this code?} \\
+The main purpose of this algorithm is to take a template vector containing zeros (acting as wildcards) and generate a matrix containing all possible combinations of values that can replace those zeros from a given target set. It also handles negative numbers in the template, which act as pointers/references to mirror the values generated at other wildcard indices.
+
+\textbf{What type of analysis or calculation does it perform?} \\
+It performs combinatorial matrix expansion. By identifying the locations of the zeros, calculating the number of wildcards, and using MATLAB's \texttt{ndgrid} function, it computes the Cartesian product of the target sets. It then replicates the template vector to match the number of combinations and substitutes the generated permutations into the wildcard slots. 
+
+\textbf{What is the mathematical/theoretical context?} \\
+The context is Combinatorics and Set Theory, specifically the generation of function spaces (like $B^X$, the set of all endomaps). The zero values represent unassigned mappings in a function, and replacing them generates the full set of possible morphisms. The negative values introduce constraints (e.g., forcing $f(x) = f(y)$ for specific elements).
+
+\newpage
+\section{Step-by-Step Code Breakdown}
+
+\subsection{1. Título da Secção/Função: Template Initialization and Zero Detection}
+\textbf{Explanation:} 
+The code begins by taking a template vector \texttt{A0} (e.g., \texttt{[0 2 0 -1]}) and ensuring it is a column vector \texttt{A1}. It then uses the \texttt{find} function to locate the linear indices of all the zeros (the wildcards) in the vector and counts them using \texttt{numel}.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% Initializing the template vector and finding wildcards
+A0 = [0 2 0 -1];
+A1 = A0(:);
+z = find(A1 == 0);
+nz = numel(z);
+\end{lstlisting}
+
+\subsection{2. Título da Secção/Função: Combinatorial Grid Generation}
+\textbf{Explanation:} 
+To replace the zeros with all possible combinations, the script relies on \texttt{ndgrid}. In this specific prototype, the first zero draws from the set \texttt{[1 3]} and the second zero draws from \texttt{1:3}. The results of the grid are flattened into columns (\texttt{a(:)} and \texttt{b(:)}) and concatenated into a matrix \texttt{ab}, where each row represents a unique combination for the wildcards.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% Generating the Cartesian product of target sets
+[a, b] = ndgrid([1 3], 1:3);
+ab = [a(:) b(:)];
+\end{lstlisting}
+
+\subsection{3. Título da Secção/Função: Matriz Expansion and Wildcard Substitution}
+\textbf{Explanation:} 
+The original column vector \texttt{A1} is duplicated across columns using \texttt{repmat} so that there is one column for every combination generated in the previous step. Then, using MATLAB's fast vector indexing, the rows corresponding to the original zeros (\texttt{z}) are entirely replaced by the transposed combinations matrix (\texttt{ab'}).
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% Replicating the template and inserting the combinations
+A = repmat(A1, 1, size(ab, 1));
+A(z, :) = ab';
+\end{lstlisting}
+
+\subsection{4. Título da Secção/Função: Resolution of Negative Pointers}
+\textbf{Explanation:} 
+The algorithm handles negative values as references to the wildcards. For example, a \texttt{-1} means "look at whatever value was generated for the 1st zero, and copy it here." The logic uses \texttt{A1 < 0} to find the rows with negative values, takes their absolute values \texttt{abs(A1(A1 < 0))} to figure out which wildcard index to point to, and copies the corresponding row from the newly filled \texttt{z} indices.
+
+\textbf{Code Snippet:}
+\begin{lstlisting}
+% replacing negative values by their respective counterparts
+A(A1 < 0, :) = A(z(abs(A1(A1 < 0))), :);
+\end{lstlisting}
+
+\newpage
+\section{Saídas e Elementos Visuais Esperados}
+
+When this specific block of code is executed, the user will not see graphical plots, but rather matrix outputs in the console representing the generated sets:
+
+\begin{itemize}
+    \item \textbf{Console Saída (The Matriz \texttt{A}):} The final output is a $4 \times 6$ matrix. Because the first zero has 2 options (\texttt{1, 3}) and the second zero has 3 options (\texttt{1, 2, 3}), there are $2 \times 3 = 6$ total combinations. 
+    \item \textbf{Matriz Structure:} 
+    \begin{itemize}
+        \item Row 1 (originally \texttt{0}) will contain the varying values \texttt{1} and \texttt{3}.
+        \item Row 2 (originally \texttt{2}) will be a solid row of \texttt{2}s, as it was a fixed constant.
+        \item Row 3 (originally \texttt{0}) will contain the varying values \texttt{1, 2, 3}.
+        \item Row 4 (originally \texttt{-1}) will be an exact duplicate of Row 1, because the \texttt{-1} pointer forces it to mirror the first wildcard.
+    \end{itemize}
+\end{itemize}
+
+

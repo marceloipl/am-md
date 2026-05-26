@@ -1,0 +1,119 @@
+
+\chapter{Technical Analysis of MATLAB Function: \texttt{orbits.m}}
+\author{}
+\date{}
+
+\maketitle
+
+\section{Overview}
+
+The \texttt{orbits.m} file is a MATLAB function designed to perform a comprehensive topological and dynamical analysis of a finite set under a specific mapping.
+
+\begin{itemize}
+    \item \textbf{Main Purpose}: The script analyzes a vector \texttt{phi}, interpreted as an endomap (a function from a set of indices to itself), to identify its underlying orbital structure.
+    \item \textbf{Type of Analysis}: It performs a decomposition of the mapping into its constituent orbits, identifying cycles, transient paths (principal and secondary components), and the connectivity between nodes.
+    \item \textbf{Mathematical/Theoretical Context}: The file operates within the context of \textbf{Graph Theory} and \textbf{Discrete Dynamics}. Specifically, it views the endomap as a functional directed graph, classifying nodes into orbits and cycles while determining hierarchical component levels.
+\end{itemize}
+
+
+
+\section{Step-by-Step Code Analysis}
+
+\subsection{Input Validation and Initialization}
+\textbf{Explanation}: This section ensures the input vector \texttt{phi} is a column vector and can be validly interpreted as an endomap. It then initializes the primary output arrays: \texttt{orb} (orbit labels), \texttt{ord} (order within an orbit), \texttt{psi} (pseudo-inverse), and \texttt{deg} (in-degree). By default, nodes are marked as potentially cyclic (\texttt{deg = -1}).
+
+\begin{lstlisting}
+try
+    phi=phi(:); % force phi to be a column vector
+    phi(phi); % make sure that phi can be interpreted as an endomap
+catch ME
+    disp('The input vector phi must be interpreted as an endomap from the set of indexes 1:numel(phi) to itself:')
+    error(ME.message)
+end
+n=numel(phi);
+idn=(1:n)'; % the identity vector of the same size as phi
+% initializing outputs
+orb=zeros(n,1);
+ord=zeros(n,1);
+psi(phi)=idn; psi=psi(:); % ensure column vector
+deg=repmat(-1,n,1);  % the degree is initiated by default as cyclic
+\end{lstlisting}
+
+\subsection{Initial Point Identification}
+\textbf{Explanation}: The algorithm identifies "initial points," which are indices that do not appear in the image of the map (nodes with an in-degree of 0). These points are the starting nodes for transient components that eventually lead into cycles.
+
+\begin{lstlisting}
+% determining initial points (those with degree 0)
+init=idn(~ismember(idn,phi))'; % vector with indexes of initial points
+m=numel(init); % number of initial elements
+term=zeros(1,m); % terminal point of each initial point
+prin=zeros(1,m); % principal components, secondary, terciary, etc
+conn=zeros(1,m); % connected component
+\end{lstlisting}
+
+\subsection{Transient Component Traversal}
+\textbf{Explanation}: This iterative loop starts from each initial point and follows the mapping path. It assigns orbit IDs, calculates the sequential order of nodes, and sets a pseudo-inverse mapping. When a path encounters a node already assigned to an orbit, it identifies the junction and classifies the current path as a principal or secondary component.
+
+\begin{lstlisting}
+% the iterative process
+for j=1:numel(init)
+    a=init(j); k=1;
+    orb(a)=j;
+    ord(a)=k;
+    psi(a)=a; % the initial points become fixed points when inverted
+    deg(a)=0;
+    while ~orb(phi(a))   % phi(a) is not yet a junction point
+        psi(phi(a))=a; % is defined before a is uptaded
+        a=phi(a); k=k+1;  % a is updated to phi(a)
+        orb(a)=j;
+        ord(a)=k;
+        deg(a)=1;
+    end
+    % phi(a) is a junction point
+    if orb(a)==orb(phi(a))  %  principal component
+        deg(phi(a))=deg(phi(a))+1;
+        term(j)=a;
+        prin(j)=1;
+        conn(j)=j;  
+    else % secondary component
+        deg(phi(a))=deg(phi(a))+1;
+        term(j)=a; 
+        prin(j)=prin(orb(phi(a)))+1;
+        conn(j)=conn(orb(phi(a)));
+    end
+end
+\end{lstlisting}
+
+\subsection{Cyclic Orbit Identification}
+\textbf{Explanation}: After processing all transient paths starting from initial points, any remaining unassigned nodes must belong to purely cyclic orbits. This loop finds these nodes, assigns new orbit labels, and calculates their order within the cycles. Cyclic nodes are identified by a degree value of -1.
+
+\begin{lstlisting}
+% It remains to compute the cyclic orbits
+q=m;  % initialize component label
+while any(~orb)
+    a=find(~orb,1);
+    q=q+1;  % update component label
+    orb(a)=q;  % set component label
+    ord(a)=1;  % initialize counting the order
+    while ~orb(phi(a))
+        a=phi(a);
+        orb(a)=q;
+        ord(a)=ord(psi(a))+1;
+        deg(a)=-1;
+    end
+end
+\end{lstlisting}
+
+\section{Expected Outputs and Visuals}
+
+The function returns numerical vectors that represent the structural properties of the functional graph. While the script itself focuses on data generation, the results describe the hierarchical decomposition of the map.
+
+
+
+\textbf{Visual Translation of Results}:
+\begin{itemize}
+    \item \textbf{Orbits (\texttt{orb})}: Identifies separate connected components in the graph structure.
+    \item \textbf{Order (\texttt{ord})}: Indicates the sequential distance from the "leaf" of a path or the position within a specific cycle.
+    \item \textbf{Degree (\texttt{deg})}: Distinguishes between leaf nodes (0), junction points ($>0$), and cyclic members (-1).
+\end{itemize}
+
